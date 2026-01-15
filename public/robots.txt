@@ -1,0 +1,8 @@
+# Bailbonds Financed - St. Tammany Parish Bail Bonds
+# https://bailbondsfinanced.com
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://bailbondsfinanced.com/sitemap.xml

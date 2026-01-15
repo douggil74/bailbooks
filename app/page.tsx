@@ -67,7 +67,7 @@ export default function Home() {
               <Phone className="w-6 h-6 sm:w-8 sm:h-8" />
               <span>{PHONE_NUMBER}</span>
             </a>
-            <p className="mt-4 text-gray-400">Call now for immediate assistance</p>
+            <p className="mt-4 text-gray-400">Call or text for immediate assistance</p>
           </div>
 
           {/* Trust badges */}
@@ -197,7 +197,7 @@ export default function Home() {
                 Why Choose <span className="text-[#d4af37]">Bailbonds Financed?</span>
               </h2>
               <p className="text-gray-400 text-lg mb-8">
-                As part of the Louisiana Bail Agents network, we bring professional
+                As an affiliate of Louisiana Bail Agents, we bring professional
                 expertise and compassionate service to every case. Your family's
                 freedom is our priority.
               </p>
@@ -273,8 +273,8 @@ export default function Home() {
                   <div className="text-sm text-gray-400">Release</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-[#d4af37]">0%</div>
-                  <div className="text-sm text-gray-400">Down Options</div>
+                  <div className="text-3xl font-bold text-[#d4af37]">Low</div>
+                  <div className="text-sm text-gray-400">Down Payment</div>
                 </div>
               </div>
             </div>
@@ -307,8 +307,71 @@ export default function Home() {
             <MapPin className="w-8 h-8 text-[#d4af37]" />
             <div className="text-left">
               <div className="text-white font-bold">St. Tammany Parish, Louisiana</div>
-              <div className="text-gray-400">Part of the Louisiana Bail Agents Network</div>
+              <div className="text-gray-400">Affiliate of Louisiana Bail Agents</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 sm:py-32 bg-gradient-to-b from-[#0a0a0a] to-[#0f0f0f]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+              Frequently Asked <span className="text-[#d4af37]">Questions</span>
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Get answers to common questions about the bail bond process
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: 'How quickly can you get someone out of jail in St. Tammany Parish?',
+                a: 'In most cases, we can begin the release process immediately after you call. Depending on the jail and processing times, release can occur within 2-8 hours. We work around the clock to expedite the process.'
+              },
+              {
+                q: 'What payment options do you offer for bail bonds?',
+                a: 'We offer flexible payment plans with small down payment options. We accept cash, credit cards, and can work with you on a payment schedule that fits your budget.'
+              },
+              {
+                q: 'Do you handle ICE and immigration bonds in Louisiana?',
+                a: 'Yes, we specialize in immigration bonds and ICE releases. These cases require specific expertise with federal procedures, and our team is experienced in navigating the immigration bond process.'
+              },
+              {
+                q: 'What information do I need to bail someone out?',
+                a: 'You will need the full legal name of the person in custody, their date of birth, the jail location, and the charges if known. We can help you gather additional information once you call us.'
+              },
+              {
+                q: 'Are your bail bond services confidential?',
+                a: 'Absolutely. We understand the sensitive nature of these situations and maintain complete confidentiality. Your privacy is protected throughout the entire process.'
+              },
+            ].map((faq, i) => (
+              <details
+                key={i}
+                className="group bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden hover:border-[#d4af37]/30 transition-colors"
+              >
+                <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
+                  <h3 className="text-lg font-semibold text-white pr-4">{faq.q}</h3>
+                  <span className="text-[#d4af37] text-2xl flex-shrink-0 group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div className="px-6 pb-6 text-gray-400 leading-relaxed">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-gray-400 mb-4">Still have questions?</p>
+            <a
+              href={PHONE_HREF}
+              className="inline-flex items-center gap-2 bg-[#d4af37] hover:bg-[#e5c55a] text-[#0a0a0a] font-bold px-6 py-3 rounded-full transition-all hover:scale-105"
+            >
+              <Phone className="w-5 h-5" />
+              <span>Call Us Now</span>
+            </a>
           </div>
         </div>
       </section>
@@ -334,7 +397,7 @@ export default function Home() {
                   <Phone className="w-8 h-8 text-[#d4af37]" />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-400 mb-1">Call Us 24/7</div>
+                  <div className="text-sm text-gray-400 mb-1">Call or Text 24/7</div>
                   <div className="text-2xl font-bold text-white">{PHONE_NUMBER}</div>
                 </div>
               </a>
@@ -358,7 +421,7 @@ export default function Home() {
               className="inline-flex items-center gap-3 bg-[#d4af37] hover:bg-[#e5c55a] text-[#0a0a0a] font-bold text-xl px-10 py-5 rounded-full transition-all hover:scale-105"
             >
               <Phone className="w-6 h-6" />
-              <span>Call Now — Free Consultation</span>
+              <span>Call or Text — Free Consultation</span>
             </a>
           </div>
         </div>
@@ -377,7 +440,7 @@ export default function Home() {
 
             <div className="text-center md:text-left">
               <div className="text-gray-400 text-sm">
-                Part of the <a href="https://louisianabailagents.org/" target="_blank" rel="noopener noreferrer" className="text-[#d4af37] hover:underline">Louisiana Bail Agents</a> Network
+                Affiliate of <a href="https://louisianabailagents.org/" target="_blank" rel="noopener noreferrer" className="text-[#d4af37] hover:underline">Louisiana Bail Agents</a>
               </div>
               <div className="text-gray-500 text-sm mt-1">
                 Serving St. Tammany Parish, Louisiana
