@@ -1,11 +1,27 @@
 'use client';
 
-import { Phone, Clock, MapPin, Shield, Scale, Users, CheckCircle, ArrowRight, Mail, FileText, Handshake } from 'lucide-react';
+import { useState } from 'react';
+import { Phone, Clock, MapPin, Shield, Scale, Users, CheckCircle, ArrowRight, Mail, FileText, Handshake, Lock } from 'lucide-react';
 
 const PHONE_NUMBER = '985-264-9519';
 const PHONE_HREF = 'tel:+19852649519';
 
 export default function Home() {
+  const [showAppModal, setShowAppModal] = useState(false);
+  const [appPassword, setAppPassword] = useState('');
+  const [appError, setAppError] = useState(false);
+
+  const handleAppAccess = () => {
+    if (appPassword === '4461') {
+      window.open('/Elite-Bail-Bonds-Application.pdf', '_blank');
+      setShowAppModal(false);
+      setAppPassword('');
+      setAppError(false);
+    } else {
+      setAppError(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Navigation */}
@@ -403,7 +419,7 @@ export default function Home() {
               </a>
 
               <a
-                href="mailto:info@bailbondsfinanced.com"
+                href="mailto:bailbondsfinanced@gmail.com"
                 className="flex flex-col items-center gap-4 p-6 bg-[#0a0a0a] rounded-2xl hover:bg-[#1a4d2e]/20 transition-colors group"
               >
                 <div className="w-16 h-16 bg-[#d4af37]/20 rounded-full flex items-center justify-center group-hover:bg-[#d4af37]/30 transition-colors">
@@ -411,7 +427,7 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Email Us</div>
-                  <div className="text-xl font-bold text-white">info@bailbondsfinanced.com</div>
+                  <div className="text-xl font-bold text-white">bailbondsfinanced@gmail.com</div>
                 </div>
               </a>
             </div>
@@ -456,11 +472,63 @@ export default function Home() {
             </a>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-white/10 text-center text-gray-500 text-sm">
-            © {new Date().getFullYear()} Bailbonds Financed. All rights reserved. Licensed Louisiana Bail Bond Agents.
+          <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center gap-3">
+            <button
+              onClick={() => { setShowAppModal(true); setAppPassword(''); setAppError(false); }}
+              className="flex items-center gap-2 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Bail Bond Application</span>
+            </button>
+            <div className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} Bailbonds Financed. All rights reserved. Licensed Louisiana Bail Bond Agents.
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* Password Modal for Bail Bond Application */}
+      {showAppModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowAppModal(false)}>
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 max-w-sm w-full mx-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-[#d4af37]/20 rounded-full flex items-center justify-center">
+                <Lock className="w-5 h-5 text-[#d4af37]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Bail Bond Application</h3>
+                <p className="text-gray-400 text-sm">Enter access code to continue</p>
+              </div>
+            </div>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={appPassword}
+              onChange={e => { setAppPassword(e.target.value); setAppError(false); }}
+              onKeyDown={e => e.key === 'Enter' && handleAppAccess()}
+              placeholder="Enter code"
+              autoFocus
+              className={`w-full bg-[#0a0a0a] border ${appError ? 'border-red-500' : 'border-white/20'} rounded-xl px-4 py-3 text-white text-center text-lg tracking-widest placeholder-gray-600 focus:outline-none focus:border-[#d4af37] transition-colors`}
+            />
+            {appError && <p className="text-red-400 text-sm mt-2 text-center">Incorrect code</p>}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAppModal(false)}
+                className="flex-1 px-4 py-2.5 border border-white/10 rounded-xl text-gray-400 hover:text-white hover:border-white/30 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAppAccess}
+                className="flex-1 px-4 py-2.5 bg-[#d4af37] hover:bg-[#e5c55a] text-[#0a0a0a] font-bold rounded-xl transition-colors"
+              >
+                Access
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
