@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 
 export const runtime = "edge";
-
-let client: OpenAI | null = null;
-function getClient() {
-  if (!client) {
-    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-  }
-  return client;
-}
 
 type Body = {
   bondAmount: number;
@@ -21,55 +12,58 @@ type Body = {
   term3: { label: string; amount: number };
 };
 
+function recommend(body: Body): { recommendation: number; reason: string } {
+  const { bondAmount, premium, downPayment, remaining } = body;
+  const terms = [body.term1, body.term2, body.term3];
+  const isMonthly = bondAmount >= 100000;
+  const downPct = premium > 0 ? (downPayment / premium) * 100 : 50;
+
+  // Weekly payment thresholds by bond size tier
+  // Monthly thresholds for $100k+ bonds
+  let maxPayment: number;
+  if (isMonthly) {
+    maxPayment = 800; // per month
+  } else if (bondAmount < 10000) {
+    maxPayment = 75;  // per week
+  } else if (bondAmount < 50000) {
+    maxPayment = 125; // per week
+  } else {
+    maxPayment = 200; // per week
+  }
+
+  // Low down payment = tight cash flow, loosen threshold
+  if (downPct < 30) {
+    maxPayment *= 0.75;
+  }
+
+  // Pick shortest term that fits under threshold
+  for (let i = 0; i < terms.length; i++) {
+    if (terms[i].amount <= maxPayment) {
+      const periodLabel = isMonthly ? '/mo' : '/wk';
+      const reasons: Record<number, string> = {
+        0: `Shortest term, $${terms[i].amount.toFixed(0)}${periodLabel} is affordable`,
+        1: `Balanced — $${terms[i].amount.toFixed(0)}${periodLabel} fits most budgets`,
+        2: `Lowest payment at $${terms[i].amount.toFixed(0)}${periodLabel}`,
+      };
+      return { recommendation: i + 1, reason: reasons[i] };
+    }
+  }
+
+  // None fit — pick longest (lowest payment)
+  return {
+    recommendation: 3,
+    reason: `Lowest payment at $${terms[2].amount.toFixed(0)}${isMonthly ? '/mo' : '/wk'}`,
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as Body;
-
-    const downPct = body.premium > 0 ? ((body.downPayment / body.premium) * 100).toFixed(0) : '50';
-
-    const prompt = `You are a bail bond payment analyst for a Louisiana bail bond agency (12% premium rate). Recommend the best payment term that balances the agency's risk exposure with the client's ability to pay.
-
-Bond Amount: $${body.bondAmount.toFixed(2)}
-Premium (12%): $${body.premium.toFixed(2)}
-Down Payment: $${body.downPayment.toFixed(2)} (${downPct}% of premium)
-Remaining Balance: $${body.remaining.toFixed(2)}
-
-Payment Options:
-1. ${body.term1.label}: $${body.term1.amount.toFixed(2)} per payment
-2. ${body.term2.label}: $${body.term2.amount.toFixed(2)} per payment
-3. ${body.term3.label}: $${body.term3.amount.toFixed(2)} per payment
-
-DECISION RULES (in priority order):
-- Shorter terms reduce agency risk exposure. Always prefer shorter if the client can afford it.
-- For bonds under $10k: payments under $75/week are manageable for most clients.
-- For bonds $10k-$50k: payments under $125/week are realistic.
-- For bonds $50k-$100k: payments under $200/week are typical.
-- For bonds over $100k (monthly terms): payments under $800/month are standard.
-- If down payment is low (under 30% of premium), prefer longer terms since the client likely has tight cash flow.
-- If down payment is high (50%+ of premium), the client can likely handle shorter terms.
-- Pick the SHORTEST term where the payment fits within the range above. If none fit, pick the lowest payment option.
-
-Respond with ONLY JSON: {"recommendation": 1, "reason": "brief reason"}
-Where recommendation is 1, 2, or 3.`;
-
-    const completion = await getClient().chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-    });
-
-    const response = completion.choices[0]?.message?.content?.trim();
-
-    try {
-      const parsed = JSON.parse(response || '{"recommendation": 2, "reason": "Middle option balances affordability and payoff time"}');
-      return NextResponse.json(parsed);
-    } catch {
-      return NextResponse.json({ recommendation: 2, reason: "Balanced option for most clients" });
-    }
+    return NextResponse.json(recommend(body));
   } catch (err: any) {
     console.error('Recommend API error:', err);
     return NextResponse.json(
-      { recommendation: 2, reason: "Default recommendation" },
+      { recommendation: 2, reason: "Balanced option" },
       { status: 200 }
     );
   }
