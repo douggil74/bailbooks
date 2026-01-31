@@ -1,5 +1,7 @@
 // Shared TypeScript types for BailMadeSimple
 
+export type ActivityStatus = 'complete' | 'information' | 'request_sent' | 'pending';
+
 export interface Application {
   id: string;
   status: 'draft' | 'submitted' | 'approved' | 'active' | 'completed';
@@ -22,6 +24,8 @@ export interface Application {
   court_date: string | null;
   case_number: string | null;
   jail_location: string | null;
+  county: string | null;
+  bond_date: string | null;
   premium: number | null;
   down_payment: number | null;
   payment_plan: string | null;
@@ -31,9 +35,28 @@ export interface Application {
   next_payment_date: string | null;
   stripe_customer_id: string | null;
   stripe_payment_method_id: string | null;
+  payment_link_token: string | null;
+  payment_link_amount: number | null;
+  payment_link_created_at: string | null;
+  payment_link_expires_at: string | null;
   sms_consent: boolean;
   gps_consent: boolean;
   checkin_frequency: 'weekly' | 'biweekly' | 'monthly';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Payment {
+  id: string;
+  application_id: string;
+  amount: number;
+  type: 'scheduled' | 'manual' | 'down_payment';
+  status: 'pending' | 'paid' | 'failed' | 'cancelled';
+  payment_method: string | null;
+  stripe_payment_intent_id: string | null;
+  description: string | null;
+  due_date: string | null;
+  paid_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -222,6 +245,55 @@ export interface RecordCheckinRequest {
   longitude: number;
   accuracy?: number;
   token?: string;
+}
+
+export interface ChargeRequest {
+  application_id: string;
+  amount: number; // dollars
+}
+
+export interface ChargeResponse {
+  success: boolean;
+  payment_intent_id: string;
+  amount_charged: number;
+  new_next_payment_date: string | null;
+}
+
+export interface CardInfoResponse {
+  has_card: boolean;
+  brand: string | null;
+  last4: string | null;
+  exp_month: number | null;
+  exp_year: number | null;
+}
+
+// Payment link types
+
+export interface SendPaymentLinkRequest {
+  application_id: string;
+  amount: number; // dollars
+  channel: 'sms' | 'email' | 'both';
+}
+
+export interface SendPaymentLinkResponse {
+  success: boolean;
+  token: string;
+  payment_url: string;
+  channels_sent: string[];
+}
+
+export interface PaymentLinkDetailsResponse {
+  valid: boolean;
+  amount: number;
+  defendant_name: string;
+  client_secret: string;
+  application_id: string;
+}
+
+export interface CompletePaymentLinkRequest {
+  token: string;
+  payment_intent_id: string;
+  payment_method_id: string;
 }
 
 export type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;

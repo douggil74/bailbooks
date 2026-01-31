@@ -27,3 +27,42 @@ export async function createSetupIntent(customerId: string) {
     payment_method_types: ['card'],
   });
 }
+
+export async function retrievePaymentMethod(pmId: string) {
+  const stripe = getStripe();
+  return stripe.paymentMethods.retrieve(pmId);
+}
+
+export async function createPaymentIntent(
+  customerId: string,
+  pmId: string,
+  amountCents: number,
+  metadata?: Record<string, string>,
+) {
+  const stripe = getStripe();
+  return stripe.paymentIntents.create({
+    amount: amountCents,
+    currency: 'usd',
+    customer: customerId,
+    payment_method: pmId,
+    off_session: true,
+    confirm: true,
+    metadata: metadata ?? {},
+  });
+}
+
+export async function createPaymentIntentForLink(
+  customerId: string,
+  amountCents: number,
+  metadata?: Record<string, string>,
+) {
+  const stripe = getStripe();
+  return stripe.paymentIntents.create({
+    amount: amountCents,
+    currency: 'usd',
+    customer: customerId,
+    payment_method_types: ['card'],
+    setup_future_usage: 'off_session',
+    metadata: metadata ?? {},
+  });
+}

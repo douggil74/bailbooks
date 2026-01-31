@@ -5,6 +5,7 @@ import type {
   WizardStep,
   ReferenceInput,
 } from '@/lib/bail-types';
+import CardCollectForm from '@/app/components/CardCollectForm';
 
 // ─── Wizard Container ────────────────────────────────────────────────
 export default function OnboardPage() {
@@ -217,20 +218,6 @@ export default function OnboardPage() {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleStep6() {
-    if (!appId) return;
-    // Create SetupIntent
-    const data = await apiCall('/api/payment/setup-intent', {
-      method: 'POST',
-      body: JSON.stringify({ application_id: appId }),
-    });
-    if (data) {
-      // In a full implementation, Stripe Elements would use data.client_secret
-      // to collect card details client-side. For now, mark as ready.
-      setPaymentSaved(true);
     }
   }
 
@@ -517,21 +504,14 @@ export default function OnboardPage() {
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
               Card saved successfully.
             </div>
+          ) : appId ? (
+            <CardCollectForm
+              applicationId={appId}
+              variant="light"
+              onSuccess={() => setPaymentSaved(true)}
+            />
           ) : (
-            <div>
-              <div className="border border-gray-200 rounded-lg p-4 mb-4 bg-white">
-                <p className="text-sm text-gray-500 text-center">
-                  Stripe Elements card form will render here.
-                </p>
-              </div>
-              <button
-                onClick={handleStep6}
-                disabled={saving}
-                className="w-full bg-[#1a4d2e] text-white py-3 rounded-lg font-medium disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Card'}
-              </button>
-            </div>
+            <p className="text-sm text-gray-500">Please complete earlier steps first.</p>
           )}
           <NavButtons onBack={() => setStep(5)} onNext={() => setStep(7)} loading={saving} />
         </section>

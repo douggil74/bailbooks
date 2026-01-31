@@ -10,3 +10,15 @@ export async function sendCheckinRequest(applicationId: string, phone: string) {
   console.warn('SMS not configured — skipping checkin request for', applicationId);
   return { sid: 'not-configured', status: 'skipped' };
 }
+
+export async function sendPaymentLinkSMS(
+  phone: string,
+  name: string,
+  amount: number,
+  url: string,
+) {
+  const body =
+    `Hi ${name}, your payment of $${amount.toFixed(2)} is ready. ` +
+    `Pay securely here: ${url} — Bailbonds Financed`;
+  return sendSMS(phone, body);
+}

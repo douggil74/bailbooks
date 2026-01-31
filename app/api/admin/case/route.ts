@@ -3,6 +3,25 @@ import { createServerClient } from '@/lib/supabase';
 
 const ALLOWED_FIELDS = [
   'status',
+  'defendant_first',
+  'defendant_last',
+  'defendant_phone',
+  'defendant_email',
+  'defendant_dob',
+  'defendant_address',
+  'defendant_city',
+  'defendant_state',
+  'defendant_zip',
+  'defendant_ssn_last4',
+  'defendant_dl_number',
+  'employer_name',
+  'employer_phone',
+  'bond_amount',
+  'charge_description',
+  'court_name',
+  'court_date',
+  'case_number',
+  'jail_location',
   'power_number',
   'premium',
   'down_payment',
@@ -11,6 +30,8 @@ const ALLOWED_FIELDS = [
   'agent_notes',
   'checkin_frequency',
   'next_payment_date',
+  'county',
+  'bond_date',
 ];
 
 export async function PUT(req: NextRequest) {
@@ -61,6 +82,33 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ application: data });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to update case';
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const application_id = searchParams.get('id');
+
+    if (!application_id) {
+      return NextResponse.json({ error: 'id is required' }, { status: 400 });
+    }
+
+    const supabase = createServerClient();
+
+    const { error } = await supabase
+      .from('applications')
+      .delete()
+      .eq('id', application_id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ deleted: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to delete case';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

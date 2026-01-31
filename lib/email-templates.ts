@@ -17,6 +17,12 @@ interface CheckinReminderParams {
   checkinUrl: string;
 }
 
+interface PaymentLinkParams {
+  defendantFirst: string;
+  amount: number;
+  paymentUrl: string;
+}
+
 const PHONE = '985-264-9519';
 const PHONE_HREF = 'tel:+19852649519';
 
@@ -134,6 +140,26 @@ export function checkinReminderEmail({ defendantFirst, checkinUrl }: CheckinRemi
       </div>
 
       <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">Please complete your check-in as soon as possible. Regular check-ins are a condition of your bond.</p>
+    `),
+  };
+}
+
+export function paymentLinkEmail({ defendantFirst, amount, paymentUrl }: PaymentLinkParams) {
+  return {
+    subject: `Payment Request — $${amount.toFixed(2)}`,
+    html: layout('Payment Request', `
+      <p style="color: #d1d5db; font-size: 15px; line-height: 1.6;">Hi ${defendantFirst},</p>
+      <p style="color: #d1d5db; font-size: 15px; line-height: 1.6;">A payment of <strong style="color: #d4af37;">$${amount.toFixed(2)}</strong> has been requested by your bondsman.</p>
+
+      ${infoCard(`
+        ${infoRow('Amount Due', `$${amount.toFixed(2)}`)}
+      `)}
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${paymentUrl}" style="display: inline-block; background: #d4af37; color: #0a0a0a; padding: 14px 32px; text-decoration: none; border-radius: 50px; font-weight: 700; font-size: 18px;">Pay Now</a>
+      </div>
+
+      <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">This link expires in 24 hours. Contact us if you have questions.</p>
     `),
   };
 }

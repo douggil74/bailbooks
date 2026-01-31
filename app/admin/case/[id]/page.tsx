@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import type {
   Application,
@@ -10,7 +10,21 @@ import type {
   Checkin,
   SmsLogEntry,
   ReminderSent,
+  CardInfoResponse,
+  Payment,
 } from '@/lib/bail-types';
+import { EMPTY_CASE_INFO } from '@/app/admin/components/CaseField';
+import type { CaseInfoFields } from '@/app/admin/components/CaseField';
+import CaseSidebar from './components/CaseSidebar';
+import type { TabId } from './components/CaseSidebar';
+import OverviewTab from './components/OverviewTab';
+import DefendantTab from './components/DefendantTab';
+import IndemnitorTab from './components/IndemnitorTab';
+import FinancesTab from './components/FinancesTab';
+import PaymentPlanTab from './components/PaymentPlanTab';
+import FilesTab from './components/FilesTab';
+import LogsTab from './components/LogsTab';
+import SettingsTab from './components/SettingsTab';
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
@@ -24,18 +38,77 @@ interface CaseData {
   checkins: Checkin[];
   sms_log: SmsLogEntry[];
   reminders_sent: ReminderSent[];
+  payments: Payment[];
 }
 
-interface TimelineEvent {
-  id: string;
-  timestamp: string;
-  type: 'created' | 'signature' | 'document' | 'checkin' | 'sms_out' | 'sms_in' | 'reminder';
+interface WizardField {
+  key: keyof CaseInfoFields;
+  label: string;
+  type?: string;
+  placeholder?: string;
+}
+
+interface WizardStepDef {
   title: string;
-  detail: string;
-  color: string;
+  description: string;
+  fields: WizardField[];
 }
 
-const STATUS_FLOW: Application['status'][] = ['submitted', 'approved', 'active', 'completed'];
+const WIZARD_STEPS: WizardStepDef[] = [
+  {
+    title: 'Contact Info',
+    description: "How can we reach the defendant?",
+    fields: [
+      { key: 'defendant_phone', label: 'Phone Number', type: 'tel', placeholder: '(985) 555-1234' },
+      { key: 'defendant_email', label: 'Email Address', type: 'email', placeholder: 'name@example.com' },
+    ],
+  },
+  {
+    title: 'Personal Details',
+    description: 'Date of birth and identification.',
+    fields: [
+      { key: 'defendant_dob', label: 'Date of Birth', type: 'date' },
+      { key: 'defendant_ssn_last4', label: 'SSN (last 4)', placeholder: '1234' },
+      { key: 'defendant_dl_number', label: "Driver's License #", placeholder: 'DL number' },
+    ],
+  },
+  {
+    title: 'Home Address',
+    description: "Defendant's residential address.",
+    fields: [
+      { key: 'defendant_address', label: 'Street Address', placeholder: '123 Main St' },
+      { key: 'defendant_city', label: 'City', placeholder: 'Covington' },
+      { key: 'defendant_state', label: 'State', placeholder: 'LA' },
+      { key: 'defendant_zip', label: 'Zip', placeholder: '70433' },
+    ],
+  },
+  {
+    title: 'Charges & Bond',
+    description: 'What are the charges and bond amount?',
+    fields: [
+      { key: 'charge_description', label: 'Charges', placeholder: 'Description of charges' },
+      { key: 'bond_amount', label: 'Bond Amount ($)', type: 'number', placeholder: '5000' },
+    ],
+  },
+  {
+    title: 'Court Information',
+    description: 'Court and case details.',
+    fields: [
+      { key: 'court_name', label: 'Court Name', placeholder: '22nd JDC' },
+      { key: 'court_date', label: 'Court Date', type: 'date' },
+      { key: 'case_number', label: 'Case Number', placeholder: 'Case #' },
+    ],
+  },
+  {
+    title: 'Jail & Employer',
+    description: 'Where is the defendant and where do they work?',
+    fields: [
+      { key: 'jail_location', label: 'Jail Location', placeholder: 'Jail name' },
+      { key: 'employer_name', label: 'Employer', placeholder: 'Company name' },
+      { key: 'employer_phone', label: 'Employer Phone', type: 'tel', placeholder: '(985) 555-5678' },
+    ],
+  },
+];
 
 function statusBadge(status: string) {
   const styles: Record<string, string> = {
@@ -48,136 +121,19 @@ function statusBadge(status: string) {
   return styles[status] || styles.draft;
 }
 
-function checkinStatusColor(checkin: Checkin) {
-  if (checkin.latitude && checkin.longitude) return 'text-green-400';
-  return 'text-yellow-400';
-}
-
-function formatDate(d: string | null) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString();
-}
-
-function formatDateTime(d: string | null) {
-  if (!d) return '—';
-  return new Date(d).toLocaleString();
-}
-
-function relativeTime(d: string): string {
-  const now = Date.now();
-  const then = new Date(d).getTime();
-  const diff = now - then;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(d).toLocaleDateString();
-}
-
-function nextCheckinDate(checkins: Checkin[], frequency: string | null): string {
-  if (!frequency || checkins.length === 0) return '—';
-  const last = new Date(checkins[0].checked_in_at);
-  const days = frequency === 'weekly' ? 7 : frequency === 'biweekly' ? 14 : 30;
-  const next = new Date(last.getTime() + days * 24 * 60 * 60 * 1000);
-  const now = new Date();
-  if (next < now) return `Overdue (was ${next.toLocaleDateString()})`;
-  return next.toLocaleDateString();
-}
-
-function buildTimeline(data: CaseData): TimelineEvent[] {
-  const events: TimelineEvent[] = [];
-
-  // Application created
-  events.push({
-    id: `created-${data.application.id}`,
-    timestamp: data.application.created_at,
-    type: 'created',
-    title: 'Application created',
-    detail: `${data.application.defendant_first} ${data.application.defendant_last} — status: ${data.application.status}`,
-    color: 'bg-gray-500',
-  });
-
-  // Signatures
-  for (const sig of data.signatures) {
-    events.push({
-      id: `sig-${sig.id}`,
-      timestamp: sig.signed_at,
-      type: 'signature',
-      title: `Signature — ${sig.signer_role}`,
-      detail: `${sig.signer_name} signed (${sig.signer_role})`,
-      color: 'bg-purple-500',
-    });
-  }
-
-  // Documents
-  for (const doc of data.documents) {
-    events.push({
-      id: `doc-${doc.id}`,
-      timestamp: doc.uploaded_at,
-      type: 'document',
-      title: `Document uploaded`,
-      detail: doc.doc_type.replace(/_/g, ' '),
-      color: 'bg-blue-500',
-    });
-  }
-
-  // Check-ins
-  for (const ci of data.checkins) {
-    const hasLocation = ci.latitude && ci.longitude;
-    events.push({
-      id: `ci-${ci.id}`,
-      timestamp: ci.checked_in_at,
-      type: 'checkin',
-      title: hasLocation ? 'Check-in recorded' : 'Check-in (no GPS)',
-      detail: hasLocation
-        ? `${ci.latitude!.toFixed(4)}, ${ci.longitude!.toFixed(4)} (${ci.accuracy ? ci.accuracy.toFixed(0) + 'm' : '?'})`
-        : `Method: ${ci.method}`,
-      color: hasLocation ? 'bg-green-500' : 'bg-yellow-500',
-    });
-  }
-
-  // Reminders
-  for (const rem of data.reminders_sent) {
-    const typeLabel = rem.reminder_type.startsWith('court') ? 'Court' :
-      rem.reminder_type.startsWith('payment') ? 'Payment' : 'Check-in';
-    events.push({
-      id: `rem-${rem.id}`,
-      timestamp: rem.sent_at,
-      type: 'reminder',
-      title: `${typeLabel} reminder sent`,
-      detail: `${rem.channel.toUpperCase()} — ${rem.reminder_type}`,
-      color: 'bg-amber-500',
-    });
-  }
-
-  // SMS
-  for (const sms of data.sms_log) {
-    events.push({
-      id: `sms-${sms.id}`,
-      timestamp: sms.sent_at,
-      type: sms.direction === 'outbound' ? 'sms_out' : 'sms_in',
-      title: sms.direction === 'outbound' ? 'SMS sent' : 'SMS received',
-      detail: sms.message || '(no content)',
-      color: sms.direction === 'outbound' ? 'bg-[#1a4d2e]' : 'bg-orange-500',
-    });
-  }
-
-  events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  return events;
-}
-
 export default function CaseDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [data, setData] = useState<CaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Editable fields
+  // Case info editable fields
+  const [caseInfo, setCaseInfo] = useState<CaseInfoFields>({ ...EMPTY_CASE_INFO });
+
+  // Agent-only fields
   const [powerNumber, setPowerNumber] = useState('');
   const [premium, setPremium] = useState('');
   const [downPayment, setDownPayment] = useState('');
@@ -188,9 +144,28 @@ export default function CaseDetailPage() {
   const [saveMsg, setSaveMsg] = useState('');
   const [checkinSending, setCheckinSending] = useState(false);
 
-  // Lightbox
+  // Wizard
+  const [showWizard, setShowWizard] = useState(false);
+  const [wizardStep, setWizardStep] = useState(0);
+  const [wizardSaving, setWizardSaving] = useState(false);
+
+  // Card & Payment
+  const [cardInfo, setCardInfo] = useState<CardInfoResponse | null>(null);
+  const [cardLoading, setCardLoading] = useState(true);
+  const [showCardForm, setShowCardForm] = useState(false);
+  const [chargeAmount, setChargeAmount] = useState('');
+  const [charging, setCharging] = useState(false);
+  const [chargeMsg, setChargeMsg] = useState('');
+
+  // Modals
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [lightboxLabel, setLightboxLabel] = useState('');
+
+  function updateCaseInfo(key: keyof CaseInfoFields, value: string) {
+    setCaseInfo((prev) => ({ ...prev, [key]: value }));
+  }
 
   const fetchCase = useCallback(async () => {
     try {
@@ -203,12 +178,42 @@ export default function CaseDetailPage() {
       }
       setData(json);
       const app = json.application;
+
+      setCaseInfo({
+        defendant_first: app.defendant_first || '',
+        defendant_last: app.defendant_last || '',
+        defendant_phone: app.defendant_phone || '',
+        defendant_email: app.defendant_email || '',
+        defendant_dob: app.defendant_dob || '',
+        defendant_address: app.defendant_address || '',
+        defendant_city: app.defendant_city || '',
+        defendant_state: app.defendant_state || '',
+        defendant_zip: app.defendant_zip || '',
+        defendant_ssn_last4: app.defendant_ssn_last4 || '',
+        defendant_dl_number: app.defendant_dl_number || '',
+        employer_name: app.employer_name || '',
+        employer_phone: app.employer_phone || '',
+        bond_amount: app.bond_amount != null ? String(app.bond_amount) : '',
+        charge_description: app.charge_description || '',
+        court_name: app.court_name || '',
+        court_date: app.court_date || '',
+        case_number: app.case_number || '',
+        jail_location: app.jail_location || '',
+        county: app.county || '',
+        bond_date: app.bond_date || '',
+      });
+
       setPowerNumber(app.power_number || '');
       setPremium(app.premium != null ? String(app.premium) : '');
       setDownPayment(app.down_payment != null ? String(app.down_payment) : '');
       setPaymentAmount(app.payment_amount != null ? String(app.payment_amount) : '');
       setAgentNotes(app.agent_notes || '');
       setNextPaymentDate(app.next_payment_date || '');
+
+      if (app.status === 'draft' && !app.defendant_phone && !app.bond_amount) {
+        setShowWizard(true);
+      }
+
       setLoading(false);
     } catch {
       setError('Failed to load case');
@@ -216,11 +221,20 @@ export default function CaseDetailPage() {
     }
   }, [id]);
 
+  const fetchCardInfo = useCallback(async () => {
+    setCardLoading(true);
+    try {
+      const res = await fetch(`/api/payment/card-info?application_id=${id}`);
+      const json = await res.json();
+      if (res.ok) setCardInfo(json);
+    } catch { /* ignore */ }
+    setCardLoading(false);
+  }, [id]);
+
   useEffect(() => {
     fetchCase();
-  }, [fetchCase]);
-
-  const timeline = useMemo(() => (data ? buildTimeline(data) : []), [data]);
+    fetchCardInfo();
+  }, [fetchCase, fetchCardInfo]);
 
   async function saveField(fields: Record<string, unknown>) {
     setSaving(true);
@@ -245,8 +259,101 @@ export default function CaseDetailPage() {
     setSaving(false);
   }
 
+  function blurSaveCaseInfo(key: keyof CaseInfoFields) {
+    const val = caseInfo[key]?.trim() || null;
+    const apiVal = key === 'bond_amount' ? (val ? parseFloat(val) : null) : val;
+    saveField({ [key]: apiVal });
+  }
+
+  async function saveWizardStep() {
+    const step = WIZARD_STEPS[wizardStep];
+    const updates: Record<string, unknown> = {};
+    for (const f of step.fields) {
+      const val = caseInfo[f.key]?.trim();
+      if (val) {
+        updates[f.key] = f.type === 'number' ? parseFloat(val) : val;
+      }
+    }
+    if (Object.keys(updates).length > 0) {
+      setWizardSaving(true);
+      await saveField(updates);
+      setWizardSaving(false);
+    }
+  }
+
+  async function wizardNext() {
+    await saveWizardStep();
+    if (wizardStep < WIZARD_STEPS.length - 1) {
+      setWizardStep(wizardStep + 1);
+    } else {
+      setShowWizard(false);
+      setWizardStep(0);
+    }
+  }
+
+  function wizardSkip() {
+    if (wizardStep < WIZARD_STEPS.length - 1) {
+      setWizardStep(wizardStep + 1);
+    } else {
+      setShowWizard(false);
+      setWizardStep(0);
+    }
+  }
+
+  function wizardBack() {
+    if (wizardStep > 0) setWizardStep(wizardStep - 1);
+  }
+
+  async function deleteCase() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/case?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        window.location.href = '/admin';
+        return;
+      }
+      const json = await res.json();
+      setSaveMsg(`Delete failed: ${json.error}`);
+    } catch {
+      setSaveMsg('Delete failed');
+    }
+    setDeleting(false);
+    setConfirmDelete(false);
+  }
+
   async function changeStatus(newStatus: Application['status']) {
     await saveField({ status: newStatus });
+  }
+
+  async function chargeCard() {
+    const amt = parseFloat(chargeAmount);
+    if (!amt || amt <= 0) {
+      setChargeMsg('Enter a valid amount');
+      return;
+    }
+    setCharging(true);
+    setChargeMsg('');
+    try {
+      const res = await fetch('/api/payment/charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ application_id: id, amount: amt }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setChargeMsg(`Error: ${json.error}`);
+      } else {
+        setChargeMsg(`Charged $${json.amount_charged.toFixed(2)} successfully`);
+        if (json.new_next_payment_date) {
+          setNextPaymentDate(json.new_next_payment_date);
+        }
+        fetchCase();
+        setTimeout(() => setChargeMsg(''), 5000);
+      }
+    } catch {
+      setChargeMsg('Charge failed');
+    }
+    setCharging(false);
   }
 
   async function sendCheckin() {
@@ -284,15 +391,130 @@ export default function CaseDetailPage() {
       <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 mb-4">{error || 'Case not found'}</p>
-          <a href="/admin" className="text-[#d4af37] underline">
-            Back to cases
-          </a>
+          <a href="/admin" className="text-[#d4af37] underline">Back to cases</a>
         </div>
       </div>
     );
   }
 
-  const { application: app, references, signatures, documents, checkins, sms_log, reminders_sent } = data;
+  const { application: app } = data;
+  const currentWizardStep = WIZARD_STEPS[wizardStep];
+  const isLastWizardStep = wizardStep === WIZARD_STEPS.length - 1;
+
+  function renderActiveTab() {
+    if (!data) return null;
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <OverviewTab
+            application={data.application}
+            signatures={data.signatures}
+            payments={data.payments}
+            onNavigateTab={setActiveTab}
+          />
+        );
+      case 'defendant':
+        return (
+          <DefendantTab
+            caseInfo={caseInfo}
+            updateCaseInfo={updateCaseInfo}
+            blurSaveCaseInfo={blurSaveCaseInfo}
+            saving={saving}
+            isDraft={data.application.status === 'draft'}
+            onRunWizard={() => { setShowWizard(true); setWizardStep(0); }}
+          />
+        );
+      case 'indemnitors':
+        return (
+          <IndemnitorTab
+            references={data.references}
+            signatures={data.signatures}
+          />
+        );
+      case 'finances':
+        return (
+          <FinancesTab
+            powerNumber={powerNumber}
+            setPowerNumber={setPowerNumber}
+            premium={premium}
+            setPremium={setPremium}
+            downPayment={downPayment}
+            setDownPayment={setDownPayment}
+            paymentAmount={paymentAmount}
+            setPaymentAmount={setPaymentAmount}
+            nextPaymentDate={nextPaymentDate}
+            setNextPaymentDate={setNextPaymentDate}
+            saveField={saveField}
+            saving={saving}
+            bondAmount={data.application.bond_amount}
+          />
+        );
+      case 'payment-plan':
+        return (
+          <PaymentPlanTab
+            applicationId={id}
+            cardInfo={cardInfo}
+            cardLoading={cardLoading}
+            showCardForm={showCardForm}
+            setShowCardForm={setShowCardForm}
+            chargeAmount={chargeAmount}
+            setChargeAmount={setChargeAmount}
+            charging={charging}
+            chargeMsg={chargeMsg}
+            onChargeCard={chargeCard}
+            onCardSuccess={(pmId, last4, brand) => {
+              setShowCardForm(false);
+              setCardInfo({ has_card: true, brand, last4, exp_month: null, exp_year: null });
+              fetchCardInfo();
+            }}
+            paymentAmount={paymentAmount}
+            premium={premium}
+            downPayment={downPayment}
+            payments={data.payments}
+            onRefresh={fetchCase}
+          />
+        );
+      case 'files':
+        return (
+          <FilesTab
+            documents={data.documents}
+            signatures={data.signatures}
+            applicationId={id}
+            onOpenLightbox={(url, label) => {
+              setLightboxUrl(url);
+              setLightboxLabel(label);
+            }}
+          />
+        );
+      case 'logs':
+        return (
+          <LogsTab
+            application={data.application}
+            checkins={data.checkins}
+            sms_log={data.sms_log}
+            reminders_sent={data.reminders_sent}
+            signatures={data.signatures}
+            documents={data.documents}
+            checkinSending={checkinSending}
+            onSendCheckin={sendCheckin}
+          />
+        );
+      case 'settings':
+        return (
+          <SettingsTab
+            application={data.application}
+            agentNotes={agentNotes}
+            setAgentNotes={setAgentNotes}
+            saveField={saveField}
+            saving={saving}
+            onChangeStatus={changeStatus}
+            onDeleteCase={() => setConfirmDelete(true)}
+          />
+        );
+      default:
+        return null;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -309,42 +531,125 @@ export default function CaseDetailPage() {
             >
               Close
             </button>
-            <img
-              src={lightboxUrl}
-              alt={lightboxLabel}
-              className="w-full rounded-lg shadow-2xl"
-            />
+            <img src={lightboxUrl} alt={lightboxLabel} className="w-full rounded-lg shadow-2xl" />
             <p className="text-center text-sm text-gray-400 mt-3 capitalize">{lightboxLabel}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Wizard Modal */}
+      {showWizard && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div
+            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-center gap-2 mb-5">
+              {WIZARD_STEPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    i === wizardStep ? 'bg-[#d4af37]' : i < wizardStep ? 'bg-[#d4af37]/40' : 'bg-gray-700'
+                  }`}
+                />
+              ))}
+            </div>
+            <h3 className="text-lg font-bold text-white mb-1">{currentWizardStep.title}</h3>
+            <p className="text-sm text-gray-400 mb-5">{currentWizardStep.description}</p>
+            <div className="space-y-3">
+              {currentWizardStep.fields.map((f, i) => (
+                <div key={f.key}>
+                  <label className="block text-xs text-gray-400 mb-1">{f.label}</label>
+                  <input
+                    type={f.type || 'text'}
+                    value={caseInfo[f.key]}
+                    onChange={(e) => updateCaseInfo(f.key, e.target.value)}
+                    placeholder={f.placeholder}
+                    autoFocus={i === 0}
+                    onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3 mt-6">
+              {wizardStep > 0 && (
+                <button onClick={wizardBack} className="px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm">
+                  Back
+                </button>
+              )}
+              <button onClick={wizardSkip} className="px-4 py-2.5 text-gray-500 hover:text-gray-300 transition-colors text-sm">
+                {isLastWizardStep ? 'Skip & Finish' : 'Skip'}
+              </button>
+              <button
+                onClick={wizardNext}
+                disabled={wizardSaving}
+                className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e5c55a] transition-colors text-sm disabled:opacity-50"
+              >
+                {wizardSaving ? 'Saving...' : isLastWizardStep ? 'Done' : 'Next'}
+              </button>
+            </div>
+            <button
+              onClick={() => { setShowWizard(false); setWizardStep(0); }}
+              className="w-full text-center text-xs text-gray-600 hover:text-gray-400 mt-4 transition-colors"
+            >
+              Fill in later
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-lg font-bold text-white mb-2">Delete Case</h3>
+            <p className="text-sm text-gray-400 mb-5">
+              Permanently delete <strong>{app.defendant_first} {app.defendant_last}</strong> and all associated data? This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteCase}
+                disabled={deleting}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-500 transition-colors text-sm disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Header */}
       <header className="bg-[#1a4d2e] px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <a href="/admin" className="text-sm text-green-200 hover:underline">
               &larr; All Cases
             </a>
-            <h1 className="text-xl font-bold mt-1">
-              {app.defendant_first} {app.defendant_last}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold">
+                {app.defendant_first} {app.defendant_last}
+              </h1>
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusBadge(app.status)}`}>
+                {app.status.toUpperCase()}
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusBadge(app.status)}`}>
-              {app.status}
-            </span>
-            <select
-              value={app.status}
-              onChange={(e) => changeStatus(e.target.value as Application['status'])}
-              className="bg-gray-900 border border-gray-700 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+            <a
+              href={`/api/onboard/generate-pdf?id=${id}`}
+              target="_blank"
+              className="bg-[#d4af37] text-gray-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors"
             >
-              {STATUS_FLOW.map((s) => (
-                <option key={s} value={s}>
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
-                </option>
-              ))}
-            </select>
+              PDF
+            </a>
           </div>
         </div>
       </header>
@@ -362,428 +667,15 @@ export default function CaseDetailPage() {
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        {/* ── CASE INFO ── */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold mb-4 text-[#d4af37]">Case Information</h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            <Field label="Phone" value={app.defendant_phone} />
-            <Field label="Email" value={app.defendant_email} />
-            <Field label="DOB" value={formatDate(app.defendant_dob)} />
-            <Field label="Address" value={app.defendant_address} />
-            <Field
-              label="City / State / Zip"
-              value={`${app.defendant_city || ''}, ${app.defendant_state || ''} ${app.defendant_zip || ''}`}
-            />
-            <Field label="SSN (last 4)" value={app.defendant_ssn_last4 ? `***-**-${app.defendant_ssn_last4}` : null} />
-            <Field label="DL Number" value={app.defendant_dl_number} />
-            <Field label="Employer" value={app.employer_name} />
-            <Field label="Employer Phone" value={app.employer_phone} />
-            <Field label="Charges" value={app.charge_description} />
-            <Field
-              label="Bond Amount"
-              value={app.bond_amount ? `$${Number(app.bond_amount).toLocaleString()}` : null}
-            />
-            <Field label="Court" value={app.court_name} />
-            <Field label="Court Date" value={formatDate(app.court_date)} />
-            <Field label="Case Number" value={app.case_number} />
-            <Field label="Jail Location" value={app.jail_location} />
-          </div>
-
-          {/* Editable agent fields */}
-          <div className="border-t border-gray-800 pt-4">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3">Agent Fields</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <EditField
-                label="Power Number"
-                value={powerNumber}
-                onChange={setPowerNumber}
-                onBlur={() => saveField({ power_number: powerNumber || null })}
-                disabled={saving}
-              />
-              <EditField
-                label="Premium ($)"
-                value={premium}
-                onChange={setPremium}
-                onBlur={() => saveField({ premium: premium ? parseFloat(premium) : null })}
-                disabled={saving}
-                type="number"
-              />
-              <EditField
-                label="Down Payment ($)"
-                value={downPayment}
-                onChange={setDownPayment}
-                onBlur={() => saveField({ down_payment: downPayment ? parseFloat(downPayment) : null })}
-                disabled={saving}
-                type="number"
-              />
-              <EditField
-                label="Payment Amount ($)"
-                value={paymentAmount}
-                onChange={setPaymentAmount}
-                onBlur={() => saveField({ payment_amount: paymentAmount ? parseFloat(paymentAmount) : null })}
-                disabled={saving}
-                type="number"
-              />
-              <EditField
-                label="Next Payment Due"
-                value={nextPaymentDate}
-                onChange={setNextPaymentDate}
-                onBlur={() => saveField({ next_payment_date: nextPaymentDate || null })}
-                disabled={saving}
-                type="date"
-              />
-            </div>
-          </div>
-
-          {/* References */}
-          {references.length > 0 && (
-            <div className="border-t border-gray-800 pt-4 mt-4">
-              <h3 className="text-sm font-semibold text-gray-400 mb-3">References</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {references.map((ref) => (
-                  <div key={ref.id} className="bg-gray-800 rounded-lg p-3">
-                    <p className="text-sm font-semibold">{ref.full_name}</p>
-                    <p className="text-xs text-gray-400">{ref.relationship}</p>
-                    <p className="text-xs text-gray-400">{ref.phone}</p>
-                    {ref.address && <p className="text-xs text-gray-500">{ref.address}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* ── DOCUMENTS & ID ── */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-[#d4af37]">Files & ID</h2>
-            <a
-              href={`/api/onboard/generate-pdf?id=${id}`}
-              target="_blank"
-              className="bg-[#d4af37] text-gray-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors"
-            >
-              Download Full PDF
-            </a>
-          </div>
-
-          {documents.length === 0 && signatures.length === 0 ? (
-            <p className="text-sm text-gray-500">No documents uploaded yet.</p>
-          ) : (
-            <>
-              {/* Photo thumbnails — grid with click-to-expand */}
-              {documents.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                  {documents.map((doc) => {
-                    const label = doc.doc_type.replace(/_/g, ' ');
-                    return (
-                      <button
-                        key={doc.id}
-                        onClick={() => {
-                          if (doc.signed_url) {
-                            setLightboxUrl(doc.signed_url);
-                            setLightboxLabel(label);
-                          }
-                        }}
-                        className="text-left bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-gray-500 transition-colors group"
-                      >
-                        {doc.signed_url ? (
-                          <div className="relative">
-                            <img
-                              src={doc.signed_url}
-                              alt={label}
-                              className="w-full h-48 object-cover group-hover:opacity-90 transition-opacity"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-                              <span className="bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-                                View full size
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="w-full h-48 flex items-center justify-center text-gray-600 text-sm">
-                            No preview available
-                          </div>
-                        )}
-                        <div className="p-3">
-                          <p className="text-sm font-semibold capitalize">{label}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {formatDateTime(doc.uploaded_at)}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Signatures inline */}
-              {signatures.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 mb-3">Signatures</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {signatures.map((sig) => (
-                      <div
-                        key={sig.id}
-                        className="bg-gray-800 rounded-xl border border-gray-700 p-4 flex items-center gap-4"
-                      >
-                        {sig.signature_data ? (
-                          <img
-                            src={sig.signature_data}
-                            alt={`${sig.signer_name} signature`}
-                            className="h-14 bg-white rounded px-2 flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="h-14 w-28 flex items-center justify-center text-gray-600 text-xs bg-gray-700 rounded flex-shrink-0">
-                            No image
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold truncate">{sig.signer_name}</p>
-                          <p className="text-xs text-gray-400 capitalize">{sig.signer_role}</p>
-                          <p className="text-xs text-gray-600">{formatDateTime(sig.signed_at)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </section>
-
-        {/* ── NOTES ── */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold text-[#d4af37] mb-3">Agent Notes</h2>
-          <textarea
-            value={agentNotes}
-            onChange={(e) => setAgentNotes(e.target.value)}
-            onBlur={() => saveField({ agent_notes: agentNotes || null })}
-            disabled={saving}
-            rows={5}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] disabled:opacity-50 leading-relaxed"
-            placeholder="Internal notes, observations, next steps..."
-          />
-          <p className="text-xs text-gray-600 mt-2">
-            Auto-saves on blur. Last updated: {app.updated_at ? formatDateTime(app.updated_at) : '—'}
-          </p>
-        </section>
-
-        {/* ── CHECK-IN SCHEDULE & HISTORY ── */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-[#d4af37]">Check-in Schedule & History</h2>
-            <button
-              onClick={sendCheckin}
-              disabled={checkinSending}
-              className="bg-[#1a4d2e] text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#256b3e] transition-colors disabled:opacity-50"
-            >
-              {checkinSending ? 'Sending...' : 'Send Check-in Now'}
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-6 text-sm mb-4">
-            <div>
-              <span className="text-gray-500">Frequency:</span>{' '}
-              <span className="capitalize font-semibold">{app.checkin_frequency || '—'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">Next Due:</span>{' '}
-              <span className="font-semibold">
-                {nextCheckinDate(checkins, app.checkin_frequency)}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500">Total Check-ins:</span>{' '}
-              <span className="font-semibold">{checkins.length}</span>
-            </div>
-          </div>
-
-          {checkins.length === 0 ? (
-            <p className="text-sm text-gray-500">No check-ins recorded yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-xs text-gray-500 uppercase border-b border-gray-800">
-                    <th className="text-left py-2 pr-4">Date / Time</th>
-                    <th className="text-left py-2 pr-4">Location</th>
-                    <th className="text-left py-2 pr-4">Accuracy</th>
-                    <th className="text-left py-2 pr-4">Method</th>
-                    <th className="text-left py-2">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {checkins.map((ci) => (
-                    <tr key={ci.id} className="border-b border-gray-800/50">
-                      <td className="py-2 pr-4 text-gray-300">
-                        {formatDateTime(ci.checked_in_at)}
-                      </td>
-                      <td className="py-2 pr-4 text-gray-400 font-mono text-xs">
-                        {ci.latitude && ci.longitude
-                          ? `${ci.latitude.toFixed(4)}, ${ci.longitude.toFixed(4)}`
-                          : '—'}
-                      </td>
-                      <td className="py-2 pr-4 text-gray-400">
-                        {ci.accuracy ? `${ci.accuracy.toFixed(0)}m` : '—'}
-                      </td>
-                      <td className="py-2 pr-4 text-gray-400 capitalize">
-                        {ci.method?.replace(/_/g, ' ') || '—'}
-                      </td>
-                      <td className={`py-2 font-semibold ${checkinStatusColor(ci)}`}>
-                        {ci.latitude && ci.longitude ? 'Responded' : 'Pending'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        {/* ── REMINDERS SENT ── */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold text-[#d4af37] mb-4">Reminders Sent</h2>
-
-          {reminders_sent.length === 0 ? (
-            <p className="text-sm text-gray-500">No reminders sent yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-xs text-gray-500 uppercase border-b border-gray-800">
-                    <th className="text-left py-2 pr-4">Date</th>
-                    <th className="text-left py-2 pr-4">Type</th>
-                    <th className="text-left py-2">Channel</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reminders_sent.map((rem) => (
-                    <tr key={rem.id} className="border-b border-gray-800/50">
-                      <td className="py-2 pr-4 text-gray-300">
-                        {formatDateTime(rem.sent_at)}
-                      </td>
-                      <td className="py-2 pr-4 text-gray-400">{rem.reminder_type}</td>
-                      <td className="py-2 text-gray-400 capitalize">{rem.channel}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        {/* ── ACTIVITY LOG ── */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold text-[#d4af37] mb-4">Activity Log</h2>
-
-          {timeline.length === 0 ? (
-            <p className="text-sm text-gray-500">No activity recorded.</p>
-          ) : (
-            <div className="relative">
-              {/* Vertical line */}
-              <div className="absolute left-[7px] top-3 bottom-3 w-px bg-gray-800" />
-
-              <div className="space-y-4">
-                {timeline.map((ev) => (
-                  <div key={ev.id} className="flex gap-4 relative">
-                    {/* Dot */}
-                    <div className={`w-[15px] h-[15px] rounded-full flex-shrink-0 mt-0.5 ${ev.color} ring-2 ring-gray-900`} />
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-white">{ev.title}</p>
-                        <time className="text-xs text-gray-600" title={formatDateTime(ev.timestamp)}>
-                          {relativeTime(ev.timestamp)}
-                        </time>
-                      </div>
-                      <p className="text-sm text-gray-400 mt-0.5 break-words">{ev.detail}</p>
-                      <p className="text-xs text-gray-700 mt-0.5">{formatDateTime(ev.timestamp)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* ── SMS LOG ── */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold text-[#d4af37] mb-4">SMS Log</h2>
-
-          {sms_log.length === 0 ? (
-            <p className="text-sm text-gray-500">No SMS messages recorded.</p>
-          ) : (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {sms_log.map((sms) => (
-                <div
-                  key={sms.id}
-                  className={`rounded-lg p-3 text-sm ${
-                    sms.direction === 'outbound'
-                      ? 'bg-[#1a4d2e]/30 border border-green-900/50 ml-8'
-                      : 'bg-gray-800 border border-gray-700 mr-8'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-gray-400 capitalize">
-                      {sms.direction === 'outbound' ? 'Sent' : 'Received'} — {sms.phone}
-                    </span>
-                    <span className="text-xs text-gray-600">
-                      {formatDateTime(sms.sent_at)}
-                    </span>
-                  </div>
-                  <p className="text-gray-300">{sms.message || '(no content)'}</p>
-                  {sms.status && (
-                    <p className="text-xs text-gray-600 mt-1">Status: {sms.status}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
-  );
-}
-
-/* ── Helper Components ── */
-
-function Field({ label, value }: { label: string; value: string | null | undefined }) {
-  return (
-    <div>
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="text-sm text-white">{value || '—'}</p>
-    </div>
-  );
-}
-
-function EditField({
-  label,
-  value,
-  onChange,
-  onBlur,
-  disabled,
-  type = 'text',
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  onBlur: () => void;
-  disabled: boolean;
-  type?: string;
-}) {
-  return (
-    <div>
-      <label className="block text-xs text-gray-500 mb-1">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onBlur}
-        disabled={disabled}
-        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] disabled:opacity-50"
-      />
+      {/* Main layout: sidebar + content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex gap-6">
+          <CaseSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+          <main className="flex-1 min-w-0">
+            {renderActiveTab()}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
