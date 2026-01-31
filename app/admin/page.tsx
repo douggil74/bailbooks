@@ -35,6 +35,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showNewCase, setShowNewCase] = useState(false);
+  const [newFirst, setNewFirst] = useState('');
+  const [newLast, setNewLast] = useState('');
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/applications')
@@ -45,6 +49,24 @@ export default function AdminPage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  async function createCase() {
+    if (!newFirst.trim() || !newLast.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch('/api/onboard/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ defendant_first: newFirst.trim(), defendant_last: newLast.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.id) {
+        window.location.href = `/admin/case/${data.id}`;
+      }
+    } catch {
+      setCreating(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     return apps.filter((app) => {
@@ -71,9 +93,17 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold">BailMadeSimple — Agent Control Panel</h1>
           <p className="text-sm text-green-200">Case Management Dashboard</p>
         </div>
-        <a href="/" className="text-sm text-green-200 underline">
-          Back to Site
-        </a>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowNewCase(true)}
+            className="bg-[#d4af37] text-[#0a0a0a] text-sm font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors"
+          >
+            + New Case
+          </button>
+          <a href="/" className="text-sm text-green-200 underline">
+            Back to Site
+          </a>
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -252,6 +282,53 @@ export default function AdminPage() {
           </>
         )}
       </main>
+
+      {showNewCase && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowNewCase(false)}
+        >
+          <div
+            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-white mb-4">New Case</h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="First name"
+                value={newFirst}
+                onChange={(e) => setNewFirst(e.target.value)}
+                autoFocus
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+              />
+              <input
+                type="text"
+                placeholder="Last name"
+                value={newLast}
+                onChange={(e) => setNewLast(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && createCase()}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+              />
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => setShowNewCase(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createCase}
+                disabled={creating || !newFirst.trim() || !newLast.trim()}
+                className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e5c55a] transition-colors text-sm disabled:opacity-50"
+              >
+                {creating ? 'Creating...' : 'Create'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
