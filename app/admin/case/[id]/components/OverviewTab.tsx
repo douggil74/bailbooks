@@ -1,4 +1,4 @@
-import type { Application, Signature, Payment } from '@/lib/bail-types';
+import type { Application, Signature, Payment, Indemnitor } from '@/lib/bail-types';
 import FinanceCard from '@/app/admin/components/FinanceCard';
 import type { TabId } from './CaseSidebar';
 
@@ -13,9 +13,13 @@ interface ChecklistItem {
 function computeChecklist(
   app: Application,
   hasDefendantSig: boolean,
-  hasIndemnitorSig: boolean,
+  indemnitors: Indemnitor[],
   hasCard: boolean,
 ): ChecklistItem[] {
+  const allIndemnitorsComplete = indemnitors.length > 0 && indemnitors.every(i => i.status === 'complete');
+  const someInProgress = indemnitors.some(i => i.status === 'in_progress');
+  const indemnitorCount = indemnitors.length;
+
   return [
     {
       label: 'Quote has been Confirmed',
@@ -33,7 +37,7 @@ function computeChecklist(
         : 'Configure payment amount and schedule.',
       complete: !!(app.payment_amount && app.next_payment_date),
       actionLabel: app.payment_amount ? 'Review' : 'Set Up',
-      targetTab: 'payment-plan',
+      targetTab: 'finances',
     },
     {
       label: "Defendant's Information is Complete",
@@ -44,11 +48,15 @@ function computeChecklist(
     },
     {
       label: "Indemnitor's Information is Complete",
-      description: hasIndemnitorSig
-        ? 'Indemnitor has signed the agreement.'
-        : 'No indemnitor signature on file yet.',
-      complete: hasIndemnitorSig,
-      actionLabel: hasIndemnitorSig ? 'View' : 'Pending',
+      description: allIndemnitorsComplete
+        ? `All ${indemnitorCount} indemnitor${indemnitorCount > 1 ? 's' : ''} complete.`
+        : indemnitorCount === 0
+          ? 'No indemnitors added yet.'
+          : someInProgress
+            ? `${indemnitors.filter(i => i.status === 'complete').length}/${indemnitorCount} indemnitor${indemnitorCount > 1 ? 's' : ''} complete.`
+            : `${indemnitorCount} indemnitor${indemnitorCount > 1 ? 's' : ''} pending.`,
+      complete: allIndemnitorsComplete,
+      actionLabel: allIndemnitorsComplete ? 'View' : indemnitorCount === 0 ? 'Add' : 'Pending',
       targetTab: 'indemnitors',
     },
     {
@@ -58,16 +66,16 @@ function computeChecklist(
         : 'No down payment recorded yet.',
       complete: !!(app.down_payment && Number(app.down_payment) > 0),
       actionLabel: 'View Payments',
-      targetTab: 'payment-plan',
+      targetTab: 'finances',
     },
     {
       label: 'Card on File',
       description: hasCard
         ? 'A payment card is stored for this customer.'
-        : 'No card on file. Collect a card in the Payment Plan tab.',
+        : 'No card on file. Collect a card in the Finances tab.',
       complete: hasCard,
       actionLabel: hasCard ? 'View' : 'Add Card',
-      targetTab: 'payment-plan',
+      targetTab: 'finances',
     },
   ];
 }
@@ -76,18 +84,19 @@ export default function OverviewTab({
   application,
   signatures,
   payments,
+  indemnitors,
   onNavigateTab,
 }: {
   application: Application;
   signatures: Signature[];
   payments: Payment[];
+  indemnitors: Indemnitor[];
   onNavigateTab: (tab: TabId) => void;
 }) {
   const hasDefendantSig = signatures.some((s) => s.signer_role === 'defendant');
-  const hasIndemnitorSig = signatures.some((s) => s.signer_role === 'indemnitor');
   const hasCard = !!application.stripe_payment_method_id;
 
-  const checklist = computeChecklist(application, hasDefendantSig, hasIndemnitorSig, hasCard);
+  const checklist = computeChecklist(application, hasDefendantSig, indemnitors, hasCard);
   const completedCount = checklist.filter((c) => c.complete).length;
   const allComplete = completedCount === checklist.length;
 

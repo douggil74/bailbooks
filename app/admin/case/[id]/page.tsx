@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { Shield } from 'lucide-react';
 import type {
   Application,
   ApplicationReference,
@@ -12,6 +13,7 @@ import type {
   ReminderSent,
   CardInfoResponse,
   Payment,
+  Indemnitor,
 } from '@/lib/bail-types';
 import { EMPTY_CASE_INFO } from '@/app/admin/components/CaseField';
 import type { CaseInfoFields } from '@/app/admin/components/CaseField';
@@ -21,7 +23,6 @@ import OverviewTab from './components/OverviewTab';
 import DefendantTab from './components/DefendantTab';
 import IndemnitorTab from './components/IndemnitorTab';
 import FinancesTab from './components/FinancesTab';
-import PaymentPlanTab from './components/PaymentPlanTab';
 import FilesTab from './components/FilesTab';
 import LogsTab from './components/LogsTab';
 import SettingsTab from './components/SettingsTab';
@@ -39,6 +40,7 @@ interface CaseData {
   sms_log: SmsLogEntry[];
   reminders_sent: ReminderSent[];
   payments: Payment[];
+  indemnitors: Indemnitor[];
 }
 
 interface WizardField {
@@ -201,6 +203,10 @@ export default function CaseDetailPage() {
         jail_location: app.jail_location || '',
         county: app.county || '',
         bond_date: app.bond_date || '',
+        car_make: app.car_make || '',
+        car_model: app.car_model || '',
+        car_year: app.car_year || '',
+        car_color: app.car_color || '',
       });
 
       setPowerNumber(app.power_number || '');
@@ -410,6 +416,7 @@ export default function CaseDetailPage() {
             application={data.application}
             signatures={data.signatures}
             payments={data.payments}
+            indemnitors={data.indemnitors}
             onNavigateTab={setActiveTab}
           />
         );
@@ -427,13 +434,18 @@ export default function CaseDetailPage() {
       case 'indemnitors':
         return (
           <IndemnitorTab
+            applicationId={id}
+            indemnitors={data.indemnitors}
             references={data.references}
             signatures={data.signatures}
+            documents={data.documents}
+            onRefresh={fetchCase}
           />
         );
       case 'finances':
         return (
           <FinancesTab
+            applicationId={id}
             powerNumber={powerNumber}
             setPowerNumber={setPowerNumber}
             premium={premium}
@@ -447,12 +459,6 @@ export default function CaseDetailPage() {
             saveField={saveField}
             saving={saving}
             bondAmount={data.application.bond_amount}
-          />
-        );
-      case 'payment-plan':
-        return (
-          <PaymentPlanTab
-            applicationId={id}
             cardInfo={cardInfo}
             cardLoading={cardLoading}
             showCardForm={showCardForm}
@@ -467,9 +473,6 @@ export default function CaseDetailPage() {
               setCardInfo({ has_card: true, brand, last4, exp_month: null, exp_year: null });
               fetchCardInfo();
             }}
-            paymentAmount={paymentAmount}
-            premium={premium}
-            downPayment={downPayment}
             payments={data.payments}
             onRefresh={fetchCase}
           />
@@ -480,6 +483,7 @@ export default function CaseDetailPage() {
             documents={data.documents}
             signatures={data.signatures}
             applicationId={id}
+            indemnitors={data.indemnitors}
             onOpenLightbox={(url, label) => {
               setLightboxUrl(url);
               setLightboxLabel(label);
@@ -630,8 +634,9 @@ export default function CaseDetailPage() {
       <header className="bg-[#1a4d2e] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <a href="/admin" className="text-sm text-green-200 hover:underline">
-              &larr; All Cases
+            <a href="/admin" className="flex items-center gap-2 text-sm text-green-200 hover:underline">
+              <Shield className="w-6 h-6 text-[#d4af37]" />
+              <span>&larr; All Cases</span>
             </a>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-bold">

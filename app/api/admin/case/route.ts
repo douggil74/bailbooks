@@ -32,6 +32,10 @@ const ALLOWED_FIELDS = [
   'next_payment_date',
   'county',
   'bond_date',
+  'car_make',
+  'car_model',
+  'car_year',
+  'car_color',
 ];
 
 export async function PUT(req: NextRequest) {

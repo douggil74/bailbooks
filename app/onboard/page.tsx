@@ -7,6 +7,13 @@ import type {
 } from '@/lib/bail-types';
 import CardCollectForm from '@/app/components/CardCollectForm';
 
+interface CoSignerInput {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  send_invite: boolean;
+}
+
 // ─── Wizard Container ────────────────────────────────────────────────
 export default function OnboardPage() {
   const [step, setStep] = useState<WizardStep>(1);
@@ -27,7 +34,12 @@ export default function OnboardPage() {
   const [ssn4, setSsn4] = useState('');
   const [dlNumber, setDlNumber] = useState('');
 
-  // Step 2 fields
+  // Step 2 fields (Co-Signers)
+  const [cosigners, setCosigners] = useState<CoSignerInput[]>([
+    { first_name: '', last_name: '', phone: '', send_invite: false },
+  ]);
+
+  // Step 3 fields (Bond Details)
   const [bondAmount, setBondAmount] = useState('');
   const [charges, setCharges] = useState('');
   const [courtName, setCourtName] = useState('');
@@ -35,26 +47,26 @@ export default function OnboardPage() {
   const [caseNumber, setCaseNumber] = useState('');
   const [jailLocation, setJailLocation] = useState('');
 
-  // Step 3 fields
+  // Step 4 fields (Employment)
   const [employerName, setEmployerName] = useState('');
   const [employerPhone, setEmployerPhone] = useState('');
 
-  // Step 4 fields
+  // Step 5 fields (References)
   const [references, setReferences] = useState<ReferenceInput[]>([
     { full_name: '', relationship: '', phone: '' },
     { full_name: '', relationship: '', phone: '' },
     { full_name: '', relationship: '', phone: '' },
   ]);
 
-  // Step 5 fields
+  // Step 6 fields (ID Upload)
   const [dlFrontUploaded, setDlFrontUploaded] = useState(false);
   const [dlBackUploaded, setDlBackUploaded] = useState(false);
   const [selfieUploaded, setSelfieUploaded] = useState(false);
 
-  // Step 6 fields
+  // Step 7 fields (Payment)
   const [paymentSaved, setPaymentSaved] = useState(false);
 
-  // Step 7 fields
+  // Step 8 fields (Sign & Consent)
   const [signerName, setSignerName] = useState('');
   const [smsConsent, setSmsConsent] = useState(false);
   const [gpsConsent, setGpsConsent] = useState(false);
@@ -150,6 +162,21 @@ export default function OnboardPage() {
 
   async function handleStep2() {
     if (!appId) return;
+    const validCosigners = cosigners.filter(c => c.first_name.trim() && c.last_name.trim());
+    if (validCosigners.length > 0) {
+      await apiCall('/api/onboard/indemnitors', {
+        method: 'POST',
+        body: JSON.stringify({
+          application_id: appId,
+          cosigners: validCosigners,
+        }),
+      });
+    }
+    if (!error) setStep(3);
+  }
+
+  async function handleStep3() {
+    if (!appId) return;
     await apiCall('/api/onboard/save', {
       method: 'PUT',
       body: JSON.stringify({
@@ -165,10 +192,10 @@ export default function OnboardPage() {
         },
       }),
     });
-    if (!error) setStep(3);
+    if (!error) setStep(4);
   }
 
-  async function handleStep3() {
+  async function handleStep4() {
     if (!appId) return;
     await apiCall('/api/onboard/save', {
       method: 'PUT',
@@ -181,10 +208,10 @@ export default function OnboardPage() {
         },
       }),
     });
-    if (!error) setStep(4);
+    if (!error) setStep(5);
   }
 
-  async function handleStep4() {
+  async function handleStep5() {
     if (!appId) return;
     const validRefs = references.filter((r) => r.full_name.trim() && r.phone.trim());
     if (validRefs.length === 0) {
@@ -195,7 +222,7 @@ export default function OnboardPage() {
       method: 'POST',
       body: JSON.stringify({ application_id: appId, references: validRefs }),
     });
-    if (!error) setStep(5);
+    if (!error) setStep(6);
   }
 
   async function handleFileUpload(file: File, docType: string) {
@@ -281,13 +308,13 @@ export default function OnboardPage() {
   }, []);
 
   useEffect(() => {
-    if (step === 7) {
+    if (step === 8) {
       const cleanup = setupCanvas();
       return cleanup;
     }
   }, [step, setupCanvas]);
 
-  async function handleStep7() {
+  async function handleStep8() {
     if (!appId) return;
     if (!signerName.trim()) {
       setError('Please type your full name');
@@ -324,10 +351,27 @@ export default function OnboardPage() {
     if (submitResult) setSubmitted(true);
   }
 
-  // ─── Progress bar ──────────────────────────────────────────────────
-  const progress = submitted ? 100 : ((step - 1) / 7) * 100;
+  // ─── Co-signer helpers ──────────────────────────────────────────────
+  function updateCosigner(index: number, field: keyof CoSignerInput, value: string | boolean) {
+    const updated = [...cosigners];
+    updated[index] = { ...updated[index], [field]: value };
+    setCosigners(updated);
+  }
 
-  const stepLabels = ['Personal', 'Bond', 'Employment', 'References', 'ID Upload', 'Payment', 'Sign'];
+  function addCosignerSlot() {
+    if (cosigners.length < 3) {
+      setCosigners([...cosigners, { first_name: '', last_name: '', phone: '', send_invite: false }]);
+    }
+  }
+
+  function removeCosigner(index: number) {
+    setCosigners(cosigners.filter((_, i) => i !== index));
+  }
+
+  // ─── Progress bar ──────────────────────────────────────────────────
+  const progress = submitted ? 100 : ((step - 1) / 8) * 100;
+
+  const stepLabels = ['Personal', 'Co-Signers', 'Bond', 'Employment', 'References', 'ID Upload', 'Payment', 'Sign'];
 
   // ─── Submitted state ──────────────────────────────────────────────
   if (submitted) {
@@ -353,7 +397,7 @@ export default function OnboardPage() {
       {/* Progress */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Step {step} of 7</span>
+          <span>Step {step} of 8</span>
           <span>{stepLabels[step - 1]}</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -396,8 +440,53 @@ export default function OnboardPage() {
         </section>
       )}
 
-      {/* Step 2: Bond Details */}
+      {/* Step 2: Co-Signers */}
       {step === 2 && (
+        <section>
+          <h2 className="text-xl font-bold mb-2">Co-Signers</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Add up to 3 co-signers (indemnitors). They&apos;ll receive a link to provide their information.
+            You can skip this step if not needed.
+          </p>
+          {cosigners.map((cs, i) => (
+            <div key={i} className="border border-gray-200 rounded-lg p-3 mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-gray-500">Co-Signer {i + 1}</p>
+                {cosigners.length > 1 && (
+                  <button onClick={() => removeCosigner(i)} className="text-xs text-red-500 hover:text-red-400">Remove</button>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Input label="First Name" value={cs.first_name} onChange={(v) => updateCosigner(i, 'first_name', v)} />
+                  <Input label="Last Name" value={cs.last_name} onChange={(v) => updateCosigner(i, 'last_name', v)} />
+                </div>
+                <Input label="Phone" type="tel" value={cs.phone} onChange={(v) => updateCosigner(i, 'phone', v)} />
+                <label className="flex items-center gap-2 mt-1">
+                  <input
+                    type="checkbox"
+                    checked={cs.send_invite}
+                    onChange={(e) => updateCosigner(i, 'send_invite', e.target.checked)}
+                  />
+                  <span className="text-sm text-gray-600">Send them a link to complete their info</span>
+                </label>
+              </div>
+            </div>
+          ))}
+          {cosigners.length < 3 && (
+            <button
+              onClick={addCosignerSlot}
+              className="text-sm text-[#1a4d2e] font-medium hover:underline mb-2"
+            >
+              + Add another co-signer
+            </button>
+          )}
+          <NavButtons onBack={() => setStep(1)} onNext={handleStep2} loading={saving} skipLabel="Skip" onSkip={() => setStep(3)} />
+        </section>
+      )}
+
+      {/* Step 3: Bond Details */}
+      {step === 3 && (
         <section>
           <h2 className="text-xl font-bold mb-4">Bond Details</h2>
           <div className="space-y-3">
@@ -408,24 +497,24 @@ export default function OnboardPage() {
             <Input label="Case Number" value={caseNumber} onChange={setCaseNumber} />
             <Input label="Jail Location" value={jailLocation} onChange={setJailLocation} />
           </div>
-          <NavButtons onBack={() => setStep(1)} onNext={handleStep2} loading={saving} />
+          <NavButtons onBack={() => setStep(2)} onNext={handleStep3} loading={saving} />
         </section>
       )}
 
-      {/* Step 3: Employment */}
-      {step === 3 && (
+      {/* Step 4: Employment */}
+      {step === 4 && (
         <section>
           <h2 className="text-xl font-bold mb-4">Employment</h2>
           <div className="space-y-3">
             <Input label="Employer Name" value={employerName} onChange={setEmployerName} />
             <Input label="Employer Phone" type="tel" value={employerPhone} onChange={setEmployerPhone} />
           </div>
-          <NavButtons onBack={() => setStep(2)} onNext={handleStep3} loading={saving} />
+          <NavButtons onBack={() => setStep(3)} onNext={handleStep4} loading={saving} />
         </section>
       )}
 
-      {/* Step 4: References */}
-      {step === 4 && (
+      {/* Step 5: References */}
+      {step === 5 && (
         <section>
           <h2 className="text-xl font-bold mb-4">References</h2>
           <p className="text-sm text-gray-500 mb-3">Provide at least 1 reference (up to 3)</p>
@@ -464,12 +553,12 @@ export default function OnboardPage() {
               </div>
             </div>
           ))}
-          <NavButtons onBack={() => setStep(3)} onNext={handleStep4} loading={saving} />
+          <NavButtons onBack={() => setStep(4)} onNext={handleStep5} loading={saving} />
         </section>
       )}
 
-      {/* Step 5: ID Upload */}
-      {step === 5 && (
+      {/* Step 6: ID Upload */}
+      {step === 6 && (
         <section>
           <h2 className="text-xl font-bold mb-4">Upload ID</h2>
           <div className="space-y-4">
@@ -489,12 +578,12 @@ export default function OnboardPage() {
               onFile={(f) => handleFileUpload(f, 'selfie')}
             />
           </div>
-          <NavButtons onBack={() => setStep(4)} onNext={() => setStep(6)} loading={saving} />
+          <NavButtons onBack={() => setStep(5)} onNext={() => setStep(7)} loading={saving} />
         </section>
       )}
 
-      {/* Step 6: Payment */}
-      {step === 6 && (
+      {/* Step 7: Payment */}
+      {step === 7 && (
         <section>
           <h2 className="text-xl font-bold mb-4">Payment Information</h2>
           <p className="text-sm text-gray-500 mb-4">
@@ -513,12 +602,12 @@ export default function OnboardPage() {
           ) : (
             <p className="text-sm text-gray-500">Please complete earlier steps first.</p>
           )}
-          <NavButtons onBack={() => setStep(5)} onNext={() => setStep(7)} loading={saving} />
+          <NavButtons onBack={() => setStep(6)} onNext={() => setStep(8)} loading={saving} />
         </section>
       )}
 
-      {/* Step 7: Sign & Consent */}
-      {step === 7 && (
+      {/* Step 8: Sign & Consent */}
+      {step === 8 && (
         <section>
           <h2 className="text-xl font-bold mb-4">Sign & Consent</h2>
           <div className="space-y-4">
@@ -590,13 +679,13 @@ export default function OnboardPage() {
 
           <div className="mt-6 flex gap-3">
             <button
-              onClick={() => setStep(6)}
+              onClick={() => setStep(7)}
               className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium"
             >
               Back
             </button>
             <button
-              onClick={handleStep7}
+              onClick={handleStep8}
               disabled={saving || signed}
               className="flex-1 bg-[#d4af37] text-gray-900 py-3 rounded-lg font-bold disabled:opacity-50"
             >
@@ -654,10 +743,14 @@ function NavButtons({
   onBack,
   onNext,
   loading,
+  skipLabel,
+  onSkip,
 }: {
   onBack: () => void;
   onNext: () => void;
   loading: boolean;
+  skipLabel?: string;
+  onSkip?: () => void;
 }) {
   return (
     <div className="mt-6 flex gap-3">
@@ -667,6 +760,14 @@ function NavButtons({
       >
         Back
       </button>
+      {onSkip && (
+        <button
+          onClick={onSkip}
+          className="px-4 py-3 text-gray-500 text-sm font-medium hover:text-gray-700"
+        >
+          {skipLabel || 'Skip'}
+        </button>
+      )}
       <button
         onClick={onNext}
         disabled={loading}

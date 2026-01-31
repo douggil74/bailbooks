@@ -39,9 +39,41 @@ export interface Application {
   payment_link_amount: number | null;
   payment_link_created_at: string | null;
   payment_link_expires_at: string | null;
+  car_make: string | null;
+  car_model: string | null;
+  car_year: string | null;
+  car_color: string | null;
   sms_consent: boolean;
   gps_consent: boolean;
   checkin_frequency: 'weekly' | 'biweekly' | 'monthly';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Indemnitor {
+  id: string;
+  application_id: string;
+  first_name: string;
+  last_name: string;
+  dob: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  city: string | null;
+  state: string;
+  zip: string | null;
+  ssn_last4: string | null;
+  dl_number: string | null;
+  car_make: string | null;
+  car_model: string | null;
+  car_year: string | null;
+  car_color: string | null;
+  employer_name: string | null;
+  employer_phone: string | null;
+  status: 'pending' | 'in_progress' | 'complete';
+  invite_token: string | null;
+  invite_sent_at: string | null;
+  invite_expires_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -74,6 +106,7 @@ export interface ApplicationReference {
 export interface Signature {
   id: string;
   application_id: string;
+  indemnitor_id: string | null;
   signer_name: string;
   signer_role: 'defendant' | 'indemnitor' | 'agent';
   signature_data: string | null;
@@ -85,6 +118,7 @@ export interface Signature {
 export interface Document {
   id: string;
   application_id: string;
+  indemnitor_id: string | null;
   doc_type: 'drivers_license_front' | 'drivers_license_back' | 'selfie' | 'other';
   storage_path: string;
   file_name: string | null;
@@ -296,4 +330,4 @@ export interface CompletePaymentLinkRequest {
   payment_method_id: string;
 }
 
-export type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;

@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import type { ApplicationReference, Signature, Indemnitor, Document } from '@/lib/bail-types';
+import { usePhoneVerify } from '@/hooks/usePhoneVerify';
+import type { PhoneStatus } from '@/hooks/usePhoneVerify';
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
@@ -102,6 +104,8 @@ export default function IndemnitorTab({
   const [editValues, setEditValues] = useState<Record<string, Record<string, string>>>({});
 
   // Wizard state
+  const { verify: verifyPhone, getStatus: getPhoneStatus } = usePhoneVerify();
+
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
   const [wizardData, setWizardData] = useState<Record<string, string>>({});
@@ -245,6 +249,14 @@ export default function IndemnitorTab({
     setTimeout(() => setActionMsg(''), 3000);
   }
 
+  const DOT_COLORS: Record<PhoneStatus, string> = {
+    idle: '',
+    checking: 'bg-gray-400 animate-pulse',
+    valid: 'bg-green-500',
+    voip: 'bg-red-500',
+    error: 'bg-yellow-500',
+  };
+
   // Render helper for field (inline, not a component — avoids re-render bug)
   function renderField(indId: string, label: string, field: string, value: string | null, type = 'text') {
     return (
@@ -261,6 +273,37 @@ export default function IndemnitorTab({
           disabled={savingField}
           className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
         />
+      </div>
+    );
+  }
+
+  function renderPhoneField(indId: string, label: string, field: string, value: string | null) {
+    const key = `${indId}-${field}`;
+    const { status, detail } = getPhoneStatus(key);
+    return (
+      <div key={key}>
+        <label className="block text-xs text-gray-400 mb-1">{label}</label>
+        <div className="relative">
+          <input
+            type="tel"
+            value={getEditValue(indId, field, value || '')}
+            onChange={(e) => setEditValue(indId, field, e.target.value)}
+            onBlur={() => {
+              const val = getEditValue(indId, field, value || '').trim() || null;
+              if (val !== (value || null)) saveIndemnitorField(indId, field, val);
+              const phone = getEditValue(indId, field, value || '');
+              if (phone) verifyPhone(phone, key);
+            }}
+            disabled={savingField}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
+          />
+          {status !== 'idle' && (
+            <span
+              className={`w-2 h-2 rounded-full absolute right-3 bottom-[11px] ${DOT_COLORS[status]}`}
+              title={detail || status}
+            />
+          )}
+        </div>
       </div>
     );
   }
@@ -336,7 +379,7 @@ export default function IndemnitorTab({
                           {renderField(ind.id, 'First Name', 'first_name', ind.first_name)}
                           {renderField(ind.id, 'Last Name', 'last_name', ind.last_name)}
                           {renderField(ind.id, 'Date of Birth', 'dob', ind.dob, 'date')}
-                          {renderField(ind.id, 'Phone', 'phone', ind.phone, 'tel')}
+                          {renderPhoneField(ind.id, 'Phone', 'phone', ind.phone)}
                           {renderField(ind.id, 'Email', 'email', ind.email, 'email')}
                           {renderField(ind.id, 'SSN (last 4)', 'ssn_last4', ind.ssn_last4)}
                           {renderField(ind.id, 'DL Number', 'dl_number', ind.dl_number)}
@@ -372,7 +415,7 @@ export default function IndemnitorTab({
                         <p className="text-xs font-semibold text-[#d4af37] mb-3">Employment</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {renderField(ind.id, 'Employer', 'employer_name', ind.employer_name)}
-                          {renderField(ind.id, 'Employer Phone', 'employer_phone', ind.employer_phone, 'tel')}
+                          {renderPhoneField(ind.id, 'Employer Phone', 'employer_phone', ind.employer_phone)}
                         </div>
                       </div>
 

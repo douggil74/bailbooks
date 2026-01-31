@@ -20,6 +20,10 @@ export interface CaseInfoFields {
   jail_location: string;
   county: string;
   bond_date: string;
+  car_make: string;
+  car_model: string;
+  car_year: string;
+  car_color: string;
 }
 
 export const EMPTY_CASE_INFO: CaseInfoFields = {
@@ -44,6 +48,10 @@ export const EMPTY_CASE_INFO: CaseInfoFields = {
   jail_location: '',
   county: '',
   bond_date: '',
+  car_make: '',
+  car_model: '',
+  car_year: '',
+  car_color: '',
 };
 
 export default function CaseField({
@@ -55,6 +63,7 @@ export default function CaseField({
   disabled,
   type = 'text',
   placeholder,
+  statusDot,
 }: {
   label: string;
   value: string;
@@ -64,19 +73,23 @@ export default function CaseField({
   disabled: boolean;
   type?: string;
   placeholder?: string;
+  statusDot?: React.ReactNode;
 }) {
   return (
     <div>
       <label className="block text-xs text-gray-400 mb-1">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(field, e.target.value)}
-        onBlur={() => onBlur(field)}
-        disabled={disabled}
-        placeholder={placeholder}
-        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
-      />
+      <div className={statusDot ? 'relative' : undefined}>
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(field, e.target.value)}
+          onBlur={() => onBlur(field)}
+          disabled={disabled}
+          placeholder={placeholder}
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
+        />
+        {statusDot}
+      </div>
     </div>
   );
 }

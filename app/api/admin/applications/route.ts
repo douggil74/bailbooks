@@ -48,8 +48,16 @@ function computeDefendantStatus(
   return 'pending';
 }
 
-function computeIndemnitorStatus(hasIndemnitorSig: boolean): ActivityStatus {
-  return hasIndemnitorSig ? 'complete' : 'pending';
+function computeIndemnitorStatus(
+  indemnitorStatuses: string[],
+  hasIndemnitorSig: boolean,
+): ActivityStatus {
+  if (indemnitorStatuses.length === 0) {
+    return hasIndemnitorSig ? 'complete' : 'pending';
+  }
+  if (indemnitorStatuses.every(s => s === 'complete')) return 'complete';
+  if (indemnitorStatuses.some(s => s === 'in_progress' || s === 'complete')) return 'information';
+  return 'pending';
 }
 
 export async function GET() {
@@ -74,8 +82,8 @@ export async function GET() {
       return NextResponse.json({ applications: [] });
     }
 
-    // Batch-query documents and signatures for status computation
-    const [docsResult, sigsResult] = await Promise.all([
+    // Batch-query documents, signatures, and indemnitors for status computation
+    const [docsResult, sigsResult, indemnitorsResult] = await Promise.all([
       supabase
         .from('documents')
         .select('application_id')
@@ -83,6 +91,10 @@ export async function GET() {
       supabase
         .from('signatures')
         .select('application_id, signer_role')
+        .in('application_id', appIds),
+      supabase
+        .from('indemnitors')
+        .select('application_id, status')
         .in('application_id', appIds),
     ]);
 
@@ -95,6 +107,14 @@ export async function GET() {
       if (s.signer_role === 'indemnitor') indSigSet.add(s.application_id);
     }
 
+    const indemnitorsByApp = new Map<string, string[]>();
+    for (const ind of indemnitorsResult.data || []) {
+      const i = ind as { application_id: string; status: string };
+      const arr = indemnitorsByApp.get(i.application_id) || [];
+      arr.push(i.status);
+      indemnitorsByApp.set(i.application_id, arr);
+    }
+
     const enriched = apps.map((app) => ({
       ...app,
       defendant_status: computeDefendantStatus(
@@ -102,7 +122,10 @@ export async function GET() {
         docSet.has(app.id),
         defSigSet.has(app.id)
       ),
-      indemnitor_status: computeIndemnitorStatus(indSigSet.has(app.id)),
+      indemnitor_status: computeIndemnitorStatus(
+        indemnitorsByApp.get(app.id) || [],
+        indSigSet.has(app.id),
+      ),
     }));
 
     return NextResponse.json({ applications: enriched });

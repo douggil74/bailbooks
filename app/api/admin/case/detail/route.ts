@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = createServerClient();
 
-    const [appResult, refsResult, sigsResult, docsResult, checkinsResult, smsResult, remindersResult, paymentsResult] =
+    const [appResult, refsResult, sigsResult, docsResult, checkinsResult, smsResult, remindersResult, paymentsResult, indemnitorsResult] =
       await Promise.all([
         supabase.from('applications').select('*').eq('id', applicationId).single(),
         supabase
@@ -49,6 +49,11 @@ export async function GET(req: NextRequest) {
           .select('*')
           .eq('application_id', applicationId)
           .order('due_date', { ascending: true }),
+        supabase
+          .from('indemnitors')
+          .select('*')
+          .eq('application_id', applicationId)
+          .order('created_at', { ascending: true }),
       ]);
 
     if (!appResult.data) {
@@ -78,6 +83,7 @@ export async function GET(req: NextRequest) {
       sms_log: smsResult.data || [],
       reminders_sent: remindersResult.data || [],
       payments: paymentsResult.data || [],
+      indemnitors: indemnitorsResult.data || [],
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch case detail';

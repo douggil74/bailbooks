@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const { data: app } = await supabase
       .from('applications')
-      .select('id, payment_link_expires_at')
+      .select('id, payment_link_amount, payment_link_expires_at')
       .eq('payment_link_token', body.token)
       .single();
 
@@ -29,7 +29,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment link has expired' }, { status: 400 });
     }
 
-    // Save payment method and clear payment link columns
+    // Record the payment
+    if (app.payment_link_amount && body.payment_intent_id) {
+      await supabase.from('payments').insert({
+        application_id: app.id,
+        amount: app.payment_link_amount,
+        type: 'manual',
+        status: 'paid',
+        payment_method: 'card',
+        stripe_payment_intent_id: body.payment_intent_id,
+        description: 'Payment via link',
+        paid_at: new Date().toISOString(),
+      });
+    }
+
+    // Save payment method for future charges and clear payment link columns
     await supabase
       .from('applications')
       .update({

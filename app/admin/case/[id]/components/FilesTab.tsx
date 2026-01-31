@@ -1,4 +1,4 @@
-import type { Document, Signature } from '@/lib/bail-types';
+import type { Document, Signature, Indemnitor } from '@/lib/bail-types';
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
@@ -9,22 +9,88 @@ function formatDateTime(d: string | null) {
   return new Date(d).toLocaleString();
 }
 
+function DocumentGrid({
+  documents,
+  onOpenLightbox,
+}: {
+  documents: DocumentWithUrl[];
+  onOpenLightbox: (url: string, label: string) => void;
+}) {
+  if (documents.length === 0) {
+    return <p className="text-sm text-gray-500">No documents uploaded.</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      {documents.map((doc) => {
+        const label = doc.doc_type.replace(/_/g, ' ');
+        return (
+          <button
+            key={doc.id}
+            onClick={() => {
+              if (doc.signed_url) onOpenLightbox(doc.signed_url, label);
+            }}
+            className="text-left bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-gray-500 transition-colors group"
+          >
+            {doc.signed_url ? (
+              <div className="relative">
+                <img
+                  src={doc.signed_url}
+                  alt={label}
+                  className="w-full h-48 object-cover group-hover:opacity-90 transition-opacity"
+                />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                  <span className="bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+                    View full size
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full h-48 flex items-center justify-center text-gray-600 text-sm">
+                No preview available
+              </div>
+            )}
+            <div className="p-3">
+              <p className="text-sm font-semibold capitalize">{label}</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {formatDateTime(doc.uploaded_at)}
+              </p>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function FilesTab({
   documents,
   signatures,
   applicationId,
+  indemnitors,
   onOpenLightbox,
 }: {
   documents: DocumentWithUrl[];
   signatures: Signature[];
   applicationId: string;
+  indemnitors: Indemnitor[];
   onOpenLightbox: (url: string, label: string) => void;
 }) {
+  const defendantDocs = documents.filter((d) => !d.indemnitor_id);
+  const indemnitorDocsMap = new Map<string, DocumentWithUrl[]>();
+  for (const doc of documents) {
+    if (doc.indemnitor_id) {
+      const arr = indemnitorDocsMap.get(doc.indemnitor_id) || [];
+      arr.push(doc);
+      indemnitorDocsMap.set(doc.indemnitor_id, arr);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#d4af37]">Documents</h2>
+          <h2 className="text-lg font-bold text-[#d4af37]">Defendant Documents</h2>
           <a
             href={`/api/onboard/generate-pdf?id=${applicationId}`}
             target="_blank"
@@ -33,51 +99,21 @@ export default function FilesTab({
             Download Full PDF
           </a>
         </div>
-
-        {documents.length === 0 ? (
-          <p className="text-sm text-gray-500">No documents uploaded yet.</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {documents.map((doc) => {
-              const label = doc.doc_type.replace(/_/g, ' ');
-              return (
-                <button
-                  key={doc.id}
-                  onClick={() => {
-                    if (doc.signed_url) onOpenLightbox(doc.signed_url, label);
-                  }}
-                  className="text-left bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-gray-500 transition-colors group"
-                >
-                  {doc.signed_url ? (
-                    <div className="relative">
-                      <img
-                        src={doc.signed_url}
-                        alt={label}
-                        className="w-full h-48 object-cover group-hover:opacity-90 transition-opacity"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-                        <span className="bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-                          View full size
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 flex items-center justify-center text-gray-600 text-sm">
-                      No preview available
-                    </div>
-                  )}
-                  <div className="p-3">
-                    <p className="text-sm font-semibold capitalize">{label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {formatDateTime(doc.uploaded_at)}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <DocumentGrid documents={defendantDocs} onOpenLightbox={onOpenLightbox} />
       </div>
+
+      {indemnitors.map((ind) => {
+        const docs = indemnitorDocsMap.get(ind.id) || [];
+        return (
+          <div key={ind.id} className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-[#d4af37] mb-4">
+              {ind.first_name} {ind.last_name}
+              <span className="text-sm font-normal text-gray-400 ml-2">(Indemnitor)</span>
+            </h2>
+            <DocumentGrid documents={docs} onOpenLightbox={onOpenLightbox} />
+          </div>
+        );
+      })}
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h2 className="text-lg font-bold text-[#d4af37] mb-4">Signatures</h2>

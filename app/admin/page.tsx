@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { Shield } from 'lucide-react';
 import StatusBadge from './components/StatusBadge';
 import type { ActivityStatus } from '@/lib/bail-types';
 
@@ -128,9 +129,12 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <header className="bg-[#1a4d2e] px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">BailMadeSimple — Agent Control Panel</h1>
-          <p className="text-sm text-green-200">Case Management Dashboard</p>
+        <div className="flex items-center gap-3">
+          <Shield className="w-8 h-8 text-[#d4af37]" />
+          <div>
+            <h1 className="text-xl font-bold">Bailbonds <span className="text-[#d4af37]">Financed</span> <span className="text-green-200 font-normal text-base">— Agent Control Panel</span></h1>
+            <p className="text-sm text-green-200">Case Management Dashboard</p>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <button

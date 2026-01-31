@@ -22,3 +22,15 @@ export async function sendPaymentLinkSMS(
     `Pay securely here: ${url} — Bailbonds Financed`;
   return sendSMS(phone, body);
 }
+
+export async function sendIndemnitorInviteSMS(
+  phone: string,
+  indemnitorName: string,
+  defendantName: string,
+  inviteUrl: string,
+) {
+  const body =
+    `Hi ${indemnitorName}, you've been listed as a co-signer for ${defendantName}. ` +
+    `Please complete your information here: ${inviteUrl} — Bailbonds Financed`;
+  return sendSMS(phone, body);
+}
