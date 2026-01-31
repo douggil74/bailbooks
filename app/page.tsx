@@ -527,6 +527,22 @@ export default function Home() {
                 <Lock className="w-3.5 h-3.5" />
                 <span>Application</span>
               </button>
+              <span className="text-gray-600">|</span>
+              <button
+                onClick={() => openProtected('Bond Calculator', '/quote')}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Calculator</span>
+              </button>
+              <span className="text-gray-600">|</span>
+              <button
+                onClick={() => openProtected('Bond Tracker', '/tracker')}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Tracker</span>
+              </button>
             </div>
             <div className="text-gray-500 text-sm">
               © {new Date().getFullYear()} Bailbonds Financed. All rights reserved. Licensed Louisiana Bail Bond Agents.
