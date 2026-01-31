@@ -529,11 +529,19 @@ export default function Home() {
               </button>
               <span className="text-gray-600">|</span>
               <button
-                onClick={() => openProtected('Bond Calculator & Tracker', '/tracker')}
+                onClick={() => openProtected('Bond Calculator', '/app')}
                 className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
               >
                 <Lock className="w-3.5 h-3.5" />
-                <span>Calculator / Tracker</span>
+                <span>Calculator</span>
+              </button>
+              <span className="text-gray-600">|</span>
+              <button
+                onClick={() => openProtected('Bond Tracker', '/tracker')}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Tracker</span>
               </button>
               <span className="text-gray-600">|</span>
               <button
