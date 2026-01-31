@@ -51,21 +51,25 @@ export default function AdminPage() {
   }, []);
 
   async function createCase() {
-    if (!newFirst.trim() || !newLast.trim()) return;
+    const first = newFirst.trim();
+    const last = newLast.trim();
+    if (!first || !last) return;
     setCreating(true);
     try {
       const res = await fetch('/api/onboard/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ defendant_first: newFirst.trim(), defendant_last: newLast.trim() }),
+        body: JSON.stringify({ defendant_first: first, defendant_last: last }),
       });
       const data = await res.json();
       if (res.ok && data.id) {
         window.location.href = `/admin/case/${data.id}`;
+        return;
       }
     } catch {
-      setCreating(false);
+      // network error
     }
+    setCreating(false);
   }
 
   const filtered = useMemo(() => {
