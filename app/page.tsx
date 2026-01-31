@@ -7,14 +7,20 @@ const PHONE_NUMBER = '985-264-9519';
 const PHONE_HREF = 'tel:+19852649519';
 
 export default function Home() {
-  const [showAppModal, setShowAppModal] = useState(false);
+  const [protectedTarget, setProtectedTarget] = useState<{ label: string; href: string } | null>(null);
   const [appPassword, setAppPassword] = useState('');
   const [appError, setAppError] = useState(false);
 
+  const openProtected = (label: string, href: string) => {
+    setProtectedTarget({ label, href });
+    setAppPassword('');
+    setAppError(false);
+  };
+
   const handleAppAccess = () => {
-    if (appPassword === '4461') {
-      window.open('/Elite-Bail-Bonds-Application.pdf', '_blank');
-      setShowAppModal(false);
+    if (appPassword === '4461' && protectedTarget) {
+      window.open(protectedTarget.href, '_blank');
+      setProtectedTarget(null);
       setAppPassword('');
       setAppError(false);
     } else {
@@ -472,14 +478,32 @@ export default function Home() {
             </a>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center gap-3">
-            <button
-              onClick={() => { setShowAppModal(true); setAppPassword(''); setAppError(false); }}
-              className="flex items-center gap-2 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Bail Bond Application</span>
-            </button>
+          <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center gap-4">
+            <div className="flex flex-wrap justify-center gap-4">
+              <button
+                onClick={() => openProtected('Bail Bond Application', '/Elite-Bail-Bonds-Application.pdf')}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Application</span>
+              </button>
+              <span className="text-gray-600">|</span>
+              <button
+                onClick={() => openProtected('Case Tracker', '/tracker')}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Tracker</span>
+              </button>
+              <span className="text-gray-600">|</span>
+              <button
+                onClick={() => openProtected('Payment Calculator', '/quote')}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Payment Calculator</span>
+              </button>
+            </div>
             <div className="text-gray-500 text-sm">
               © {new Date().getFullYear()} Bailbonds Financed. All rights reserved. Licensed Louisiana Bail Bond Agents.
             </div>
@@ -487,16 +511,16 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Password Modal for Bail Bond Application */}
-      {showAppModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowAppModal(false)}>
+      {/* Password Modal for Protected Links */}
+      {protectedTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setProtectedTarget(null)}>
           <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 max-w-sm w-full mx-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-[#d4af37]/20 rounded-full flex items-center justify-center">
                 <Lock className="w-5 h-5 text-[#d4af37]" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Bail Bond Application</h3>
+                <h3 className="text-lg font-bold text-white">{protectedTarget.label}</h3>
                 <p className="text-gray-400 text-sm">Enter access code to continue</p>
               </div>
             </div>
@@ -514,7 +538,7 @@ export default function Home() {
             {appError && <p className="text-red-400 text-sm mt-2 text-center">Incorrect code</p>}
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => setShowAppModal(false)}
+                onClick={() => setProtectedTarget(null)}
                 className="flex-1 px-4 py-2.5 border border-white/10 rounded-xl text-gray-400 hover:text-white hover:border-white/30 transition-colors"
               >
                 Cancel
