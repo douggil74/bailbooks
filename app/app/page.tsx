@@ -342,6 +342,16 @@ export default function MobileAppPage() {
         <p className="text-gray-600 text-xs mt-6 text-center">
           {isHighBond ? '$100k+ bond = monthly terms' : 'Under $100k = weekly terms'}
         </p>
+
+        <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap justify-center gap-3 text-xs">
+          <a href="/Elite-Bail-Bonds-Application.pdf" target="_blank" className="text-gray-500 hover:text-[#d4af37] transition-colors">Application</a>
+          <span className="text-gray-700">|</span>
+          <span className="text-[#d4af37]">Calculator</span>
+          <span className="text-gray-700">|</span>
+          <a href="/tracker" className="text-gray-500 hover:text-[#d4af37] transition-colors">Tracker</a>
+          <span className="text-gray-700">|</span>
+          <a href="/quote" className="text-gray-500 hover:text-[#d4af37] transition-colors">Quote</a>
+        </div>
       </div>
     </div>
   );

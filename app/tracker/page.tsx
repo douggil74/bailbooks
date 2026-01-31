@@ -802,6 +802,16 @@ export default function TrackerPage() {
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
           Cloud synced - access from any device
         </p>
+
+        <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap justify-center gap-3 text-xs">
+          <a href="/Elite-Bail-Bonds-Application.pdf" target="_blank" className="text-gray-500 hover:text-[#d4af37] transition-colors">Application</a>
+          <span className="text-gray-700">|</span>
+          <a href="/app" className="text-gray-500 hover:text-[#d4af37] transition-colors">Calculator</a>
+          <span className="text-gray-700">|</span>
+          <span className="text-[#d4af37]">Tracker</span>
+          <span className="text-gray-700">|</span>
+          <a href="/quote" className="text-gray-500 hover:text-[#d4af37] transition-colors">Quote</a>
+        </div>
       </div>
 
       {/* PDF Export Modal */}
