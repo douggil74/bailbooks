@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: bailbonds-financed
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: RESEND_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: POSTGRES_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: NODE_ENV
+        value: production

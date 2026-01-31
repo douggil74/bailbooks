@@ -9,11 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.93.3",
     "@tailwindcss/postcss": "^4.1.18",
+    "@vercel/postgres": "^0.10.0",
+    "firebase": "^12.8.0",
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.562.0",
     "next": "^16.1.1",
+    "openai": "^6.16.0",
+    "pg": "^8.17.1",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "resend": "^6.7.0",
+    "stripe": "^20.3.0",
+    "twilio": "^5.12.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -22,6 +32,7 @@
     "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "xlsx": "^0.18.5"
   }
 }

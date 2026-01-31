@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, Clock, MapPin, Shield, Scale, Users, CheckCircle, ArrowRight, Mail, FileText, Handshake, Lock } from 'lucide-react';
+import { Phone, Clock, MapPin, Shield, Scale, Users, CheckCircle, ArrowRight, Mail, FileText, Handshake, Lock, Calculator } from 'lucide-react';
 
 const PHONE_NUMBER = '985-264-9519';
 const PHONE_HREF = 'tel:+19852649519';
@@ -30,6 +30,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
+      <style>{`
+        @keyframes glow-pulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4), 0 0 40px rgba(212, 175, 55, 0.2), 0 0 60px rgba(212, 175, 55, 0.1); }
+          50% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.6), 0 0 60px rgba(212, 175, 55, 0.3), 0 0 90px rgba(212, 175, 55, 0.15); }
+        }
+        .glow-button { animation: glow-pulse 2s ease-in-out infinite; }
+      `}</style>
+
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,6 +98,18 @@ export default function Home() {
               <span>{PHONE_NUMBER}</span>
             </a>
             <p className="mt-4 text-gray-400">Call or text for immediate assistance</p>
+          </div>
+
+          {/* Quote CTA */}
+          <div className="mb-12">
+            <a
+              href="/quote"
+              className="glow-button inline-flex items-center gap-3 bg-[#1a4d2e] hover:bg-[#2d6b45] text-white font-bold text-lg sm:text-xl px-8 sm:px-10 py-3 sm:py-4 rounded-full border-2 border-[#d4af37] transition-all hover:scale-105"
+            >
+              <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4af37]" />
+              <span>Get a Free Quote</span>
+              <ArrowRight className="w-5 h-5 text-[#d4af37]" />
+            </a>
           </div>
 
           {/* Trust badges */}
@@ -207,6 +227,26 @@ export default function Home() {
               </ul>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Free Quote CTA Section */}
+      <section className="py-16 sm:py-20 bg-gradient-to-r from-[#0a0a0a] via-[#1a4d2e]/30 to-[#0a0a0a]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Find Out What You&apos;ll Pay — <span className="text-[#d4af37]">Instantly</span>
+          </h2>
+          <p className="text-gray-400 text-lg mb-8">
+            Use our free quote calculator to estimate your bail bond cost and payment plan. No obligation, no commitment.
+          </p>
+          <a
+            href="/quote"
+            className="glow-button inline-flex items-center gap-3 bg-[#d4af37] hover:bg-[#e5c55a] text-[#0a0a0a] font-bold text-xl sm:text-2xl px-10 sm:px-14 py-4 sm:py-5 rounded-full transition-all hover:scale-105"
+          >
+            <Calculator className="w-6 h-6 sm:w-7 sm:h-7" />
+            <span>Get Your Free Quote</span>
+            <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
+          </a>
         </div>
       </section>
 
@@ -486,22 +526,6 @@ export default function Home() {
               >
                 <Lock className="w-3.5 h-3.5" />
                 <span>Application</span>
-              </button>
-              <span className="text-gray-600">|</span>
-              <button
-                onClick={() => openProtected('Case Tracker', '/tracker')}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Tracker</span>
-              </button>
-              <span className="text-gray-600">|</span>
-              <button
-                onClick={() => openProtected('Payment Calculator', '/quote')}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Payment Calculator</span>
               </button>
             </div>
             <div className="text-gray-500 text-sm">
