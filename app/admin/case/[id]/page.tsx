@@ -180,6 +180,7 @@ export default function CaseDetailPage() {
   const id = params.id as string;
 
   const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [fromOverview, setFromOverview] = useState(false);
   const [data, setData] = useState<CaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -552,6 +553,38 @@ export default function CaseDetailPage() {
   const currentWizardStep = WIZARD_STEPS[wizardStep];
   const isLastWizardStep = wizardStep === WIZARD_STEPS.length - 1;
 
+  // Navigate from overview checklist → set flag so "Back to Overview" shows
+  function navigateFromOverview(tab: TabId) {
+    setFromOverview(true);
+    setActiveTab(tab);
+  }
+
+  // Navigate via sidebar or back button → clear the flag
+  function navigateTab(tab: TabId) {
+    setFromOverview(false);
+    setActiveTab(tab);
+  }
+
+  function backToOverview() {
+    setFromOverview(false);
+    setActiveTab('overview');
+  }
+
+  function OverviewBackBar() {
+    if (!fromOverview || activeTab === 'overview') return null;
+    return (
+      <button
+        onClick={backToOverview}
+        className="w-full flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-[#d4af37]/10 border border-[#d4af37]/30 text-[#d4af37] text-sm font-semibold hover:bg-[#d4af37]/20 transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Overview
+      </button>
+    );
+  }
+
   function renderActiveTab() {
     if (!data) return null;
     switch (activeTab) {
@@ -562,7 +595,7 @@ export default function CaseDetailPage() {
             signatures={data.signatures}
             payments={data.payments}
             indemnitors={data.indemnitors}
-            onNavigateTab={setActiveTab}
+            onNavigateTab={navigateFromOverview}
           />
         );
       case 'defendant':
@@ -981,7 +1014,7 @@ export default function CaseDetailPage() {
         <div className="flex gap-6">
           <CaseSidebar
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={navigateTab}
             defendantName={`${app.defendant_first} ${app.defendant_last}`}
             defendantDob={app.defendant_dob}
             defendantPhone={app.defendant_phone}
@@ -992,6 +1025,7 @@ export default function CaseDetailPage() {
             }
           />
           <main className="flex-1 min-w-0">
+            <OverviewBackBar />
             {renderActiveTab()}
           </main>
         </div>
