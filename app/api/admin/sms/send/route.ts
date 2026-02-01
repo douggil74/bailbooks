@@ -16,14 +16,19 @@ export async function POST(req: NextRequest) {
     const result = await sendSMS(phone, message);
 
     const supabase = createServerClient();
-    await supabase.from('sms_log').insert({
+    const { error: insertErr } = await supabase.from('sms_log').insert({
       application_id,
       phone,
       direction: 'outbound',
       message,
       twilio_sid: result.sid,
       status: result.status,
+      sent_at: new Date().toISOString(),
     });
+
+    if (insertErr) {
+      console.error('[SMS] sms_log insert failed:', insertErr);
+    }
 
     if (result.status === 'skipped') {
       return NextResponse.json({
