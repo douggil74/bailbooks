@@ -399,6 +399,18 @@ export default function FinancesTab({
 
         {paymentMode === 'plan' && (
           <div className="space-y-4">
+            {/* Advisor hint */}
+            {!showPlanForm && payments.length === 0 && (
+              <div className="bg-[#fbbf24]/5 border border-[#fbbf24]/20 rounded-lg px-4 py-3 flex items-center gap-3">
+                <svg className="w-5 h-5 text-[#fbbf24] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                </svg>
+                <span className="text-xs text-zinc-300">
+                  Use the <strong className="text-[#fbbf24]">Plan Advisor</strong> on the right to get AI-suggested payment plans, or set up a custom schedule below.
+                </span>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <EditField
                 label="Payment Amount ($)"
@@ -424,18 +436,18 @@ export default function FinancesTab({
                     setPlanPayment(paymentAmount);
                     setShowPlanForm(true);
                   }}
-                  className="bg-teal-800 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
+                  className="bg-zinc-700 text-zinc-200 text-xs font-bold px-4 py-2 rounded-lg hover:bg-zinc-600 transition-colors"
                 >
-                  {payments.length > 0 ? 'Restructure Schedule' : 'Generate Schedule'}
+                  {payments.length > 0 ? 'Restructure' : 'Custom Schedule'}
                 </button>
               </div>
             </div>
 
-            {/* Generate/Restructure Plan Form */}
+            {/* Manual Plan Form (secondary to advisor) */}
             {showPlanForm && (
               <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
                 <h3 className="text-sm font-bold text-[#fbbf24] mb-3">
-                  {payments.length > 0 ? 'Restructure Payment Plan' : 'Create Payment Plan'}
+                  {payments.length > 0 ? 'Restructure Payment Plan' : 'Custom Payment Schedule'}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
                   <div>
@@ -621,19 +633,6 @@ export default function FinancesTab({
         <button onClick={() => setShowRecordForm(true)} className="bg-[#fbbf24] text-zinc-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors">
           Record Payment
         </button>
-        {payments.length > 0 && (
-          <button
-            onClick={() => {
-              setPlanTotal(premium);
-              setPlanDown(downPayment);
-              setPlanPayment(paymentAmount);
-              setShowPlanForm(true);
-            }}
-            className="bg-teal-800 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
-          >
-            Restructure
-          </button>
-        )}
         {pendingPayments.length > 0 && (
           <button onClick={deletePlan} className="bg-red-800 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
             Delete Pending

@@ -27,6 +27,7 @@ import FilesTab from './components/FilesTab';
 import LogsTab from './components/LogsTab';
 import SettingsTab from './components/SettingsTab';
 import CommsPanel from './components/CommsPanel';
+import PlanAdvisor from './components/PlanAdvisor';
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
@@ -406,6 +407,45 @@ export default function CaseDetailPage() {
       if (res.ok) fetchCase();
     } catch { /* ignore */ }
     setSelfieUploading(false);
+  }
+
+  async function applyAdvisorPlan(plan: {
+    totalAmount: number;
+    downPayment: number;
+    paymentAmount: number;
+    frequency: string;
+  }) {
+    // Set the financial fields from the advisor
+    setPremium(String(plan.totalAmount));
+    setDownPayment(String(plan.downPayment));
+    setPaymentAmount(String(plan.paymentAmount));
+    // Save to DB
+    await saveField({
+      premium: plan.totalAmount,
+      down_payment: plan.downPayment,
+      payment_amount: plan.paymentAmount,
+    });
+    // Auto-create the payment schedule
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + (plan.frequency === 'weekly' ? 7 : plan.frequency === 'biweekly' ? 14 : 30));
+    const start = startDate.toISOString().split('T')[0];
+    setNextPaymentDate(start);
+    await saveField({ next_payment_date: start });
+    try {
+      await fetch('/api/admin/payments/plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          application_id: id,
+          total_amount: plan.totalAmount,
+          down_payment: plan.downPayment,
+          payment_amount: plan.paymentAmount,
+          frequency: plan.frequency,
+          start_date: start,
+        }),
+      });
+      fetchCase();
+    } catch { /* ignore */ }
   }
 
   async function saveIndemnitorStep() {
@@ -1050,15 +1090,24 @@ export default function CaseDetailPage() {
             <OverviewBackBar />
             {renderActiveTab()}
           </main>
-          <CommsPanel
-            applicationId={id}
-            smsLog={data.sms_log}
-            defendantName={`${app.defendant_first} ${app.defendant_last}`}
-            defendantPhone={app.defendant_phone}
-            indemnitors={data.indemnitors}
-            smsConsent={app.sms_consent ?? false}
-            onRefresh={fetchCase}
-          />
+          {activeTab === 'finances' ? (
+            <PlanAdvisor
+              bondAmount={app.bond_amount}
+              premium={premium}
+              downPayment={downPayment}
+              onApplyPlan={applyAdvisorPlan}
+            />
+          ) : (
+            <CommsPanel
+              applicationId={id}
+              smsLog={data.sms_log}
+              defendantName={`${app.defendant_first} ${app.defendant_last}`}
+              defendantPhone={app.defendant_phone}
+              indemnitors={data.indemnitors}
+              smsConsent={app.sms_consent ?? false}
+              onRefresh={fetchCase}
+            />
+          )}
         </div>
       </div>
     </div>
