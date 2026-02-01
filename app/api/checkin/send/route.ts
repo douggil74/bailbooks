@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
     const checkinUrl = `${siteUrl}/checkin?id=${app.id}`;
     const channels: string[] = [];
 
-    // Send SMS if consent + phone exist
-    if (app.sms_consent && app.defendant_phone) {
+    // Send SMS if phone exists (admin-initiated sends skip consent check)
+    if (app.defendant_phone) {
       try {
         const message = await sendCheckinRequest(app.id, app.defendant_phone);
         await supabase.from('sms_log').insert({
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
           checkinUrl,
         });
         await resend.emails.send({
-          from: 'Bailbonds Financed <reminders@resend.dev>',
+          from: 'BailBonds Made Easy <reminders@resend.dev>',
           to: app.defendant_email,
           subject: emailTemplate.subject,
           html: emailTemplate.html,
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     if (channels.length === 0) {
       return NextResponse.json(
-        { error: 'No contact method available (no phone with SMS consent or email)' },
+        { error: 'No contact method available (no phone or email on file)' },
         { status: 400 }
       );
     }

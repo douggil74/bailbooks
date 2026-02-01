@@ -45,20 +45,48 @@ export default function SettingsTab({
         </div>
       </div>
 
-      {/* Check-in Frequency */}
+      {/* Check-in Settings */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h2 className="text-lg font-bold text-[#d4af37] mb-4">Check-in Settings</h2>
-        <div className="flex items-center gap-4">
-          <label className="text-sm text-gray-400">Frequency:</label>
-          <select
-            value={application.checkin_frequency || 'weekly'}
-            onChange={(e) => saveField({ checkin_frequency: e.target.value })}
-            className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
-          >
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Biweekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <label className="text-sm text-gray-400">Frequency:</label>
+            <select
+              value={application.checkin_frequency || 'weekly'}
+              onChange={(e) => saveField({ checkin_frequency: e.target.value })}
+              className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+            >
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Biweekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-white font-medium">SMS Consent</p>
+              <p className="text-xs text-gray-500">Defendant agreed to receive text messages</p>
+            </div>
+            <button
+              onClick={() => saveField({ sms_consent: !application.sms_consent })}
+              className={`relative w-11 h-6 rounded-full transition-colors ${application.sms_consent ? 'bg-green-600' : 'bg-gray-700'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${application.sms_consent ? 'translate-x-5' : ''}`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-white font-medium">GPS Consent</p>
+              <p className="text-xs text-gray-500">Defendant agreed to GPS check-in tracking</p>
+            </div>
+            <button
+              onClick={() => saveField({ gps_consent: !application.gps_consent })}
+              className={`relative w-11 h-6 rounded-full transition-colors ${application.gps_consent ? 'bg-green-600' : 'bg-gray-700'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${application.gps_consent ? 'translate-x-5' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 

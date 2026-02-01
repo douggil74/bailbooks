@@ -54,14 +54,37 @@ interface WizardField {
   placeholder?: string;
 }
 
-interface WizardStepDef {
+interface WizardFieldStep {
+  type: 'fields';
   title: string;
   description: string;
   fields: WizardField[];
 }
 
+interface WizardUploadStep {
+  type: 'uploads';
+  title: string;
+  description: string;
+  uploads: { docType: string; label: string }[];
+}
+
+interface WizardIndemnitorStep {
+  type: 'indemnitor';
+  title: string;
+  description: string;
+}
+
+interface WizardConsentStep {
+  type: 'consent';
+  title: string;
+  description: string;
+}
+
+type WizardStepDef = WizardFieldStep | WizardUploadStep | WizardIndemnitorStep | WizardConsentStep;
+
 const WIZARD_STEPS: WizardStepDef[] = [
   {
+    type: 'fields',
     title: 'Contact Info',
     description: "How can we reach the defendant?",
     fields: [
@@ -70,6 +93,12 @@ const WIZARD_STEPS: WizardStepDef[] = [
     ],
   },
   {
+    type: 'consent',
+    title: 'Consent',
+    description: 'Does the defendant consent to SMS and GPS check-ins?',
+  },
+  {
+    type: 'fields',
     title: 'Personal Details',
     description: 'Date of birth and identification.',
     fields: [
@@ -79,6 +108,22 @@ const WIZARD_STEPS: WizardStepDef[] = [
     ],
   },
   {
+    type: 'uploads',
+    title: 'ID & Photo',
+    description: 'Upload driver\'s license and a selfie for identification.',
+    uploads: [
+      { docType: 'dl_front', label: "Driver's License (Front)" },
+      { docType: 'dl_back', label: "Driver's License (Back)" },
+      { docType: 'selfie', label: 'Selfie' },
+    ],
+  },
+  {
+    type: 'indemnitor',
+    title: 'Co-Signer',
+    description: 'Add a co-signer (indemnitor) for this bond.',
+  },
+  {
+    type: 'fields',
     title: 'Home Address',
     description: "Defendant's residential address.",
     fields: [
@@ -89,6 +134,7 @@ const WIZARD_STEPS: WizardStepDef[] = [
     ],
   },
   {
+    type: 'fields',
     title: 'Charges & Bond',
     description: 'What are the charges and bond amount?',
     fields: [
@@ -97,6 +143,7 @@ const WIZARD_STEPS: WizardStepDef[] = [
     ],
   },
   {
+    type: 'fields',
     title: 'Court Information',
     description: 'Court and case details.',
     fields: [
@@ -106,6 +153,7 @@ const WIZARD_STEPS: WizardStepDef[] = [
     ],
   },
   {
+    type: 'fields',
     title: 'Jail & Employer',
     description: 'Where is the defendant and where do they work?',
     fields: [
@@ -148,12 +196,24 @@ export default function CaseDetailPage() {
   const [nextPaymentDate, setNextPaymentDate] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [lastSavedField, setLastSavedField] = useState<string | null>(null);
   const [checkinSending, setCheckinSending] = useState(false);
 
   // Wizard
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
   const [wizardSaving, setWizardSaving] = useState(false);
+
+  // Wizard: uploads
+  const [uploadedDocs, setUploadedDocs] = useState<Record<string, boolean>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
+
+  // Wizard: indemnitor
+  const [indemnitorFirst, setIndemnitorFirst] = useState('');
+  const [indemnitorLast, setIndemnitorLast] = useState('');
+  const [indemnitorPhone, setIndemnitorPhone] = useState('');
+  const [indemnitorEmail, setIndemnitorEmail] = useState('');
+  const [indemnitorAdded, setIndemnitorAdded] = useState(false);
 
   // Card & Payment
   const [cardInfo, setCardInfo] = useState<CardInfoResponse | null>(null);
@@ -272,11 +332,15 @@ export default function CaseDetailPage() {
   function blurSaveCaseInfo(key: keyof CaseInfoFields) {
     const val = caseInfo[key]?.trim() || null;
     const apiVal = key === 'bond_amount' ? (val ? parseFloat(val) : null) : val;
-    saveField({ [key]: apiVal });
+    saveField({ [key]: apiVal }).then(() => {
+      setLastSavedField(key);
+      setTimeout(() => setLastSavedField(null), 2000);
+    });
   }
 
   async function saveWizardStep() {
     const step = WIZARD_STEPS[wizardStep];
+    if (step.type !== 'fields') return;
     const updates: Record<string, unknown> = {};
     for (const f of step.fields) {
       const val = caseInfo[f.key]?.trim();
@@ -291,13 +355,61 @@ export default function CaseDetailPage() {
     }
   }
 
+  async function handleWizardUpload(docType: string, file: File) {
+    setUploading(docType);
+    try {
+      const formData = new FormData();
+      formData.append('application_id', id);
+      formData.append('file', file);
+      formData.append('doc_type', docType);
+      const res = await fetch('/api/onboard/upload', { method: 'POST', body: formData });
+      if (res.ok) {
+        setUploadedDocs((prev) => ({ ...prev, [docType]: true }));
+      }
+    } catch { /* ignore upload errors */ }
+    setUploading(null);
+  }
+
+  async function saveIndemnitorStep() {
+    const first = indemnitorFirst.trim();
+    const last = indemnitorLast.trim();
+    if (!first || !last) return;
+    setWizardSaving(true);
+    try {
+      const res = await fetch('/api/admin/indemnitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          application_id: id,
+          first_name: first,
+          last_name: last,
+          phone: indemnitorPhone.trim() || null,
+          email: indemnitorEmail.trim() || null,
+        }),
+      });
+      if (res.ok) {
+        setIndemnitorAdded(true);
+        fetchCase();
+      }
+    } catch { /* ignore */ }
+    setWizardSaving(false);
+  }
+
   async function wizardNext() {
-    await saveWizardStep();
+    const step = WIZARD_STEPS[wizardStep];
+    if (step.type === 'fields') {
+      await saveWizardStep();
+    } else if (step.type === 'indemnitor') {
+      await saveIndemnitorStep();
+    }
+    // uploads save individually on file select
+
     if (wizardStep < WIZARD_STEPS.length - 1) {
       setWizardStep(wizardStep + 1);
     } else {
       setShowWizard(false);
       setWizardStep(0);
+      fetchCase();
     }
   }
 
@@ -436,6 +548,7 @@ export default function CaseDetailPage() {
             onRunWizard={() => { setShowWizard(true); setWizardStep(0); }}
             checkinSending={checkinSending}
             onSendCheckin={sendCheckin}
+            lastSavedField={lastSavedField}
           />
         );
       case 'indemnitors':
@@ -568,7 +681,7 @@ export default function CaseDetailPage() {
             <h3 className="text-lg font-bold text-white mb-1">{currentWizardStep.title}</h3>
             <p className="text-sm text-gray-400 mb-5">{currentWizardStep.description}</p>
             <div className="space-y-3">
-              {currentWizardStep.fields.map((f, i) => (
+              {currentWizardStep.type === 'fields' && currentWizardStep.fields.map((f, i) => (
                 <div key={f.key}>
                   <label className="block text-xs text-gray-400 mb-1">{f.label}</label>
                   <input
@@ -582,6 +695,118 @@ export default function CaseDetailPage() {
                   />
                 </div>
               ))}
+              {currentWizardStep.type === 'uploads' && currentWizardStep.uploads.map((u) => (
+                <div key={u.docType} className="flex items-center gap-3">
+                  <label className="flex-1 flex items-center gap-3 bg-gray-800 border border-gray-700 rounded-lg px-3 py-3 cursor-pointer hover:border-gray-500 transition-colors">
+                    {uploadedDocs[u.docType] ? (
+                      <svg className="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : uploading === u.docType ? (
+                      <svg className="w-5 h-5 text-[#d4af37] shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                    <span className={`text-sm ${uploadedDocs[u.docType] ? 'text-green-400' : 'text-gray-300'}`}>
+                      {uploadedDocs[u.docType] ? `${u.label} ✓` : u.label}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleWizardUpload(u.docType, file);
+                      }}
+                    />
+                  </label>
+                </div>
+              ))}
+              {currentWizardStep.type === 'consent' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-4 py-3">
+                    <div>
+                      <p className="text-sm text-white font-medium">SMS Consent</p>
+                      <p className="text-xs text-gray-500">Allow text messages for reminders & check-ins</p>
+                    </div>
+                    <button
+                      onClick={() => saveField({ sms_consent: !data?.application.sms_consent })}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${data?.application.sms_consent ? 'bg-green-600' : 'bg-gray-600'}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${data?.application.sms_consent ? 'translate-x-5' : ''}`} />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-4 py-3">
+                    <div>
+                      <p className="text-sm text-white font-medium">GPS Consent</p>
+                      <p className="text-xs text-gray-500">Allow GPS location tracking for check-ins</p>
+                    </div>
+                    <button
+                      onClick={() => saveField({ gps_consent: !data?.application.gps_consent })}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${data?.application.gps_consent ? 'bg-green-600' : 'bg-gray-600'}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${data?.application.gps_consent ? 'translate-x-5' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {currentWizardStep.type === 'indemnitor' && (
+                <>
+                  {indemnitorAdded && (
+                    <div className="bg-green-900/50 border border-green-800 rounded-lg px-3 py-2 text-sm text-green-300">
+                      Co-signer added successfully
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">First Name</label>
+                    <input
+                      type="text"
+                      value={indemnitorFirst}
+                      onChange={(e) => setIndemnitorFirst(e.target.value)}
+                      placeholder="First name"
+                      autoFocus
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Last Name</label>
+                    <input
+                      type="text"
+                      value={indemnitorLast}
+                      onChange={(e) => setIndemnitorLast(e.target.value)}
+                      placeholder="Last name"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Phone</label>
+                    <input
+                      type="tel"
+                      value={indemnitorPhone}
+                      onChange={(e) => setIndemnitorPhone(e.target.value)}
+                      placeholder="(985) 555-1234"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={indemnitorEmail}
+                      onChange={(e) => setIndemnitorEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                    />
+                  </div>
+                </>
+              )}
             </div>
             <div className="flex gap-3 mt-6">
               {wizardStep > 0 && (
@@ -666,16 +891,27 @@ export default function CaseDetailPage() {
         </div>
       </header>
 
-      {/* Save indicator */}
+      {/* Fixed save toast */}
       {saveMsg && (
         <div
-          className={`text-center text-sm py-2 ${
+          className={`fixed bottom-4 right-4 z-40 text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg ${
             saveMsg.startsWith('Error') || saveMsg.includes('failed')
-              ? 'bg-red-900/50 text-red-300'
-              : 'bg-green-900/50 text-green-300'
+              ? 'bg-red-900 text-red-200 border border-red-800'
+              : 'bg-green-900 text-green-200 border border-green-800'
           }`}
         >
-          {saveMsg}
+          <div className="flex items-center gap-2">
+            {saveMsg.startsWith('Error') || saveMsg.includes('failed') ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            {saveMsg}
+          </div>
         </div>
       )}
 

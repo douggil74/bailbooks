@@ -53,7 +53,7 @@ export async function sendCheckinRequest(applicationId: string, phone: string) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bailbondsfinanced.com';
   const checkinUrl = `${siteUrl}/checkin?id=${applicationId}`;
   const body =
-    `Time to check in! Tap the link below to complete your GPS check-in:\n${checkinUrl}\n— Bailbonds Financed`;
+    `Time to check in! Tap the link below to complete your GPS check-in:\n${checkinUrl}\n— BailBonds Made Easy`;
   return sendSMS(phone, body);
 }
 
@@ -65,7 +65,7 @@ export async function sendPaymentLinkSMS(
 ) {
   const body =
     `Hi ${name}, your payment of $${amount.toFixed(2)} is ready. ` +
-    `Pay securely here: ${url} — Bailbonds Financed`;
+    `Pay securely here: ${url} — BailBonds Made Easy`;
   return sendSMS(phone, body);
 }
 
@@ -77,6 +77,6 @@ export async function sendIndemnitorInviteSMS(
 ) {
   const body =
     `Hi ${indemnitorName}, you've been listed as a co-signer for ${defendantName}. ` +
-    `Please complete your information here: ${inviteUrl} — Bailbonds Financed`;
+    `Please complete your information here: ${inviteUrl} — BailBonds Made Easy`;
   return sendSMS(phone, body);
 }
