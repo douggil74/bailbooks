@@ -116,6 +116,8 @@ export default function AdminPage() {
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
   const [recentlyAdded, setRecentlyAdded] = useState<PowerRow[]>([]);
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState('');
 
   useEffect(() => {
     fetch('/api/admin/applications')
@@ -199,6 +201,31 @@ export default function AdminPage() {
       body: JSON.stringify({ id }),
     });
     fetchPowers();
+  }
+
+  async function extractFromFile(file: File) {
+    setExtracting(true);
+    setExtractError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/admin/powers/extract', {
+        method: 'POST',
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setExtractError(data.error || 'Extraction failed');
+        setExtracting(false);
+        return;
+      }
+      if (data.power_number) setNewNumber(data.power_number);
+      if (data.amount != null) setNewAmount(String(data.amount));
+      if (data.surety) setNewSurety(data.surety);
+    } catch {
+      setExtractError('Network error during extraction');
+    }
+    setExtracting(false);
   }
 
   const filtered = useMemo(() => {
@@ -448,6 +475,7 @@ export default function AdminPage() {
                     setShowPowerModal(true);
                     setRecentlyAdded([]);
                     setAddError('');
+                    setExtractError('');
                   }}
                   className="bg-[#d4af37] text-[#0a0a0a] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#e5c55a] transition-colors"
                 >
@@ -614,6 +642,43 @@ export default function AdminPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-white mb-4">Load Power</h3>
+
+            {/* Document Scanner */}
+            <label className={`block border-2 border-dashed rounded-xl p-4 mb-4 text-center cursor-pointer transition-colors ${
+              extracting
+                ? 'border-[#d4af37]/50 bg-[#d4af37]/5'
+                : 'border-gray-700 hover:border-gray-500'
+            }`}>
+              {extracting ? (
+                <div className="flex items-center justify-center gap-2 text-[#d4af37]">
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  <span className="text-sm font-medium">Scanning document...</span>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-400">Upload power document to auto-fill</p>
+                  <p className="text-xs text-gray-600 mt-1">Photo or PDF</p>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                disabled={extracting}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) extractFromFile(file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+            {extractError && (
+              <p className="text-sm text-red-400 mb-3">{extractError}</p>
+            )}
+
             <div className="space-y-3">
               <input
                 type="text"
