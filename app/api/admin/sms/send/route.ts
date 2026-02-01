@@ -25,6 +25,12 @@ export async function POST(req: NextRequest) {
       status: result.status,
     });
 
+    if (result.status === 'skipped') {
+      return NextResponse.json({
+        error: 'SMS not configured — message logged but not delivered. Check SignalWire env vars.',
+      }, { status: 503 });
+    }
+
     return NextResponse.json({
       success: true,
       sid: result.sid,

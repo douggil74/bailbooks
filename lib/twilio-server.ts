@@ -29,11 +29,12 @@ function normalizePhone(phone: string): string {
 export async function sendSMS(to: string, body: string) {
   const url = getBaseUrl();
   if (!url) {
-    console.warn('SignalWire not configured — skipping send to', to);
+    console.warn('[SMS] SignalWire not configured — skipping send to', to);
     return { sid: 'not-configured', status: 'skipped' };
   }
 
   const normalizedTo = normalizePhone(to);
+  console.log(`[SMS] Sending to ${normalizedTo} from ${FROM_NUMBER} via ${SPACE_URL}`);
 
   const params = new URLSearchParams();
   params.append('From', FROM_NUMBER!);
@@ -51,22 +52,26 @@ export async function sendSMS(to: string, body: string) {
   });
 
   // Safely parse response — SignalWire may return empty or non-JSON body
+  const text = await res.text();
+  console.log(`[SMS] SignalWire HTTP ${res.status}: ${text.slice(0, 500)}`);
+
   let data: Record<string, unknown>;
   try {
-    const text = await res.text();
     data = text ? JSON.parse(text) : {};
   } catch {
     if (!res.ok) {
-      throw new Error(`SignalWire error ${res.status} (non-JSON response)`);
+      throw new Error(`SignalWire error ${res.status}: ${text.slice(0, 200)}`);
     }
     data = {};
   }
 
   if (!res.ok) {
-    console.error('SignalWire SMS error:', data);
-    throw new Error((data.message as string) || `SignalWire error ${res.status}`);
+    const errMsg = (data.message as string) || (data.error_message as string) || `SignalWire error ${res.status}`;
+    console.error('[SMS] SignalWire error:', errMsg, data);
+    throw new Error(errMsg);
   }
 
+  console.log(`[SMS] Success — SID: ${data.sid}, status: ${data.status}`);
   return { sid: (data.sid as string) || 'sent', status: (data.status as string) || 'queued' };
 }
 
