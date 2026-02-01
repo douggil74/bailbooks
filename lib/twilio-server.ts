@@ -17,6 +17,15 @@ function getAuthHeader() {
   return 'Basic ' + Buffer.from(`${PROJECT_ID}:${API_TOKEN}`).toString('base64');
 }
 
+/** Normalize phone to E.164 (+1XXXXXXXXXX) for US numbers */
+function normalizePhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  if (phone.startsWith('+')) return phone;
+  return `+${digits}`;
+}
+
 export async function sendSMS(to: string, body: string) {
   const url = getBaseUrl();
   if (!url) {
@@ -24,9 +33,11 @@ export async function sendSMS(to: string, body: string) {
     return { sid: 'not-configured', status: 'skipped' };
   }
 
+  const normalizedTo = normalizePhone(to);
+
   const params = new URLSearchParams();
   params.append('From', FROM_NUMBER!);
-  params.append('To', to);
+  params.append('To', normalizedTo);
   params.append('Body', body);
 
   const res = await fetch(url, {
@@ -39,14 +50,24 @@ export async function sendSMS(to: string, body: string) {
     body: params.toString(),
   });
 
-  const data = await res.json();
+  // Safely parse response — SignalWire may return empty or non-JSON body
+  let data: Record<string, unknown>;
+  try {
+    const text = await res.text();
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    if (!res.ok) {
+      throw new Error(`SignalWire error ${res.status} (non-JSON response)`);
+    }
+    data = {};
+  }
 
   if (!res.ok) {
     console.error('SignalWire SMS error:', data);
-    throw new Error(data.message || `SignalWire error ${res.status}`);
+    throw new Error((data.message as string) || `SignalWire error ${res.status}`);
   }
 
-  return { sid: data.sid || 'sent', status: data.status || 'queued' };
+  return { sid: (data.sid as string) || 'sent', status: (data.status as string) || 'queued' };
 }
 
 export async function sendCheckinRequest(applicationId: string, phone: string) {

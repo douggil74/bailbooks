@@ -106,8 +106,8 @@ export default function CommsPanel({
         setMessage('');
         onRefresh();
       }
-    } catch {
-      setSendError('Failed to send');
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Failed to send');
     }
     setSending(false);
   }
