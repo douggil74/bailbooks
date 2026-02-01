@@ -215,6 +215,15 @@ export default function CaseDetailPage() {
   const [indemnitorEmail, setIndemnitorEmail] = useState('');
   const [indemnitorAdded, setIndemnitorAdded] = useState(false);
 
+  // Wizard: info categories for indemnitor portal
+  const [infoCategories, setInfoCategories] = useState<Record<string, boolean>>({
+    personal: true,
+    address: true,
+    vehicle: false,
+    employer: true,
+    id_photos: true,
+  });
+
   // Card & Payment
   const [cardInfo, setCardInfo] = useState<CardInfoResponse | null>(null);
   const [cardLoading, setCardLoading] = useState(true);
@@ -279,6 +288,18 @@ export default function CaseDetailPage() {
       setPaymentAmount(app.payment_amount != null ? String(app.payment_amount) : '');
       setAgentNotes(app.agent_notes || '');
       setNextPaymentDate(app.next_payment_date || '');
+
+      // Parse info categories from DB
+      if (app.indemnitor_info_categories != null) {
+        const cats = app.indemnitor_info_categories.split(',').map((s: string) => s.trim()).filter(Boolean);
+        setInfoCategories({
+          personal: cats.includes('personal'),
+          address: cats.includes('address'),
+          vehicle: cats.includes('vehicle'),
+          employer: cats.includes('employer'),
+          id_photos: cats.includes('id_photos'),
+        });
+      }
 
       if (app.status === 'draft' && !app.defendant_phone && !app.bond_amount) {
         setShowWizard(true);
@@ -371,6 +392,13 @@ export default function CaseDetailPage() {
   }
 
   async function saveIndemnitorStep() {
+    // Always save info categories
+    const cats = Object.entries(infoCategories)
+      .filter(([, v]) => v)
+      .map(([k]) => k)
+      .join(',');
+    await saveField({ indemnitor_info_categories: cats });
+
     const first = indemnitorFirst.trim();
     const last = indemnitorLast.trim();
     if (!first || !last) return;
@@ -804,6 +832,39 @@ export default function CaseDetailPage() {
                       onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }}
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
                     />
+                  </div>
+
+                  {/* Information to Collect */}
+                  <div className="border-t border-gray-700 pt-4 mt-4">
+                    <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Information to Collect</p>
+                    <p className="text-xs text-gray-500 mb-3">What should the co-signer provide?</p>
+                    <div className="space-y-2">
+                      {([
+                        { key: 'personal', label: 'Personal Details', desc: 'DOB, SSN, DL#' },
+                        { key: 'address', label: 'Home Address', desc: 'Street, city, state, zip' },
+                        { key: 'vehicle', label: 'Vehicle Info', desc: 'Make, model, year, color' },
+                        { key: 'employer', label: 'Current Employer', desc: 'Name, phone' },
+                        { key: 'id_photos', label: 'ID & Photos', desc: 'DL front/back, selfie' },
+                      ] as const).map((cat) => (
+                        <div key={cat.key} className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5">
+                          <div>
+                            <p className="text-sm text-white">{cat.label}</p>
+                            <p className="text-xs text-gray-500">{cat.desc}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setInfoCategories((prev) => ({ ...prev, [cat.key]: !prev[cat.key] }))}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${infoCategories[cat.key] ? 'bg-[#d4af37]' : 'bg-gray-600'}`}
+                          >
+                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${infoCategories[cat.key] ? 'translate-x-5' : ''}`} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 space-y-1">
+                      <p className="text-xs text-gray-500">&#10003; Name &amp; contact &mdash; always required</p>
+                      <p className="text-xs text-gray-500">&#10003; Signature &mdash; always required</p>
+                    </div>
                   </div>
                 </>
               )}

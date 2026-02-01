@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     const { data: indemnitor } = await supabase
       .from('indemnitors')
-      .select('*, applications(defendant_first, defendant_last)')
+      .select('*, applications(defendant_first, defendant_last, indemnitor_info_categories)')
       .eq('invite_token', token)
       .single();
 
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'This link has expired. Please ask the agent to send a new one.' }, { status: 410 });
     }
 
-    const app = indemnitor.applications as { defendant_first: string; defendant_last: string } | null;
+    const app = indemnitor.applications as { defendant_first: string; defendant_last: string; indemnitor_info_categories: string | null } | null;
 
     return NextResponse.json({
       valid: true,
@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
         status: indemnitor.status,
       },
       defendant_name: app ? `${app.defendant_first} ${app.defendant_last}` : null,
+      info_categories: app?.indemnitor_info_categories ?? 'personal,address,employer,id_photos',
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to validate token';

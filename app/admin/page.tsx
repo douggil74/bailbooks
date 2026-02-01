@@ -23,6 +23,7 @@ interface AppRow {
   created_at: string;
   checkin_frequency: string | null;
   updated_at: string | null;
+  power_number: string | null;
   defendant_status: ActivityStatus;
   indemnitor_status: ActivityStatus;
 }
@@ -143,6 +144,12 @@ export default function AdminPage() {
           >
             + New Case
           </button>
+          <a
+            href="/admin/powers"
+            className="text-sm font-semibold text-green-200 hover:text-white transition-colors"
+          >
+            Powers
+          </a>
           <a href="/" className="text-sm text-green-200 underline">
             Back to Site
           </a>
@@ -229,9 +236,16 @@ export default function AdminPage() {
                   />
 
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-white truncate">
-                      {app.defendant_first} {app.defendant_last}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-sm text-white truncate">
+                        {app.defendant_first} {app.defendant_last}
+                      </p>
+                      {app.power_number && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-900/60 text-teal-400 border border-teal-800/50 whitespace-nowrap">
+                          {app.power_number}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-x-3 text-xs text-gray-500 mt-0.5">
                       {app.county && <span>County: {app.county}</span>}
                       {!app.county && app.court_name && <span>{app.court_name}</span>}
@@ -282,9 +296,16 @@ export default function AdminPage() {
                       status={app.status}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-white truncate">
-                        {app.defendant_first} {app.defendant_last}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-sm text-white truncate">
+                          {app.defendant_first} {app.defendant_last}
+                        </p>
+                        {app.power_number && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-teal-900/60 text-teal-400 border border-teal-800/50 whitespace-nowrap">
+                            {app.power_number}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap gap-x-2 text-xs text-gray-500 mt-0.5">
                         {app.county && <span>{app.county}</span>}
                         {app.bond_amount && (

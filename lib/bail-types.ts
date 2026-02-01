@@ -46,6 +46,7 @@ export interface Application {
   sms_consent: boolean;
   gps_consent: boolean;
   checkin_frequency: 'weekly' | 'biweekly' | 'monthly';
+  indemnitor_info_categories: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -155,6 +156,17 @@ export interface ReminderSent {
   reminder_type: string;
   channel: string;
   sent_at: string;
+}
+
+export interface Power {
+  id: string;
+  power_number: string;
+  amount: number;
+  surety: string;
+  status: 'open' | 'active' | 'voided';
+  application_id: string | null;
+  assigned_at: string | null;
+  created_at: string;
 }
 
 // Wizard step data types

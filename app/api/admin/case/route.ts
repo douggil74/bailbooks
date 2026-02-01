@@ -36,6 +36,9 @@ const ALLOWED_FIELDS = [
   'car_model',
   'car_year',
   'car_color',
+  'sms_consent',
+  'gps_consent',
+  'indemnitor_info_categories',
 ];
 
 export async function PUT(req: NextRequest) {

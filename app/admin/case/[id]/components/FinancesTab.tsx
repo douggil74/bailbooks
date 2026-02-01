@@ -1,10 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import EditField from '@/app/admin/components/EditField';
 import FinanceCard from '@/app/admin/components/FinanceCard';
 import type { CardInfoResponse, Payment } from '@/lib/bail-types';
 import CardCollectForm from '@/app/components/CardCollectForm';
+
+interface OpenPower {
+  id: string;
+  power_number: string;
+  amount: number;
+  surety: string;
+}
+
+interface AssignedPower {
+  id: string;
+  power_number: string;
+  amount: number;
+  surety: string;
+}
 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -100,6 +114,89 @@ export default function FinancesTab({
   const [planStart, setPlanStart] = useState(new Date().toISOString().split('T')[0]);
   const [planCreating, setPlanCreating] = useState(false);
   const [actionMsg, setActionMsg] = useState('');
+  const [openPowers, setOpenPowers] = useState<OpenPower[]>([]);
+  const [assignedPower, setAssignedPower] = useState<AssignedPower | null>(null);
+  const [powerLoading, setPowerLoading] = useState(true);
+  const [assigning, setAssigning] = useState(false);
+
+  useEffect(() => {
+    async function loadPowers() {
+      try {
+        // Fetch all powers to find which is assigned to this case + available open ones
+        const res = await fetch('/api/admin/powers');
+        const data = await res.json();
+        const all = data.powers || [];
+        const assigned = all.find(
+          (p: { application_id: string | null; status: string }) =>
+            p.application_id === applicationId && p.status === 'active'
+        );
+        if (assigned) {
+          setAssignedPower({
+            id: assigned.id,
+            power_number: assigned.power_number,
+            amount: assigned.amount,
+            surety: assigned.surety,
+          });
+        }
+        setOpenPowers(
+          all
+            .filter((p: { status: string }) => p.status === 'open')
+            .map((p: { id: string; power_number: string; amount: number; surety: string }) => ({
+              id: p.id,
+              power_number: p.power_number,
+              amount: p.amount,
+              surety: p.surety,
+            }))
+        );
+      } catch { /* ignore */ }
+      setPowerLoading(false);
+    }
+    loadPowers();
+  }, [applicationId]);
+
+  async function assignPower(powerId: string) {
+    setAssigning(true);
+    try {
+      const res = await fetch('/api/admin/powers', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: powerId, application_id: applicationId }),
+      });
+      if (res.ok) {
+        const selected = openPowers.find((p) => p.id === powerId);
+        if (selected) {
+          setAssignedPower(selected);
+          setOpenPowers((prev) => prev.filter((p) => p.id !== powerId));
+          // Also save the power_number to the application record
+          setPowerNumber(selected.power_number);
+          await saveField({ power_number: selected.power_number });
+        }
+      }
+    } catch { /* ignore */ }
+    setAssigning(false);
+  }
+
+  async function unassignPower() {
+    if (!assignedPower) return;
+    setAssigning(true);
+    try {
+      const res = await fetch('/api/admin/powers', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: assignedPower.id }),
+      });
+      if (res.ok) {
+        setOpenPowers((prev) => [
+          { id: assignedPower.id, power_number: assignedPower.power_number, amount: assignedPower.amount, surety: assignedPower.surety },
+          ...prev,
+        ]);
+        setAssignedPower(null);
+        setPowerNumber('');
+        await saveField({ power_number: null });
+      }
+    } catch { /* ignore */ }
+    setAssigning(false);
+  }
 
   const premNum = premium ? parseFloat(premium) : null;
   const dpNum = downPayment ? parseFloat(downPayment) : 0;
@@ -213,13 +310,44 @@ export default function FinancesTab({
           <h2 className="text-lg font-bold text-[#d4af37]">Agent Financial Fields</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <EditField
-            label="Power Number"
-            value={powerNumber}
-            onChange={setPowerNumber}
-            onBlur={() => saveField({ power_number: powerNumber || null })}
-            disabled={saving}
-          />
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Power Number</label>
+            {powerLoading ? (
+              <p className="text-xs text-gray-500 py-2">Loading powers...</p>
+            ) : assignedPower ? (
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white">
+                  <span className="font-medium">{assignedPower.power_number}</span>
+                  <span className="text-gray-400 ml-2">— {assignedPower.surety} — ${Number(assignedPower.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <button
+                  onClick={unassignPower}
+                  disabled={assigning}
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors whitespace-nowrap disabled:opacity-50"
+                >
+                  Unassign
+                </button>
+              </div>
+            ) : (
+              <select
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) assignPower(e.target.value);
+                }}
+                disabled={assigning || openPowers.length === 0}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
+              >
+                <option value="">
+                  {openPowers.length === 0 ? 'No open powers' : 'Select a power...'}
+                </option>
+                {openPowers.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.power_number} — {p.surety} — ${Number(p.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
           <EditField
             label="Premium ($)"
             value={premium}

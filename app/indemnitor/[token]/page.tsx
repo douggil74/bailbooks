@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 
-type Step = 1 | 2 | 3 | 4;
+type StepId = 1 | 2 | 3 | 4;
 
 interface IndemnitorData {
   id: string;
@@ -34,9 +34,14 @@ export default function IndemnitorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [defendantName, setDefendantName] = useState('');
-  const [step, setStep] = useState<Step>(1);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [complete, setComplete] = useState(false);
+
+  // Enabled info categories (from agent config)
+  const [enabledCategories, setEnabledCategories] = useState<Set<string>>(
+    new Set(['personal', 'address', 'vehicle', 'employer', 'id_photos'])
+  );
 
   // Step 1: Personal Info
   const [firstName, setFirstName] = useState('');
@@ -69,6 +74,37 @@ export default function IndemnitorPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
 
+  // Compute dynamic steps based on enabled categories
+  const steps = useMemo(() => {
+    const s: StepId[] = [1]; // personal info always shown
+    if (enabledCategories.has('vehicle')) s.push(2);
+    if (enabledCategories.has('id_photos')) s.push(3);
+    s.push(4); // sign always shown
+    return s;
+  }, [enabledCategories]);
+
+  const currentStep = steps[currentStepIndex];
+  const totalSteps = steps.length;
+
+  const stepLabels: Record<StepId, string> = {
+    1: 'Personal Info',
+    2: 'Vehicle',
+    3: 'ID Upload',
+    4: 'Sign',
+  };
+
+  function goNext() {
+    if (currentStepIndex < steps.length - 1) {
+      setCurrentStepIndex(currentStepIndex + 1);
+    }
+  }
+
+  function goBack() {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(currentStepIndex - 1);
+    }
+  }
+
   // Validate token on mount
   useEffect(() => {
     async function validate() {
@@ -83,6 +119,12 @@ export default function IndemnitorPage() {
 
         const ind: IndemnitorData = data.indemnitor;
         setDefendantName(data.defendant_name || '');
+
+        // Parse info categories
+        if (data.info_categories) {
+          const cats = (data.info_categories as string).split(',').map((s: string) => s.trim()).filter(Boolean);
+          setEnabledCategories(new Set(cats));
+        }
 
         // Pre-fill fields
         setFirstName(ind.first_name || '');
@@ -141,22 +183,29 @@ export default function IndemnitorPage() {
       setError('First and last name are required');
       return;
     }
-    const ok = await saveFields({
+    const fields: Record<string, unknown> = {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      dob: dob || null,
       phone: phone || null,
       email: email || null,
-      address: address || null,
-      city: city || null,
-      state: state || 'LA',
-      zip: zip || null,
-      ssn_last4: ssn4 || null,
-      dl_number: dlNumber || null,
-      employer_name: employerName || null,
-      employer_phone: employerPhone || null,
-    });
-    if (ok) setStep(2);
+    };
+    if (enabledCategories.has('personal')) {
+      fields.dob = dob || null;
+      fields.ssn_last4 = ssn4 || null;
+      fields.dl_number = dlNumber || null;
+    }
+    if (enabledCategories.has('address')) {
+      fields.address = address || null;
+      fields.city = city || null;
+      fields.state = state || 'LA';
+      fields.zip = zip || null;
+    }
+    if (enabledCategories.has('employer')) {
+      fields.employer_name = employerName || null;
+      fields.employer_phone = employerPhone || null;
+    }
+    const ok = await saveFields(fields);
+    if (ok) goNext();
   }
 
   async function handleStep2() {
@@ -166,7 +215,7 @@ export default function IndemnitorPage() {
       car_year: carYear || null,
       car_color: carColor || null,
     });
-    if (ok) setStep(3);
+    if (ok) goNext();
   }
 
   async function handleFileUpload(file: File, docType: string) {
@@ -251,11 +300,11 @@ export default function IndemnitorPage() {
   }, []);
 
   useEffect(() => {
-    if (step === 4) {
+    if (currentStep === 4) {
       const cleanup = setupCanvas();
       return cleanup;
     }
-  }, [step, setupCanvas]);
+  }, [currentStep, setupCanvas]);
 
   async function handleSign() {
     if (!signerName.trim()) {
@@ -289,8 +338,7 @@ export default function IndemnitorPage() {
   }
 
   // Progress
-  const progress = complete ? 100 : ((step - 1) / 4) * 100;
-  const stepLabels = ['Personal Info', 'Vehicle', 'ID Upload', 'Sign'];
+  const progress = complete ? 100 : (currentStepIndex / totalSteps) * 100;
 
   if (loading) {
     return (
@@ -351,8 +399,8 @@ export default function IndemnitorPage() {
         {/* Progress */}
         <div className="mb-6">
           <div className="flex justify-between text-xs text-gray-500 mb-1">
-            <span>Step {step} of 4</span>
-            <span>{stepLabels[step - 1]}</span>
+            <span>Step {currentStepIndex + 1} of {totalSteps}</span>
+            <span>{stepLabels[currentStep]}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
@@ -370,7 +418,7 @@ export default function IndemnitorPage() {
         )}
 
         {/* Step 1: Personal Info */}
-        {step === 1 && (
+        {currentStep === 1 && (
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h2>
             <div className="space-y-3">
@@ -378,19 +426,31 @@ export default function IndemnitorPage() {
                 <Input label="First Name *" value={firstName} onChange={setFirstName} />
                 <Input label="Last Name *" value={lastName} onChange={setLastName} />
               </div>
-              <Input label="Date of Birth" type="date" value={dob} onChange={setDob} />
               <Input label="Phone" type="tel" value={phone} onChange={setPhone} />
               <Input label="Email" type="email" value={email} onChange={setEmail} />
-              <Input label="Address" value={address} onChange={setAddress} />
-              <div className="grid grid-cols-3 gap-3">
-                <Input label="City" value={city} onChange={setCity} />
-                <Input label="State" value={state} onChange={setState} />
-                <Input label="ZIP" value={zip} onChange={setZip} />
-              </div>
-              <Input label="Last 4 of SSN" value={ssn4} onChange={setSsn4} maxLength={4} />
-              <Input label="Driver&apos;s License #" value={dlNumber} onChange={setDlNumber} />
-              <Input label="Employer" value={employerName} onChange={setEmployerName} />
-              <Input label="Employer Phone" type="tel" value={employerPhone} onChange={setEmployerPhone} />
+              {enabledCategories.has('personal') && (
+                <>
+                  <Input label="Date of Birth" type="date" value={dob} onChange={setDob} />
+                  <Input label="Last 4 of SSN" value={ssn4} onChange={setSsn4} maxLength={4} />
+                  <Input label="Driver&apos;s License #" value={dlNumber} onChange={setDlNumber} />
+                </>
+              )}
+              {enabledCategories.has('address') && (
+                <>
+                  <Input label="Address" value={address} onChange={setAddress} />
+                  <div className="grid grid-cols-3 gap-3">
+                    <Input label="City" value={city} onChange={setCity} />
+                    <Input label="State" value={state} onChange={setState} />
+                    <Input label="ZIP" value={zip} onChange={setZip} />
+                  </div>
+                </>
+              )}
+              {enabledCategories.has('employer') && (
+                <>
+                  <Input label="Employer" value={employerName} onChange={setEmployerName} />
+                  <Input label="Employer Phone" type="tel" value={employerPhone} onChange={setEmployerPhone} />
+                </>
+              )}
             </div>
             <button
               onClick={handleStep1}
@@ -403,7 +463,7 @@ export default function IndemnitorPage() {
         )}
 
         {/* Step 2: Vehicle Info */}
-        {step === 2 && (
+        {currentStep === 2 && (
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">Vehicle Information</h2>
             <p className="text-sm text-gray-500 mb-4">If you own a vehicle, please provide the details below.</p>
@@ -415,12 +475,12 @@ export default function IndemnitorPage() {
                 <Input label="Color" value={carColor} onChange={setCarColor} placeholder="e.g. Silver" />
               </div>
             </div>
-            <NavButtons onBack={() => setStep(1)} onNext={handleStep2} loading={saving} />
+            <NavButtons onBack={goBack} onNext={handleStep2} loading={saving} />
           </section>
         )}
 
         {/* Step 3: ID Upload */}
-        {step === 3 && (
+        {currentStep === 3 && (
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">Upload ID</h2>
             <p className="text-sm text-gray-500 mb-4">Take a photo or upload your driver&apos;s license and a selfie.</p>
@@ -441,12 +501,12 @@ export default function IndemnitorPage() {
                 onFile={(f) => handleFileUpload(f, 'selfie')}
               />
             </div>
-            <NavButtons onBack={() => setStep(2)} onNext={() => setStep(4)} loading={saving} />
+            <NavButtons onBack={goBack} onNext={goNext} loading={saving} />
           </section>
         )}
 
         {/* Step 4: Sign */}
-        {step === 4 && (
+        {currentStep === 4 && (
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">Sign Agreement</h2>
             <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 mb-4 text-xs text-gray-600 leading-relaxed">
@@ -484,7 +544,7 @@ export default function IndemnitorPage() {
 
             <div className="mt-6 flex gap-3">
               <button
-                onClick={() => setStep(3)}
+                onClick={goBack}
                 className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium"
               >
                 Back

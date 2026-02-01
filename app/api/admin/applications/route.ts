@@ -115,8 +115,22 @@ export async function GET() {
       indemnitorsByApp.set(i.application_id, arr);
     }
 
+    // Fetch assigned powers for all applications
+    const powersResult = await supabase
+      .from('powers')
+      .select('application_id, power_number')
+      .eq('status', 'active')
+      .in('application_id', appIds);
+
+    const powerByApp = new Map<string, string>();
+    for (const pw of powersResult.data || []) {
+      const p = pw as { application_id: string; power_number: string };
+      powerByApp.set(p.application_id, p.power_number);
+    }
+
     const enriched = apps.map((app) => ({
       ...app,
+      power_number: powerByApp.get(app.id) || null,
       defendant_status: computeDefendantStatus(
         app,
         docSet.has(app.id),
