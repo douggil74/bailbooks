@@ -10,34 +10,84 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
 ];
 
+function formatDob(dob: string | null | undefined): string {
+  if (!dob) return '\u2014';
+  const d = new Date(dob + 'T00:00:00');
+  if (isNaN(d.getTime())) return '\u2014';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 export default function CaseSidebar({
   activeTab,
   onTabChange,
+  defendantName,
+  defendantDob,
+  defendantPhone,
+  selfieUrl,
 }: {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  defendantName?: string;
+  defendantDob?: string | null;
+  defendantPhone?: string | null;
+  selfieUrl?: string | null;
 }) {
   return (
     <>
       {/* Desktop sidebar */}
-      <nav className="hidden lg:block w-56 bg-gray-900 border border-gray-800 rounded-xl p-2 flex-shrink-0 self-start sticky top-4">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? 'bg-gray-800 text-[#d4af37] border-l-2 border-[#d4af37]'
-                : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-            }`}
-          >
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={tab.icon} />
-            </svg>
-            {tab.label}
-          </button>
-        ))}
-      </nav>
+      <div className="hidden lg:block w-56 flex-shrink-0 self-start sticky top-4 space-y-3">
+        {/* Defendant identity card */}
+        {defendantName && (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <div className="flex flex-col items-center text-center">
+              {selfieUrl ? (
+                <img
+                  src={selfieUrl}
+                  alt={defendantName}
+                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-700 mb-3"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center mb-3">
+                  <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              )}
+              <p className="font-bold text-white text-sm leading-tight">{defendantName}</p>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-800 space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-500">DOB</span>
+                <span className="text-gray-300">{formatDob(defendantDob)}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-500">Phone</span>
+                <span className="text-gray-300">{defendantPhone || '\u2014'}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <nav className="bg-gray-900 border border-gray-800 rounded-xl p-2">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-gray-800 text-[#d4af37] border-l-2 border-[#d4af37]'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+              }`}
+            >
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={tab.icon} />
+              </svg>
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
       {/* Mobile horizontal tabs */}
       <div className="lg:hidden overflow-x-auto -mx-4 px-4 mb-4 sticky top-0 z-30 bg-gray-950 pb-2 pt-2 border-b border-gray-800/50">

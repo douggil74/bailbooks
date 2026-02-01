@@ -115,7 +115,7 @@ export default function DefendantTab({
               <button
                 onClick={onSendCheckin}
                 disabled={checkinSending}
-                className="absolute right-0 -bottom-5 text-[10px] text-[#1a4d2e] hover:text-green-400 font-semibold transition-colors disabled:opacity-50"
+                className="absolute right-0 -bottom-5 text-[10px] text-[#d4af37] hover:text-[#e5c55a] font-semibold transition-colors disabled:opacity-50"
               >
                 {checkinSending ? 'Sending...' : 'Send Check-in'}
               </button>

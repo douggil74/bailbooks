@@ -20,34 +20,41 @@ function computeChecklist(
   const someInProgress = indemnitors.some(i => i.status === 'in_progress');
   const indemnitorCount = indemnitors.length;
 
+  const quoteSet = !!(app.bond_amount && app.premium);
+  const planSet = !!(app.payment_amount && app.next_payment_date);
+  const defComplete = !!(app.defendant_phone && app.defendant_email && app.defendant_dob && app.defendant_address && app.defendant_dl_number);
+  const dpReceived = !!(app.down_payment && Number(app.down_payment) > 0);
+
   return [
     {
-      label: 'Quote has been Confirmed',
-      description: app.bond_amount && app.premium
-        ? 'Bond amount and premium are set.'
-        : 'Set the bond amount and premium in the Finances tab.',
-      complete: !!(app.bond_amount && app.premium),
-      actionLabel: app.bond_amount && app.premium ? 'Update' : 'Set Up',
+      label: quoteSet ? 'Quote Confirmed' : 'Confirm Quote',
+      description: quoteSet
+        ? `Bond $${Number(app.bond_amount).toLocaleString()} · Premium $${Number(app.premium).toLocaleString()}`
+        : 'Set the bond amount and premium.',
+      complete: quoteSet,
+      actionLabel: quoteSet ? 'Update' : 'Set Up',
       targetTab: 'finances',
     },
     {
-      label: 'Review and Confirm your Payment Plan',
-      description: app.payment_plan && app.payment_amount && app.next_payment_date
-        ? 'Payment plan is configured.'
+      label: planSet ? 'Payment Plan Set' : 'Set Up Payment Plan',
+      description: planSet
+        ? `$${Number(app.payment_amount).toLocaleString()} per period · Next due ${app.next_payment_date}`
         : 'Configure payment amount and schedule.',
-      complete: !!(app.payment_amount && app.next_payment_date),
-      actionLabel: app.payment_amount ? 'Review' : 'Set Up',
+      complete: planSet,
+      actionLabel: planSet ? 'Review' : 'Set Up',
       targetTab: 'finances',
     },
     {
-      label: "Defendant's Information is Complete",
-      description: 'All personal details, address, and identification on file.',
-      complete: !!(app.defendant_phone && app.defendant_email && app.defendant_dob && app.defendant_address && app.defendant_dl_number),
-      actionLabel: app.defendant_phone ? 'View' : 'Complete',
+      label: defComplete ? 'Defendant Info Complete' : 'Complete Defendant Info',
+      description: defComplete
+        ? 'All personal details, address, and identification on file.'
+        : 'Enter phone, email, DOB, address, and DL number.',
+      complete: defComplete,
+      actionLabel: defComplete ? 'View' : 'Complete',
       targetTab: 'defendant',
     },
     {
-      label: "Indemnitor's Information is Complete",
+      label: allIndemnitorsComplete ? 'Indemnitor Info Complete' : 'Add Indemnitor Info',
       description: allIndemnitorsComplete
         ? `All ${indemnitorCount} indemnitor${indemnitorCount > 1 ? 's' : ''} complete.`
         : indemnitorCount === 0
@@ -60,19 +67,19 @@ function computeChecklist(
       targetTab: 'indemnitors',
     },
     {
-      label: 'Initial Payment Received',
-      description: app.down_payment && Number(app.down_payment) > 0
+      label: dpReceived ? 'Initial Payment Received' : 'Collect Initial Payment',
+      description: dpReceived
         ? `Down payment of $${Number(app.down_payment).toLocaleString()} recorded.`
         : 'No down payment recorded yet.',
-      complete: !!(app.down_payment && Number(app.down_payment) > 0),
-      actionLabel: 'View Payments',
+      complete: dpReceived,
+      actionLabel: dpReceived ? 'View Payments' : 'View Payments',
       targetTab: 'finances',
     },
     {
-      label: 'Card on File',
+      label: hasCard ? 'Card on File' : 'Collect Card',
       description: hasCard
         ? 'A payment card is stored for this customer.'
-        : 'No card on file. Collect a card in the Finances tab.',
+        : 'No card on file yet.',
       complete: hasCard,
       actionLabel: hasCard ? 'View' : 'Add Card',
       targetTab: 'finances',
@@ -122,7 +129,7 @@ export default function OverviewTab({
       <div className={`rounded-xl border p-4 flex items-center gap-3 ${
         allComplete
           ? 'bg-green-900/20 border-green-800 text-green-400'
-          : 'bg-amber-900/20 border-amber-800 text-amber-400'
+          : 'bg-red-900/20 border-red-800 text-red-400'
       }`}>
         <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {allComplete ? (
@@ -156,7 +163,7 @@ export default function OverviewTab({
               className={`rounded-lg border p-4 flex items-center justify-between gap-4 ${
                 item.complete
                   ? 'bg-green-900/10 border-green-900/30'
-                  : 'bg-amber-900/10 border-amber-900/30'
+                  : 'bg-red-900/10 border-red-900/30'
               }`}
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -165,8 +172,9 @@ export default function OverviewTab({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 ) : (
-                  <svg className="w-6 h-6 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h8" />
                   </svg>
                 )}
                 <div className="min-w-0">

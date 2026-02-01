@@ -979,7 +979,18 @@ export default function CaseDetailPage() {
       {/* Main layout: sidebar + content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-6">
-          <CaseSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+          <CaseSidebar
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            defendantName={`${app.defendant_first} ${app.defendant_last}`}
+            defendantDob={app.defendant_dob}
+            defendantPhone={app.defendant_phone}
+            selfieUrl={
+              data.documents.find((d) => d.doc_type === 'selfie' && !d.indemnitor_id)?.signed_url
+              || data.checkins.find((c) => c.selfie_url)?.selfie_url
+              || null
+            }
+          />
           <main className="flex-1 min-w-0">
             {renderActiveTab()}
           </main>
