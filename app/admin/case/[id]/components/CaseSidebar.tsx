@@ -24,6 +24,8 @@ export default function CaseSidebar({
   defendantDob,
   defendantPhone,
   selfieUrl,
+  onSelfieUpload,
+  selfieUploading,
 }: {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
@@ -31,6 +33,8 @@ export default function CaseSidebar({
   defendantDob?: string | null;
   defendantPhone?: string | null;
   selfieUrl?: string | null;
+  onSelfieUpload?: (file: File) => void;
+  selfieUploading?: boolean;
 }) {
   return (
     <>
@@ -40,19 +44,49 @@ export default function CaseSidebar({
         {defendantName && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <div className="flex flex-col items-center text-center">
-              {selfieUrl ? (
-                <img
-                  src={selfieUrl}
-                  alt={defendantName}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700 mb-3"
+              {/* Clickable avatar — upload / replace selfie */}
+              <label className="relative cursor-pointer group mb-3">
+                {selfieUploading ? (
+                  <div className="w-20 h-20 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-[#fbbf24] animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                  </div>
+                ) : selfieUrl ? (
+                  <img
+                    src={selfieUrl}
+                    alt={defendantName}
+                    className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700 group-hover:border-[#fbbf24] transition-colors"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-zinc-800 border-2 border-zinc-700 group-hover:border-[#fbbf24] flex items-center justify-center transition-colors">
+                    <svg className="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )}
+                {/* Camera overlay */}
+                {!selfieUploading && (
+                  <div className="absolute bottom-0 right-0 w-6 h-6 bg-zinc-700 group-hover:bg-[#fbbf24] rounded-full flex items-center justify-center border-2 border-zinc-900 transition-colors">
+                    <svg className="w-3 h-3 text-zinc-300 group-hover:text-[#0a0a0a]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={selfieUploading}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && onSelfieUpload) onSelfieUpload(file);
+                    e.target.value = '';
+                  }}
                 />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center mb-3">
-                  <svg className="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              )}
+              </label>
               <p className="font-bold text-white text-sm leading-tight">{defendantName}</p>
             </div>
             <div className="mt-3 pt-3 border-t border-zinc-800 space-y-2">

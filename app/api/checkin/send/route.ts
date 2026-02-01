@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bailbondsfinanced.com';
     const checkinUrl = `${siteUrl}/checkin?id=${app.id}`;
     const channels: string[] = [];
+    const errors: string[] = [];
 
     // Send SMS if phone exists (admin-initiated sends skip consent check)
     if (app.defendant_phone) {
@@ -43,7 +44,9 @@ export async function POST(req: NextRequest) {
         });
         channels.push('sms');
       } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown SMS error';
         console.error('Check-in SMS failed:', err);
+        errors.push(`SMS: ${errMsg}`);
       }
     }
 
@@ -68,10 +71,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (channels.length === 0) {
-      return NextResponse.json(
-        { error: 'No contact method available (no phone or email on file)' },
-        { status: 400 }
-      );
+      const detail = errors.length > 0
+        ? `Send failed: ${errors.join('; ')}`
+        : 'No contact method available (no phone or email on file)';
+      return NextResponse.json({ error: detail }, { status: 400 });
     }
 
     // Log to reminders_sent
@@ -83,7 +86,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: true, channels_sent: channels });
+    return NextResponse.json({
+      success: true,
+      channels_sent: channels,
+      ...(errors.length > 0 ? { warnings: errors } : {}),
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to send check-in';
     return NextResponse.json({ error: msg }, { status: 500 });

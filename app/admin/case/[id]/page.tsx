@@ -26,6 +26,7 @@ import FinancesTab from './components/FinancesTab';
 import FilesTab from './components/FilesTab';
 import LogsTab from './components/LogsTab';
 import SettingsTab from './components/SettingsTab';
+import CommsPanel from './components/CommsPanel';
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
@@ -199,6 +200,7 @@ export default function CaseDetailPage() {
   const [saveMsg, setSaveMsg] = useState('');
   const [lastSavedField, setLastSavedField] = useState<string | null>(null);
   const [checkinSending, setCheckinSending] = useState(false);
+  const [selfieUploading, setSelfieUploading] = useState(false);
 
   // Wizard
   const [showWizard, setShowWizard] = useState(false);
@@ -387,9 +389,23 @@ export default function CaseDetailPage() {
       const res = await fetch('/api/onboard/upload', { method: 'POST', body: formData });
       if (res.ok) {
         setUploadedDocs((prev) => ({ ...prev, [docType]: true }));
+        if (docType === 'selfie') fetchCase();
       }
     } catch { /* ignore upload errors */ }
     setUploading(null);
+  }
+
+  async function handleSelfieUpload(file: File) {
+    setSelfieUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('application_id', id);
+      formData.append('file', file);
+      formData.append('doc_type', 'selfie');
+      const res = await fetch('/api/onboard/upload', { method: 'POST', body: formData });
+      if (res.ok) fetchCase();
+    } catch { /* ignore */ }
+    setSelfieUploading(false);
   }
 
   async function saveIndemnitorStep() {
@@ -520,8 +536,12 @@ export default function CaseDetailPage() {
         setSaveMsg(`Check-in error: ${json.error}`);
       } else {
         const channels = (json.channels_sent as string[]).join(' + ');
-        setSaveMsg(`Check-in sent via ${channels}`);
-        setTimeout(() => setSaveMsg(''), 3000);
+        const warnings = json.warnings as string[] | undefined;
+        const msg = warnings?.length
+          ? `Check-in sent via ${channels} (${warnings.join('; ')})`
+          : `Check-in sent via ${channels}`;
+        setSaveMsg(msg);
+        setTimeout(() => setSaveMsg(''), 5000);
         fetchCase();
       }
     } catch {
@@ -1009,8 +1029,8 @@ export default function CaseDetailPage() {
         </div>
       )}
 
-      {/* Main layout: sidebar + content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* Main layout: sidebar + content + comms */}
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
         <div className="flex gap-6">
           <CaseSidebar
             activeTab={activeTab}
@@ -1023,11 +1043,22 @@ export default function CaseDetailPage() {
               || data.checkins.find((c) => c.selfie_url)?.selfie_url
               || null
             }
+            onSelfieUpload={handleSelfieUpload}
+            selfieUploading={selfieUploading}
           />
           <main className="flex-1 min-w-0">
             <OverviewBackBar />
             {renderActiveTab()}
           </main>
+          <CommsPanel
+            applicationId={id}
+            smsLog={data.sms_log}
+            defendantName={`${app.defendant_first} ${app.defendant_last}`}
+            defendantPhone={app.defendant_phone}
+            indemnitors={data.indemnitors}
+            smsConsent={app.sms_consent ?? false}
+            onRefresh={fetchCase}
+          />
         </div>
       </div>
     </div>
