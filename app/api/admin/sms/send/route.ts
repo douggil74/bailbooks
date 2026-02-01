@@ -6,6 +6,8 @@ export async function POST(req: NextRequest) {
   try {
     const { application_id, phone, message, recipient_label } = await req.json();
 
+    console.log('[SMS Send] Payload:', { application_id, phone, message: message?.slice(0, 50), recipient_label });
+
     if (!application_id || !phone || !message) {
       return NextResponse.json(
         { error: 'application_id, phone, and message are required' },
@@ -14,6 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await sendSMS(phone, message);
+    console.log('[SMS Send] Result:', result);
 
     const supabase = createServerClient();
     const { error: insertErr } = await supabase.from('sms_log').insert({
@@ -40,6 +43,7 @@ export async function POST(req: NextRequest) {
       success: true,
       sid: result.sid,
       status: result.status,
+      phone,
       recipient_label: recipient_label || phone,
     });
   } catch (err) {

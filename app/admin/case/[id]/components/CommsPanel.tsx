@@ -100,6 +100,7 @@ export default function CommsPanel({
         }),
       });
       const json = await res.json();
+      console.log('[CommsPanel] Send response:', json);
       if (!res.ok) {
         setSendError(json.error || 'Send failed');
       } else {
