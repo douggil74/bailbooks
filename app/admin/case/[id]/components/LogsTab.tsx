@@ -220,7 +220,16 @@ export default function LogsTab({
                   <tr key={ci.id} className="border-b border-zinc-800/50">
                     <td className="py-2 pr-4 text-zinc-300">{formatDateTime(ci.checked_in_at)}</td>
                     <td className="py-2 pr-4 text-zinc-400 font-mono text-xs">
-                      {ci.latitude && ci.longitude ? `${ci.latitude.toFixed(4)}, ${ci.longitude.toFixed(4)}` : '—'}
+                      {ci.latitude && ci.longitude ? (
+                        <a
+                          href={`https://www.google.com/maps?q=${ci.latitude},${ci.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#fbbf24] hover:underline"
+                        >
+                          {ci.latitude.toFixed(4)}, {ci.longitude.toFixed(4)}
+                        </a>
+                      ) : '—'}
                     </td>
                     <td className="py-2 pr-4 text-zinc-400">{ci.accuracy ? `${ci.accuracy.toFixed(0)}m` : '—'}</td>
                     <td className="py-2 pr-4">

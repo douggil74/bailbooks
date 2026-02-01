@@ -726,6 +726,7 @@ export default function CaseDetailPage() {
             signatures={data.signatures}
             applicationId={id}
             indemnitors={data.indemnitors}
+            checkins={data.checkins}
             onOpenLightbox={(url, label) => {
               setLightboxUrl(url);
               setLightboxLabel(label);
