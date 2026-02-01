@@ -1,4 +1,7 @@
+import dynamic from 'next/dynamic';
 import type { Document, Signature, Indemnitor, Checkin } from '@/lib/bail-types';
+
+const LocationMap = dynamic(() => import('./LocationMap'), { ssr: false });
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
@@ -109,13 +112,17 @@ export default function FilesTab({
         <DocumentGrid documents={defendantDocs} onOpenLightbox={onOpenLightbox} />
       </div>
 
-      {/* Check-in Selfies with GPS */}
-      {checkinsWithSelfies.length > 0 && (
+      {/* Check-in Photos & Location History */}
+      {checkins.some((ci) => ci.latitude && ci.longitude) && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
           <h2 className="text-lg font-bold text-[#fbbf24] mb-4">
             Check-in Photos
             <span className="text-sm font-normal text-zinc-400 ml-2">({checkinsWithSelfies.length})</span>
           </h2>
+          {/* Location map */}
+          <div className="mb-5">
+            <LocationMap checkins={checkins} height={300} />
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {checkinsWithSelfies.map((ci) => (
               <button

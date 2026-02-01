@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import type { Checkin, SmsLogEntry, ReminderSent, Application, Signature, Document } from '@/lib/bail-types';
+
+const LocationMap = dynamic(() => import('./LocationMap'), { ssr: false });
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
@@ -198,6 +201,11 @@ export default function LogsTab({
             <span className="text-zinc-500">Total Check-ins:</span>{' '}
             <span className="font-semibold">{checkins.length}</span>
           </div>
+        </div>
+
+        {/* Location Map */}
+        <div className="mb-5">
+          <LocationMap checkins={checkins} height={400} />
         </div>
 
         {checkins.length === 0 ? (
