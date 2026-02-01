@@ -31,7 +31,9 @@ export default function PlanAdvisor({
   const bond = bondAmount ?? 0;
   const computedPremium = bond * 0.12;
   const premNum = premiumStr ? parseFloat(premiumStr) : 0;
-  const actualPremium = premNum > 0 ? premNum : computedPremium;
+  // Always use 12% calculation — the manual premium field is informational
+  const actualPremium = computedPremium;
+  const premiumMismatch = premNum > 0 && Math.abs(premNum - computedPremium) > 1;
   const downNum = downStr ? parseFloat(downStr) : 0;
   const autoDown = actualPremium * 0.5;
   const actualDown = downNum > 0 ? downNum : autoDown;
@@ -163,6 +165,11 @@ export default function PlanAdvisor({
               <span className="bg-green-900/40 text-green-400 px-1.5 py-0.5 rounded">GA 3.5%: {fmt(ga)}</span>
               <span className="bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded">BUF: {fmt(buf)}</span>
             </div>
+            {premiumMismatch && (
+              <div className="text-[10px] text-amber-400 bg-amber-900/20 rounded px-2 py-1">
+                Premium field shows {fmt(premNum)} — plans use 12% ({fmt(computedPremium)})
+              </div>
+            )}
           </div>
 
           {/* Down + Remaining */}
