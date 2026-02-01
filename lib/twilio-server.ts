@@ -1,10 +1,10 @@
 // SMS via SignalWire Compatibility API (LaML)
 // No SDK needed — uses fetch with Basic Auth
 
-const PROJECT_ID = process.env.SIGNALWIRE_PROJECT_ID;
-const API_TOKEN = process.env.SIGNALWIRE_API_TOKEN;
-const SPACE_URL = process.env.SIGNALWIRE_SPACE_URL;
-const FROM_NUMBER = process.env.SIGNALWIRE_PHONE_NUMBER;
+const PROJECT_ID = process.env.SIGNALWIRE_PROJECT_ID?.trim();
+const API_TOKEN = process.env.SIGNALWIRE_API_TOKEN?.trim();
+const SPACE_URL = process.env.SIGNALWIRE_SPACE_URL?.trim();
+const FROM_NUMBER = process.env.SIGNALWIRE_PHONE_NUMBER?.trim();
 
 function getBaseUrl() {
   if (!PROJECT_ID || !API_TOKEN || !SPACE_URL || !FROM_NUMBER) {
