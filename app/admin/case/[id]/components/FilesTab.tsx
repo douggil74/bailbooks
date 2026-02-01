@@ -17,7 +17,7 @@ function DocumentGrid({
   onOpenLightbox: (url: string, label: string) => void;
 }) {
   if (documents.length === 0) {
-    return <p className="text-sm text-gray-500">No documents uploaded.</p>;
+    return <p className="text-sm text-zinc-500">No documents uploaded.</p>;
   }
 
   return (
@@ -30,7 +30,7 @@ function DocumentGrid({
             onClick={() => {
               if (doc.signed_url) onOpenLightbox(doc.signed_url, label);
             }}
-            className="text-left bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-gray-500 transition-colors group"
+            className="text-left bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700 hover:border-zinc-500 transition-colors group"
           >
             {doc.signed_url ? (
               <div className="relative">
@@ -46,13 +46,13 @@ function DocumentGrid({
                 </div>
               </div>
             ) : (
-              <div className="w-full h-48 flex items-center justify-center text-gray-600 text-sm">
+              <div className="w-full h-48 flex items-center justify-center text-zinc-600 text-sm">
                 No preview available
               </div>
             )}
             <div className="p-3">
               <p className="text-sm font-semibold capitalize">{label}</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-zinc-500 mt-0.5">
                 {formatDateTime(doc.uploaded_at)}
               </p>
             </div>
@@ -88,13 +88,13 @@ export default function FilesTab({
 
   return (
     <div className="space-y-6">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#d4af37]">Defendant Documents</h2>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Defendant Documents</h2>
           <a
             href={`/api/onboard/generate-pdf?id=${applicationId}`}
             target="_blank"
-            className="bg-[#d4af37] text-gray-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors"
+            className="bg-[#fbbf24] text-zinc-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors"
           >
             Download Full PDF
           </a>
@@ -105,27 +105,27 @@ export default function FilesTab({
       {indemnitors.map((ind) => {
         const docs = indemnitorDocsMap.get(ind.id) || [];
         return (
-          <div key={ind.id} className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-[#d4af37] mb-4">
+          <div key={ind.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-[#fbbf24] mb-4">
               {ind.first_name} {ind.last_name}
-              <span className="text-sm font-normal text-gray-400 ml-2">(Indemnitor)</span>
+              <span className="text-sm font-normal text-zinc-400 ml-2">(Indemnitor)</span>
             </h2>
             <DocumentGrid documents={docs} onOpenLightbox={onOpenLightbox} />
           </div>
         );
       })}
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">Signatures</h2>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <h2 className="text-lg font-bold text-[#fbbf24] mb-4">Signatures</h2>
 
         {signatures.length === 0 ? (
-          <p className="text-sm text-gray-500">No signatures on file.</p>
+          <p className="text-sm text-zinc-500">No signatures on file.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {signatures.map((sig) => (
               <div
                 key={sig.id}
-                className="bg-gray-800 rounded-xl border border-gray-700 p-4 flex items-center gap-4"
+                className="bg-zinc-800 rounded-xl border border-zinc-700 p-4 flex items-center gap-4"
               >
                 {sig.signature_data ? (
                   <img
@@ -134,14 +134,14 @@ export default function FilesTab({
                     className="h-14 bg-white rounded px-2 flex-shrink-0"
                   />
                 ) : (
-                  <div className="h-14 w-28 flex items-center justify-center text-gray-600 text-xs bg-gray-700 rounded flex-shrink-0">
+                  <div className="h-14 w-28 flex items-center justify-center text-zinc-600 text-xs bg-zinc-700 rounded flex-shrink-0">
                     No image
                   </div>
                 )}
                 <div className="min-w-0">
                   <p className="text-sm font-semibold truncate">{sig.signer_name}</p>
-                  <p className="text-xs text-gray-400 capitalize">{sig.signer_role}</p>
-                  <p className="text-xs text-gray-600">{formatDateTime(sig.signed_at)}</p>
+                  <p className="text-xs text-zinc-400 capitalize">{sig.signer_role}</p>
+                  <p className="text-xs text-zinc-600">{formatDateTime(sig.signed_at)}</p>
                 </div>
               </div>
             ))}

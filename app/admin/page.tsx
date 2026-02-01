@@ -47,9 +47,9 @@ function caseStatusBadge(status: string) {
   const styles: Record<string, string> = {
     submitted: 'bg-yellow-900 text-yellow-300',
     approved: 'bg-green-900 text-green-300',
-    active: 'bg-blue-900 text-blue-300',
-    completed: 'bg-gray-700 text-gray-300',
-    draft: 'bg-gray-800 text-gray-400',
+    active: 'bg-violet-900 text-violet-300',
+    completed: 'bg-zinc-700 text-zinc-300',
+    draft: 'bg-zinc-800 text-zinc-400',
   };
   return styles[status] || styles.draft;
 }
@@ -59,11 +59,11 @@ function powerStatusBadge(status: string) {
     case 'open':
       return 'bg-green-900/60 text-green-400';
     case 'active':
-      return 'bg-blue-900/60 text-blue-400';
+      return 'bg-violet-900/60 text-violet-400';
     case 'voided':
-      return 'bg-gray-700 text-gray-400';
+      return 'bg-zinc-700 text-zinc-400';
     default:
-      return 'bg-gray-700 text-gray-400';
+      return 'bg-zinc-700 text-zinc-400';
   }
 }
 
@@ -76,12 +76,12 @@ function DateBadge({ dateStr, status }: { dateStr: string | null; status: string
 
   const bgColor =
     status === 'completed'
-      ? 'bg-gray-700'
+      ? 'bg-zinc-700'
       : status === 'active' || status === 'approved'
-        ? 'bg-[#1a4d2e]'
+        ? 'bg-violet-900/60'
         : status === 'submitted'
           ? 'bg-yellow-800'
-          : 'bg-gray-800';
+          : 'bg-zinc-800';
 
   return (
     <div
@@ -264,23 +264,23 @@ export default function AdminPage() {
   }, [powers]);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="bg-[#1a4d2e] px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-zinc-950 text-white">
+      <header className="bg-[#18181b] border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Shield className="w-8 h-8 text-[#d4af37]" />
+          <Shield className="w-8 h-8 text-[#fbbf24]" />
           <div>
-            <h1 className="text-xl font-bold">BailBonds <span className="text-[#d4af37]">Made Easy</span> <span className="text-green-200 font-normal text-base">— Agent Control Panel</span></h1>
-            <p className="text-sm text-green-200">Case Management Dashboard</p>
+            <h1 className="text-xl font-bold">BailBonds <span className="text-[#fbbf24]">Made Easy</span> <span className="text-zinc-500 font-normal text-base">— Agent Control Panel</span></h1>
+            <p className="text-sm text-violet-400">Case Management Dashboard</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setShowNewCase(true)}
-            className="bg-[#d4af37] text-[#0a0a0a] text-sm font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors"
+            className="bg-[#fbbf24] text-[#0a0a0a] text-sm font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors"
           >
             + New Case
           </button>
-          <a href="/" className="text-sm text-green-200 underline">
+          <a href="/" className="text-sm text-zinc-400 underline">
             Back to Site
           </a>
         </div>
@@ -292,21 +292,21 @@ export default function AdminPage() {
           <div className="flex-1 min-w-0">
             {/* Stats Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
                 <p className="text-2xl font-bold text-white">{stats.total}</p>
-                <p className="text-xs text-gray-400 mt-1">Total Cases</p>
+                <p className="text-xs text-zinc-400 mt-1">Total Cases</p>
               </div>
-              <div className="bg-gray-900 border border-yellow-900/50 rounded-xl p-4 text-center">
+              <div className="bg-zinc-900 border border-yellow-900/50 rounded-xl p-4 text-center">
                 <p className="text-2xl font-bold text-yellow-400">{stats.submitted}</p>
-                <p className="text-xs text-gray-400 mt-1">Submitted</p>
+                <p className="text-xs text-zinc-400 mt-1">Submitted</p>
               </div>
-              <div className="bg-gray-900 border border-blue-900/50 rounded-xl p-4 text-center">
-                <p className="text-2xl font-bold text-blue-400">{stats.active}</p>
-                <p className="text-xs text-gray-400 mt-1">Active</p>
+              <div className="bg-zinc-900 border border-violet-900/50 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-violet-400">{stats.active}</p>
+                <p className="text-xs text-zinc-400 mt-1">Active</p>
               </div>
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-                <p className="text-2xl font-bold text-gray-400">{stats.completed}</p>
-                <p className="text-xs text-gray-400 mt-1">Completed</p>
+              <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-zinc-400">{stats.completed}</p>
+                <p className="text-xs text-zinc-400 mt-1">Completed</p>
               </div>
             </div>
 
@@ -317,7 +317,7 @@ export default function AdminPage() {
                 placeholder="Search by name..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]"
+                className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
               />
               <div className="flex gap-2 flex-wrap">
                 {STATUS_OPTIONS.map((s) => (
@@ -326,8 +326,8 @@ export default function AdminPage() {
                     onClick={() => setStatusFilter(s)}
                     className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize transition-colors ${
                       statusFilter === s
-                        ? 'bg-[#1a4d2e] text-white'
-                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                        ? 'bg-[#fbbf24] text-[#0a0a0a]'
+                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
                     }`}
                   >
                     {s}
@@ -338,17 +338,17 @@ export default function AdminPage() {
 
             {/* Customer Management Header */}
             <div className="mb-4">
-              <h2 className="text-lg font-bold text-[#d4af37]">Customer Management</h2>
-              <p className="text-sm text-gray-400">
+              <h2 className="text-lg font-bold text-[#fbbf24]">Customer Management</h2>
+              <p className="text-sm text-zinc-400">
                 Manage customers, communications, and their status in the bail bond process.
               </p>
             </div>
 
             {/* Case Cards */}
             {loading ? (
-              <p className="text-gray-400">Loading cases...</p>
+              <p className="text-zinc-400">Loading cases...</p>
             ) : filtered.length === 0 ? (
-              <p className="text-gray-400">No cases match your criteria.</p>
+              <p className="text-zinc-400">No cases match your criteria.</p>
             ) : (
               <div className="space-y-3">
                 {filtered.map((app) => {
@@ -357,7 +357,7 @@ export default function AdminPage() {
                   <a
                     key={app.id}
                     href={`/admin/case/${app.id}`}
-                    className={`block bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-gray-600 hover:bg-gray-900/80 transition-colors ${
+                    className={`block bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 hover:bg-zinc-900/80 transition-colors ${
                       needsAttention ? 'border-l-2 border-l-orange-500' : ''
                     }`}
                   >
@@ -379,7 +379,7 @@ export default function AdminPage() {
                             </span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-x-3 text-xs text-gray-500 mt-0.5">
+                        <div className="flex flex-wrap gap-x-3 text-xs text-zinc-500 mt-0.5">
                           {app.county && <span>County: {app.county}</span>}
                           {!app.county && app.court_name && <span>{app.court_name}</span>}
                           {app.bond_date && (
@@ -439,7 +439,7 @@ export default function AdminPage() {
                               </span>
                             )}
                           </div>
-                          <div className="flex flex-wrap gap-x-2 text-xs text-gray-500 mt-0.5">
+                          <div className="flex flex-wrap gap-x-2 text-xs text-zinc-500 mt-0.5">
                             {app.county && <span>{app.county}</span>}
                             {app.bond_amount && (
                               <span>${Number(app.bond_amount).toLocaleString()}</span>
@@ -469,7 +469,7 @@ export default function AdminPage() {
             <div className="sticky top-6">
               {/* Powers Header */}
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#d4af37]">Powers</h2>
+                <h2 className="text-lg font-bold text-[#fbbf24]">Powers</h2>
                 <button
                   onClick={() => {
                     setShowPowerModal(true);
@@ -477,7 +477,7 @@ export default function AdminPage() {
                     setAddError('');
                     setExtractError('');
                   }}
-                  className="bg-[#d4af37] text-[#0a0a0a] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#e5c55a] transition-colors"
+                  className="bg-[#fbbf24] text-[#0a0a0a] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#fcd34d] transition-colors"
                 >
                   + Load Power
                 </button>
@@ -485,17 +485,17 @@ export default function AdminPage() {
 
               {/* Power Stats */}
               <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
                   <p className="text-xl font-bold text-white">{powerStats.total}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Total</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">Total</p>
                 </div>
-                <div className="bg-gray-900 border border-green-900/50 rounded-xl p-3 text-center">
+                <div className="bg-zinc-900 border border-green-900/50 rounded-xl p-3 text-center">
                   <p className="text-xl font-bold text-green-400">{powerStats.open}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Open</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">Open</p>
                 </div>
-                <div className="bg-gray-900 border border-blue-900/50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-blue-400">{powerStats.active}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Active</p>
+                <div className="bg-zinc-900 border border-violet-900/50 rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-violet-400">{powerStats.active}</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">Active</p>
                 </div>
               </div>
 
@@ -506,7 +506,7 @@ export default function AdminPage() {
                   placeholder="Search powers..."
                   value={powerSearch}
                   onChange={(e) => setPowerSearch(e.target.value)}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]"
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
                 />
                 <div className="flex gap-2">
                   {POWER_STATUS_FILTERS.map((s) => (
@@ -515,8 +515,8 @@ export default function AdminPage() {
                       onClick={() => setPowerStatusFilter(s)}
                       className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
                         powerStatusFilter === s
-                          ? 'bg-[#1a4d2e] text-white'
-                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                          ? 'bg-[#fbbf24] text-[#0a0a0a]'
+                          : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
                       }`}
                     >
                       {s}
@@ -528,21 +528,21 @@ export default function AdminPage() {
               {/* Powers List */}
               <div className="max-h-[calc(100vh-340px)] overflow-y-auto space-y-2 pr-1">
                 {powersLoading ? (
-                  <p className="text-gray-400 text-sm">Loading powers...</p>
+                  <p className="text-zinc-400 text-sm">Loading powers...</p>
                 ) : filteredPowers.length === 0 ? (
-                  <p className="text-gray-400 text-sm">No powers found.</p>
+                  <p className="text-zinc-400 text-sm">No powers found.</p>
                 ) : (
                   filteredPowers.map((p) => (
                     <div
                       key={p.id}
-                      className="bg-gray-900 border border-gray-800 rounded-xl p-3 flex items-center gap-3 hover:border-gray-600 transition-colors"
+                      className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex items-center gap-3 hover:border-zinc-600 transition-colors"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-bold text-sm text-white">
                             {p.power_number}
                           </p>
-                          <span className="text-xs text-gray-400 truncate">{p.surety}</span>
+                          <span className="text-xs text-zinc-400 truncate">{p.surety}</span>
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${powerStatusBadge(p.status)}`}
                           >
@@ -552,7 +552,7 @@ export default function AdminPage() {
                         {p.status === 'active' && p.defendant_name && (
                           <a
                             href={`/admin/case/${p.application_id}`}
-                            className="text-xs text-blue-400 hover:text-blue-300 mt-0.5 inline-block"
+                            className="text-xs text-violet-400 hover:text-violet-300 mt-0.5 inline-block"
                           >
                             {p.defendant_name}
                           </a>
@@ -569,7 +569,7 @@ export default function AdminPage() {
                       {p.status === 'open' && (
                         <button
                           onClick={() => voidPower(p.id)}
-                          className="text-[10px] text-gray-500 hover:text-red-400 transition-colors"
+                          className="text-[10px] text-zinc-500 hover:text-red-400 transition-colors"
                         >
                           Void
                         </button>
@@ -590,7 +590,7 @@ export default function AdminPage() {
           onClick={() => setShowNewCase(false)}
         >
           <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-sm"
+            className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-sm"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-white mb-4">New Case</h3>
@@ -601,7 +601,7 @@ export default function AdminPage() {
                 value={newFirst}
                 onChange={(e) => setNewFirst(e.target.value)}
                 autoFocus
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
               />
               <input
                 type="text"
@@ -609,20 +609,20 @@ export default function AdminPage() {
                 value={newLast}
                 onChange={(e) => setNewLast(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && createCase()}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
               />
             </div>
             <div className="flex gap-3 mt-5">
               <button
                 onClick={() => setShowNewCase(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm"
+                className="flex-1 px-4 py-2.5 border border-zinc-700 rounded-lg text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={createCase}
                 disabled={creating || !newFirst.trim() || !newLast.trim()}
-                className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e5c55a] transition-colors text-sm disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-[#fbbf24] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#fcd34d] transition-colors text-sm disabled:opacity-50"
               >
                 {creating ? 'Creating...' : 'Create'}
               </button>
@@ -638,7 +638,7 @@ export default function AdminPage() {
           onClick={() => setShowPowerModal(false)}
         >
           <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md"
+            className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-white mb-4">Load Power</h3>
@@ -646,11 +646,11 @@ export default function AdminPage() {
             {/* Document Scanner */}
             <label className={`block border-2 border-dashed rounded-xl p-4 mb-4 text-center cursor-pointer transition-colors ${
               extracting
-                ? 'border-[#d4af37]/50 bg-[#d4af37]/5'
-                : 'border-gray-700 hover:border-gray-500'
+                ? 'border-[#fbbf24]/50 bg-[#fbbf24]/5'
+                : 'border-zinc-700 hover:border-zinc-500'
             }`}>
               {extracting ? (
-                <div className="flex items-center justify-center gap-2 text-[#d4af37]">
+                <div className="flex items-center justify-center gap-2 text-[#fbbf24]">
                   <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
@@ -659,8 +659,8 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <>
-                  <p className="text-sm text-gray-400">Upload power document to auto-fill</p>
-                  <p className="text-xs text-gray-600 mt-1">Photo or PDF</p>
+                  <p className="text-sm text-zinc-400">Upload power document to auto-fill</p>
+                  <p className="text-xs text-zinc-600 mt-1">Photo or PDF</p>
                 </>
               )}
               <input
@@ -686,7 +686,7 @@ export default function AdminPage() {
                 value={newNumber}
                 onChange={(e) => setNewNumber(e.target.value)}
                 autoFocus
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
               />
               <input
                 type="number"
@@ -694,7 +694,7 @@ export default function AdminPage() {
                 placeholder="Amount"
                 value={newAmount}
                 onChange={(e) => setNewAmount(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
               />
               <input
                 type="text"
@@ -702,7 +702,7 @@ export default function AdminPage() {
                 value={newSurety}
                 onChange={(e) => setNewSurety(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addPower()}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
               />
             </div>
             {addError && (
@@ -711,7 +711,7 @@ export default function AdminPage() {
             <div className="flex gap-3 mt-5">
               <button
                 onClick={() => setShowPowerModal(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm"
+                className="flex-1 px-4 py-2.5 border border-zinc-700 rounded-lg text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors text-sm"
               >
                 Done
               </button>
@@ -723,7 +723,7 @@ export default function AdminPage() {
                   !newAmount.trim() ||
                   !newSurety.trim()
                 }
-                className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e5c55a] transition-colors text-sm disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-[#fbbf24] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#fcd34d] transition-colors text-sm disabled:opacity-50"
               >
                 {adding ? 'Adding...' : 'Add'}
               </button>
@@ -731,18 +731,18 @@ export default function AdminPage() {
 
             {/* Recently added */}
             {recentlyAdded.length > 0 && (
-              <div className="mt-4 border-t border-gray-800 pt-3">
-                <p className="text-xs text-gray-500 mb-2">Just added:</p>
+              <div className="mt-4 border-t border-zinc-800 pt-3">
+                <p className="text-xs text-zinc-500 mb-2">Just added:</p>
                 <div className="space-y-1">
                   {recentlyAdded.map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between text-xs bg-gray-800/50 rounded-lg px-3 py-2"
+                      className="flex items-center justify-between text-xs bg-zinc-800/50 rounded-lg px-3 py-2"
                     >
                       <span className="text-white font-medium">
                         {p.power_number}
                       </span>
-                      <span className="text-gray-400">{p.surety}</span>
+                      <span className="text-zinc-400">{p.surety}</span>
                       <span className="text-teal-400 font-bold">
                         ${Number(p.amount).toLocaleString('en-US', {
                           minimumFractionDigits: 2,

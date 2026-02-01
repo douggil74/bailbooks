@@ -120,7 +120,7 @@ export default function OverviewTab({
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <FinanceCard label="Bond Amount" amount={application.bond_amount} colorClass="bg-green-900/30 border-green-800 text-green-400" />
         <FinanceCard label="Total Due" amount={totalDue || null} colorClass="bg-teal-900/30 border-teal-800 text-teal-400" />
-        <FinanceCard label="Premium" amount={premNum} colorClass="bg-gray-800 border-gray-700 text-gray-300" />
+        <FinanceCard label="Premium" amount={premNum} colorClass="bg-zinc-800 border-zinc-700 text-zinc-300" />
         <FinanceCard label="Amount Paid" amount={amountPaid || null} colorClass="bg-orange-900/30 border-orange-800 text-orange-400" />
         <FinanceCard label="Balance" amount={balance || null} colorClass="bg-red-900/30 border-red-800 text-red-400" />
       </div>
@@ -129,7 +129,7 @@ export default function OverviewTab({
       <div className={`rounded-xl border p-4 flex items-center gap-3 ${
         allComplete
           ? 'bg-green-900/20 border-green-800 text-green-400'
-          : 'bg-red-900/20 border-red-800 text-red-400'
+          : 'bg-amber-900/20 border-amber-800 text-amber-400'
       }`}>
         <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {allComplete ? (
@@ -151,10 +151,10 @@ export default function OverviewTab({
       </div>
 
       {/* Activity Checklist */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#d4af37]">Overview</h2>
-          <span className="text-xs text-gray-500">{completedCount}/{checklist.length} complete</span>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Overview</h2>
+          <span className="text-xs text-zinc-500">{completedCount}/{checklist.length} complete</span>
         </div>
         <div className="space-y-3">
           {checklist.map((item) => (
@@ -163,7 +163,7 @@ export default function OverviewTab({
               className={`rounded-lg border p-4 flex items-center justify-between gap-4 ${
                 item.complete
                   ? 'bg-green-900/10 border-green-900/30'
-                  : 'bg-red-900/10 border-red-900/30'
+                  : 'bg-amber-900/10 border-amber-900/30'
               }`}
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -172,22 +172,22 @@ export default function OverviewTab({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 ) : (
-                  <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" strokeWidth={2} />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h8" />
                   </svg>
                 )}
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-white">{item.label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">{item.description}</p>
                 </div>
               </div>
               <button
                 onClick={() => onNavigateTab(item.targetTab)}
                 className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
                   item.complete
-                    ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-300'
-                    : 'bg-[#d4af37] text-gray-900 hover:bg-[#e5c55a]'
+                    ? 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300'
+                    : 'bg-[#fbbf24] text-zinc-900 hover:bg-[#fcd34d]'
                 }`}
               >
                 {item.actionLabel}

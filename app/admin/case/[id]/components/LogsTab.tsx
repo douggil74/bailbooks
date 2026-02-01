@@ -63,7 +63,7 @@ function buildTimeline(
     type: 'created',
     title: 'Application created',
     detail: `${app.defendant_first} ${app.defendant_last} — status: ${app.status}`,
-    color: 'bg-gray-500',
+    color: 'bg-zinc-500',
   });
 
   for (const sig of signatures) {
@@ -84,7 +84,7 @@ function buildTimeline(
       type: 'document',
       title: 'Document uploaded',
       detail: doc.doc_type.replace(/_/g, ' '),
-      color: 'bg-gray-400',
+      color: 'bg-zinc-400',
     });
   }
 
@@ -122,7 +122,7 @@ function buildTimeline(
       type: sms.direction === 'outbound' ? 'sms_out' : 'sms_in',
       title: sms.direction === 'outbound' ? 'SMS sent' : 'SMS received',
       detail: sms.message || '(no content)',
-      color: sms.direction === 'outbound' ? 'bg-[#1a4d2e]' : 'bg-orange-500',
+      color: sms.direction === 'outbound' ? 'bg-[#18181b]' : 'bg-orange-500',
     });
   }
 
@@ -163,7 +163,7 @@ export default function LogsTab({
           <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setSelfieLightbox(null)}
-              className="absolute -top-10 right-0 text-gray-400 hover:text-white text-sm"
+              className="absolute -top-10 right-0 text-zinc-400 hover:text-white text-sm"
             >
               Close
             </button>
@@ -173,13 +173,13 @@ export default function LogsTab({
       )}
 
       {/* Check-in Schedule */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#d4af37]">Check-in Schedule & History</h2>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Check-in Schedule & History</h2>
           <button
             onClick={onSendCheckin}
             disabled={checkinSending}
-            className="bg-[#1a4d2e] text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#256b3e] transition-colors disabled:opacity-50"
+            className="bg-[#fbbf24] text-[#0a0a0a] text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors disabled:opacity-50"
           >
             {checkinSending ? 'Sending...' : 'Send Check-in Now'}
           </button>
@@ -187,26 +187,26 @@ export default function LogsTab({
 
         <div className="flex flex-wrap gap-6 text-sm mb-4">
           <div>
-            <span className="text-gray-500">Frequency:</span>{' '}
+            <span className="text-zinc-500">Frequency:</span>{' '}
             <span className="capitalize font-semibold">{application.checkin_frequency || '—'}</span>
           </div>
           <div>
-            <span className="text-gray-500">Next Due:</span>{' '}
+            <span className="text-zinc-500">Next Due:</span>{' '}
             <span className="font-semibold">{nextCheckinDate(checkins, application.checkin_frequency)}</span>
           </div>
           <div>
-            <span className="text-gray-500">Total Check-ins:</span>{' '}
+            <span className="text-zinc-500">Total Check-ins:</span>{' '}
             <span className="font-semibold">{checkins.length}</span>
           </div>
         </div>
 
         {checkins.length === 0 ? (
-          <p className="text-sm text-gray-500">No check-ins recorded yet.</p>
+          <p className="text-sm text-zinc-500">No check-ins recorded yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-500 uppercase border-b border-gray-800">
+                <tr className="text-xs text-zinc-500 uppercase border-b border-zinc-800">
                   <th className="text-left py-2 pr-4">Date / Time</th>
                   <th className="text-left py-2 pr-4">Location</th>
                   <th className="text-left py-2 pr-4">Accuracy</th>
@@ -217,26 +217,26 @@ export default function LogsTab({
               </thead>
               <tbody>
                 {checkins.map((ci) => (
-                  <tr key={ci.id} className="border-b border-gray-800/50">
-                    <td className="py-2 pr-4 text-gray-300">{formatDateTime(ci.checked_in_at)}</td>
-                    <td className="py-2 pr-4 text-gray-400 font-mono text-xs">
+                  <tr key={ci.id} className="border-b border-zinc-800/50">
+                    <td className="py-2 pr-4 text-zinc-300">{formatDateTime(ci.checked_in_at)}</td>
+                    <td className="py-2 pr-4 text-zinc-400 font-mono text-xs">
                       {ci.latitude && ci.longitude ? `${ci.latitude.toFixed(4)}, ${ci.longitude.toFixed(4)}` : '—'}
                     </td>
-                    <td className="py-2 pr-4 text-gray-400">{ci.accuracy ? `${ci.accuracy.toFixed(0)}m` : '—'}</td>
+                    <td className="py-2 pr-4 text-zinc-400">{ci.accuracy ? `${ci.accuracy.toFixed(0)}m` : '—'}</td>
                     <td className="py-2 pr-4">
                       {ci.selfie_url ? (
                         <button onClick={() => setSelfieLightbox(ci.selfie_url)}>
                           <img
                             src={ci.selfie_url}
                             alt="Selfie"
-                            className="w-8 h-8 rounded-full object-cover border border-gray-700 hover:border-[#d4af37] transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-full object-cover border border-zinc-700 hover:border-[#fbbf24] transition-colors cursor-pointer"
                           />
                         </button>
                       ) : (
-                        <span className="text-gray-600 text-xs">—</span>
+                        <span className="text-zinc-600 text-xs">—</span>
                       )}
                     </td>
-                    <td className="py-2 pr-4 text-gray-400 capitalize">{ci.method?.replace(/_/g, ' ') || '—'}</td>
+                    <td className="py-2 pr-4 text-zinc-400 capitalize">{ci.method?.replace(/_/g, ' ') || '—'}</td>
                     <td className={`py-2 font-semibold ${ci.latitude && ci.longitude ? 'text-green-400' : 'text-yellow-400'}`}>
                       {ci.latitude && ci.longitude ? 'Responded' : 'Pending'}
                     </td>
@@ -249,15 +249,15 @@ export default function LogsTab({
       </div>
 
       {/* Reminders Sent */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">Reminders Sent</h2>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <h2 className="text-lg font-bold text-[#fbbf24] mb-4">Reminders Sent</h2>
         {reminders_sent.length === 0 ? (
-          <p className="text-sm text-gray-500">No reminders sent yet.</p>
+          <p className="text-sm text-zinc-500">No reminders sent yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-500 uppercase border-b border-gray-800">
+                <tr className="text-xs text-zinc-500 uppercase border-b border-zinc-800">
                   <th className="text-left py-2 pr-4">Date</th>
                   <th className="text-left py-2 pr-4">Type</th>
                   <th className="text-left py-2">Channel</th>
@@ -265,10 +265,10 @@ export default function LogsTab({
               </thead>
               <tbody>
                 {reminders_sent.map((rem) => (
-                  <tr key={rem.id} className="border-b border-gray-800/50">
-                    <td className="py-2 pr-4 text-gray-300">{formatDateTime(rem.sent_at)}</td>
-                    <td className="py-2 pr-4 text-gray-400">{rem.reminder_type}</td>
-                    <td className="py-2 text-gray-400 capitalize">{rem.channel}</td>
+                  <tr key={rem.id} className="border-b border-zinc-800/50">
+                    <td className="py-2 pr-4 text-zinc-300">{formatDateTime(rem.sent_at)}</td>
+                    <td className="py-2 pr-4 text-zinc-400">{rem.reminder_type}</td>
+                    <td className="py-2 text-zinc-400 capitalize">{rem.channel}</td>
                   </tr>
                 ))}
               </tbody>
@@ -278,26 +278,26 @@ export default function LogsTab({
       </div>
 
       {/* Activity Timeline */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">Activity Log</h2>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <h2 className="text-lg font-bold text-[#fbbf24] mb-4">Activity Log</h2>
         {timeline.length === 0 ? (
-          <p className="text-sm text-gray-500">No activity recorded.</p>
+          <p className="text-sm text-zinc-500">No activity recorded.</p>
         ) : (
           <div className="relative">
-            <div className="absolute left-[7px] top-3 bottom-3 w-px bg-gray-800" />
+            <div className="absolute left-[7px] top-3 bottom-3 w-px bg-zinc-800" />
             <div className="space-y-4">
               {timeline.map((ev) => (
                 <div key={ev.id} className="flex gap-4 relative">
-                  <div className={`w-[15px] h-[15px] rounded-full flex-shrink-0 mt-0.5 ${ev.color} ring-2 ring-gray-900`} />
+                  <div className={`w-[15px] h-[15px] rounded-full flex-shrink-0 mt-0.5 ${ev.color} ring-2 ring-zinc-900`} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <p className="text-sm font-semibold text-white">{ev.title}</p>
-                      <time className="text-xs text-gray-600" title={formatDateTime(ev.timestamp)}>
+                      <time className="text-xs text-zinc-600" title={formatDateTime(ev.timestamp)}>
                         {relativeTime(ev.timestamp)}
                       </time>
                     </div>
-                    <p className="text-sm text-gray-400 mt-0.5 break-words">{ev.detail}</p>
-                    <p className="text-xs text-gray-700 mt-0.5">{formatDateTime(ev.timestamp)}</p>
+                    <p className="text-sm text-zinc-400 mt-0.5 break-words">{ev.detail}</p>
+                    <p className="text-xs text-zinc-700 mt-0.5">{formatDateTime(ev.timestamp)}</p>
                   </div>
                 </div>
               ))}
@@ -307,10 +307,10 @@ export default function LogsTab({
       </div>
 
       {/* SMS Log */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">SMS Log</h2>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <h2 className="text-lg font-bold text-[#fbbf24] mb-4">SMS Log</h2>
         {sms_log.length === 0 ? (
-          <p className="text-sm text-gray-500">No SMS messages recorded.</p>
+          <p className="text-sm text-zinc-500">No SMS messages recorded.</p>
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {sms_log.map((sms) => (
@@ -318,18 +318,18 @@ export default function LogsTab({
                 key={sms.id}
                 className={`rounded-lg p-3 text-sm ${
                   sms.direction === 'outbound'
-                    ? 'bg-[#1a4d2e]/30 border border-green-900/50 ml-8'
-                    : 'bg-gray-800 border border-gray-700 mr-8'
+                    ? 'bg-[#18181b]/30 border border-green-900/50 ml-8'
+                    : 'bg-zinc-800 border border-zinc-700 mr-8'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-gray-400 capitalize">
+                  <span className="text-xs font-semibold text-zinc-400 capitalize">
                     {sms.direction === 'outbound' ? 'Sent' : 'Received'} — {sms.phone}
                   </span>
-                  <span className="text-xs text-gray-600">{formatDateTime(sms.sent_at)}</span>
+                  <span className="text-xs text-zinc-600">{formatDateTime(sms.sent_at)}</span>
                 </div>
-                <p className="text-gray-300">{sms.message || '(no content)'}</p>
-                {sms.status && <p className="text-xs text-gray-600 mt-1">Status: {sms.status}</p>}
+                <p className="text-zinc-300">{sms.message || '(no content)'}</p>
+                {sms.status && <p className="text-xs text-zinc-600 mt-1">Status: {sms.status}</p>}
               </div>
             ))}
           </div>

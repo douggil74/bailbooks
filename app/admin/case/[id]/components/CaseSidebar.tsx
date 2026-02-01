@@ -38,46 +38,46 @@ export default function CaseSidebar({
       <div className="hidden lg:block w-56 flex-shrink-0 self-start sticky top-4 space-y-3">
         {/* Defendant identity card */}
         {defendantName && (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <div className="flex flex-col items-center text-center">
               {selfieUrl ? (
                 <img
                   src={selfieUrl}
                   alt={defendantName}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-700 mb-3"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-zinc-700 mb-3"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center mb-3">
-                  <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center mb-3">
+                  <svg className="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               )}
               <p className="font-bold text-white text-sm leading-tight">{defendantName}</p>
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-800 space-y-2">
+            <div className="mt-3 pt-3 border-t border-zinc-800 space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-gray-500">DOB</span>
-                <span className="text-gray-300">{formatDob(defendantDob)}</span>
+                <span className="text-zinc-500">DOB</span>
+                <span className="text-zinc-300">{formatDob(defendantDob)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-gray-500">Phone</span>
-                <span className="text-gray-300">{defendantPhone || '\u2014'}</span>
+                <span className="text-zinc-500">Phone</span>
+                <span className="text-zinc-300">{defendantPhone || '\u2014'}</span>
               </div>
             </div>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="bg-gray-900 border border-gray-800 rounded-xl p-2">
+        <nav className="bg-zinc-900 border border-zinc-800 rounded-xl p-2">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-gray-800 text-[#d4af37] border-l-2 border-[#d4af37]'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                  ? 'bg-zinc-800 text-[#fbbf24] border-l-2 border-[#fbbf24]'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
               }`}
             >
               <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@ export default function CaseSidebar({
       </div>
 
       {/* Mobile horizontal tabs */}
-      <div className="lg:hidden overflow-x-auto -mx-4 px-4 mb-4 sticky top-0 z-30 bg-gray-950 pb-2 pt-2 border-b border-gray-800/50">
+      <div className="lg:hidden overflow-x-auto -mx-4 px-4 mb-4 sticky top-0 z-30 bg-zinc-950 pb-2 pt-2 border-b border-zinc-800/50">
         <div className="flex gap-1 min-w-max">
           {TABS.map((tab) => (
             <button
@@ -98,8 +98,8 @@ export default function CaseSidebar({
               onClick={() => onTabChange(tab.id)}
               className={`px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-gray-800 text-[#d4af37] border-b-2 border-[#d4af37]'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                  ? 'bg-zinc-800 text-[#fbbf24] border-b-2 border-[#fbbf24]'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
               }`}
             >
               {tab.label}

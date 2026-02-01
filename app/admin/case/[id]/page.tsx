@@ -168,9 +168,9 @@ function statusBadge(status: string) {
   const styles: Record<string, string> = {
     submitted: 'bg-yellow-900 text-yellow-300',
     approved: 'bg-green-900 text-green-300',
-    active: 'bg-blue-900 text-blue-300',
-    completed: 'bg-gray-700 text-gray-300',
-    draft: 'bg-gray-800 text-gray-400',
+    active: 'bg-violet-900 text-violet-300',
+    completed: 'bg-zinc-700 text-zinc-300',
+    draft: 'bg-zinc-800 text-zinc-400',
   };
   return styles[status] || styles.draft;
 }
@@ -532,18 +532,18 @@ export default function CaseDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <p className="text-gray-400">Loading case...</p>
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+        <p className="text-zinc-400">Loading case...</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 mb-4">{error || 'Case not found'}</p>
-          <a href="/admin" className="text-[#d4af37] underline">Back to cases</a>
+          <a href="/admin" className="text-[#fbbf24] underline">Back to cases</a>
         </div>
       </div>
     );
@@ -575,7 +575,7 @@ export default function CaseDetailPage() {
     return (
       <button
         onClick={backToOverview}
-        className="w-full flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-[#d4af37]/10 border border-[#d4af37]/30 text-[#d4af37] text-sm font-semibold hover:bg-[#d4af37]/20 transition-colors"
+        className="w-full flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-[#fbbf24]/10 border border-[#fbbf24]/30 text-[#fbbf24] text-sm font-semibold hover:bg-[#fbbf24]/20 transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -702,7 +702,7 @@ export default function CaseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-zinc-950 text-white">
       {/* Lightbox */}
       {lightboxUrl && (
         <div
@@ -712,12 +712,12 @@ export default function CaseDetailPage() {
           <div className="relative max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setLightboxUrl(null)}
-              className="absolute -top-10 right-0 text-gray-400 hover:text-white text-sm"
+              className="absolute -top-10 right-0 text-zinc-400 hover:text-white text-sm"
             >
               Close
             </button>
             <img src={lightboxUrl} alt={lightboxLabel} className="w-full rounded-lg shadow-2xl" />
-            <p className="text-center text-sm text-gray-400 mt-3 capitalize">{lightboxLabel}</p>
+            <p className="text-center text-sm text-zinc-400 mt-3 capitalize">{lightboxLabel}</p>
           </div>
         </div>
       )}
@@ -726,7 +726,7 @@ export default function CaseDetailPage() {
       {showWizard && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-center gap-2 mb-5">
@@ -734,17 +734,17 @@ export default function CaseDetailPage() {
                 <div
                   key={i}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    i === wizardStep ? 'bg-[#d4af37]' : i < wizardStep ? 'bg-[#d4af37]/40' : 'bg-gray-700'
+                    i === wizardStep ? 'bg-[#fbbf24]' : i < wizardStep ? 'bg-[#fbbf24]/40' : 'bg-zinc-700'
                   }`}
                 />
               ))}
             </div>
             <h3 className="text-lg font-bold text-white mb-1">{currentWizardStep.title}</h3>
-            <p className="text-sm text-gray-400 mb-5">{currentWizardStep.description}</p>
+            <p className="text-sm text-zinc-400 mb-5">{currentWizardStep.description}</p>
             <div className="space-y-3">
               {currentWizardStep.type === 'fields' && currentWizardStep.fields.map((f, i) => (
                 <div key={f.key}>
-                  <label className="block text-xs text-gray-400 mb-1">{f.label}</label>
+                  <label className="block text-xs text-zinc-400 mb-1">{f.label}</label>
                   <input
                     type={f.type || 'text'}
                     value={caseInfo[f.key]}
@@ -752,28 +752,28 @@ export default function CaseDetailPage() {
                     placeholder={f.placeholder}
                     autoFocus={i === 0}
                     onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
                   />
                 </div>
               ))}
               {currentWizardStep.type === 'uploads' && currentWizardStep.uploads.map((u) => (
                 <div key={u.docType} className="flex items-center gap-3">
-                  <label className="flex-1 flex items-center gap-3 bg-gray-800 border border-gray-700 rounded-lg px-3 py-3 cursor-pointer hover:border-gray-500 transition-colors">
+                  <label className="flex-1 flex items-center gap-3 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-3 cursor-pointer hover:border-zinc-500 transition-colors">
                     {uploadedDocs[u.docType] ? (
                       <svg className="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                       </svg>
                     ) : uploading === u.docType ? (
-                      <svg className="w-5 h-5 text-[#d4af37] shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-[#fbbf24] shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-zinc-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     )}
-                    <span className={`text-sm ${uploadedDocs[u.docType] ? 'text-green-400' : 'text-gray-300'}`}>
+                    <span className={`text-sm ${uploadedDocs[u.docType] ? 'text-green-400' : 'text-zinc-300'}`}>
                       {uploadedDocs[u.docType] ? `${u.label} ✓` : u.label}
                     </span>
                     <input
@@ -791,26 +791,26 @@ export default function CaseDetailPage() {
               ))}
               {currentWizardStep.type === 'consent' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-4 py-3">
+                  <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3">
                     <div>
                       <p className="text-sm text-white font-medium">SMS Consent</p>
-                      <p className="text-xs text-gray-500">Allow text messages for reminders & check-ins</p>
+                      <p className="text-xs text-zinc-500">Allow text messages for reminders & check-ins</p>
                     </div>
                     <button
                       onClick={() => saveField({ sms_consent: !data?.application.sms_consent })}
-                      className={`relative w-11 h-6 rounded-full transition-colors ${data?.application.sms_consent ? 'bg-green-600' : 'bg-gray-600'}`}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${data?.application.sms_consent ? 'bg-green-600' : 'bg-zinc-600'}`}
                     >
                       <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${data?.application.sms_consent ? 'translate-x-5' : ''}`} />
                     </button>
                   </div>
-                  <div className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-4 py-3">
+                  <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3">
                     <div>
                       <p className="text-sm text-white font-medium">GPS Consent</p>
-                      <p className="text-xs text-gray-500">Allow GPS location tracking for check-ins</p>
+                      <p className="text-xs text-zinc-500">Allow GPS location tracking for check-ins</p>
                     </div>
                     <button
                       onClick={() => saveField({ gps_consent: !data?.application.gps_consent })}
-                      className={`relative w-11 h-6 rounded-full transition-colors ${data?.application.gps_consent ? 'bg-green-600' : 'bg-gray-600'}`}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${data?.application.gps_consent ? 'bg-green-600' : 'bg-zinc-600'}`}
                     >
                       <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${data?.application.gps_consent ? 'translate-x-5' : ''}`} />
                     </button>
@@ -825,52 +825,52 @@ export default function CaseDetailPage() {
                     </div>
                   )}
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">First Name</label>
+                    <label className="block text-xs text-zinc-400 mb-1">First Name</label>
                     <input
                       type="text"
                       value={indemnitorFirst}
                       onChange={(e) => setIndemnitorFirst(e.target.value)}
                       placeholder="First name"
                       autoFocus
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Last Name</label>
+                    <label className="block text-xs text-zinc-400 mb-1">Last Name</label>
                     <input
                       type="text"
                       value={indemnitorLast}
                       onChange={(e) => setIndemnitorLast(e.target.value)}
                       placeholder="Last name"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Phone</label>
+                    <label className="block text-xs text-zinc-400 mb-1">Phone</label>
                     <input
                       type="tel"
                       value={indemnitorPhone}
                       onChange={(e) => setIndemnitorPhone(e.target.value)}
                       placeholder="(985) 555-1234"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Email</label>
+                    <label className="block text-xs text-zinc-400 mb-1">Email</label>
                     <input
                       type="email"
                       value={indemnitorEmail}
                       onChange={(e) => setIndemnitorEmail(e.target.value)}
                       placeholder="name@example.com"
                       onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
                     />
                   </div>
 
                   {/* Information to Collect */}
-                  <div className="border-t border-gray-700 pt-4 mt-4">
-                    <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Information to Collect</p>
-                    <p className="text-xs text-gray-500 mb-3">What should the co-signer provide?</p>
+                  <div className="border-t border-zinc-700 pt-4 mt-4">
+                    <p className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1">Information to Collect</p>
+                    <p className="text-xs text-zinc-500 mb-3">What should the co-signer provide?</p>
                     <div className="space-y-2">
                       {([
                         { key: 'personal', label: 'Personal Details', desc: 'DOB, SSN, DL#' },
@@ -879,15 +879,15 @@ export default function CaseDetailPage() {
                         { key: 'employer', label: 'Current Employer', desc: 'Name, phone' },
                         { key: 'id_photos', label: 'ID & Photos', desc: 'DL front/back, selfie' },
                       ] as const).map((cat) => (
-                        <div key={cat.key} className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5">
+                        <div key={cat.key} className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5">
                           <div>
                             <p className="text-sm text-white">{cat.label}</p>
-                            <p className="text-xs text-gray-500">{cat.desc}</p>
+                            <p className="text-xs text-zinc-500">{cat.desc}</p>
                           </div>
                           <button
                             type="button"
                             onClick={() => setInfoCategories((prev) => ({ ...prev, [cat.key]: !prev[cat.key] }))}
-                            className={`relative w-11 h-6 rounded-full transition-colors ${infoCategories[cat.key] ? 'bg-[#d4af37]' : 'bg-gray-600'}`}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${infoCategories[cat.key] ? 'bg-[#fbbf24]' : 'bg-zinc-600'}`}
                           >
                             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${infoCategories[cat.key] ? 'translate-x-5' : ''}`} />
                           </button>
@@ -895,8 +895,8 @@ export default function CaseDetailPage() {
                       ))}
                     </div>
                     <div className="mt-3 space-y-1">
-                      <p className="text-xs text-gray-500">&#10003; Name &amp; contact &mdash; always required</p>
-                      <p className="text-xs text-gray-500">&#10003; Signature &mdash; always required</p>
+                      <p className="text-xs text-zinc-500">&#10003; Name &amp; contact &mdash; always required</p>
+                      <p className="text-xs text-zinc-500">&#10003; Signature &mdash; always required</p>
                     </div>
                   </div>
                 </>
@@ -904,24 +904,24 @@ export default function CaseDetailPage() {
             </div>
             <div className="flex gap-3 mt-6">
               {wizardStep > 0 && (
-                <button onClick={wizardBack} className="px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm">
+                <button onClick={wizardBack} className="px-4 py-2.5 border border-zinc-700 rounded-lg text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors text-sm">
                   Back
                 </button>
               )}
-              <button onClick={wizardSkip} className="px-4 py-2.5 text-gray-500 hover:text-gray-300 transition-colors text-sm">
+              <button onClick={wizardSkip} className="px-4 py-2.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
                 {isLastWizardStep ? 'Skip & Finish' : 'Skip'}
               </button>
               <button
                 onClick={wizardNext}
                 disabled={wizardSaving}
-                className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e5c55a] transition-colors text-sm disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-[#fbbf24] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#fcd34d] transition-colors text-sm disabled:opacity-50"
               >
                 {wizardSaving ? 'Saving...' : isLastWizardStep ? 'Done' : 'Next'}
               </button>
             </div>
             <button
               onClick={() => { setShowWizard(false); setWizardStep(0); }}
-              className="w-full text-center text-xs text-gray-600 hover:text-gray-400 mt-4 transition-colors"
+              className="w-full text-center text-xs text-zinc-600 hover:text-zinc-400 mt-4 transition-colors"
             >
               Fill in later
             </button>
@@ -932,15 +932,15 @@ export default function CaseDetailPage() {
       {/* Delete Confirmation */}
       {confirmDelete && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <h3 className="text-lg font-bold text-white mb-2">Delete Case</h3>
-            <p className="text-sm text-gray-400 mb-5">
+            <p className="text-sm text-zinc-400 mb-5">
               Permanently delete <strong>{app.defendant_first} {app.defendant_last}</strong> and all associated data? This cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm"
+                className="flex-1 px-4 py-2.5 border border-zinc-700 rounded-lg text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors text-sm"
               >
                 Cancel
               </button>
@@ -957,11 +957,11 @@ export default function CaseDetailPage() {
       )}
 
       {/* Header */}
-      <header className="bg-[#1a4d2e] px-6 py-4">
+      <header className="bg-[#18181b] border-b border-zinc-800 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <a href="/admin" className="flex items-center gap-2 text-sm text-green-200 hover:underline">
-              <Shield className="w-6 h-6 text-[#d4af37]" />
+            <a href="/admin" className="flex items-center gap-2 text-sm text-zinc-400 hover:underline">
+              <Shield className="w-6 h-6 text-[#fbbf24]" />
               <span>&larr; All Cases</span>
             </a>
             <div className="flex items-center gap-3">
@@ -977,7 +977,7 @@ export default function CaseDetailPage() {
             <a
               href={`/api/onboard/generate-pdf?id=${id}`}
               target="_blank"
-              className="bg-[#d4af37] text-gray-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors"
+              className="bg-[#fbbf24] text-zinc-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors"
             >
               PDF
             </a>

@@ -29,17 +29,17 @@ function statusBadgeClass(status: string) {
     case 'paid': return 'bg-green-900/60 text-green-400';
     case 'pending': return 'bg-yellow-900/60 text-yellow-400';
     case 'failed': return 'bg-red-900/60 text-red-400';
-    case 'cancelled': return 'bg-gray-700 text-gray-400';
-    default: return 'bg-gray-700 text-gray-400';
+    case 'cancelled': return 'bg-zinc-700 text-zinc-400';
+    default: return 'bg-zinc-700 text-zinc-400';
   }
 }
 
 function methodBadgeClass(method: string | null) {
   switch (method) {
-    case 'card': return 'bg-blue-900/60 text-blue-400';
+    case 'card': return 'bg-violet-900/60 text-violet-400';
     case 'cash': return 'bg-green-900/60 text-green-400';
     case 'check': return 'bg-purple-900/60 text-purple-400';
-    default: return 'bg-gray-700 text-gray-400';
+    default: return 'bg-zinc-700 text-zinc-400';
   }
 }
 
@@ -298,27 +298,27 @@ export default function FinancesTab({
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <FinanceCard label="Bond Amount" amount={bondAmount} colorClass="bg-green-900/30 border-green-800 text-green-400" />
         <FinanceCard label="Total Due" amount={totalDue || null} colorClass="bg-teal-900/30 border-teal-800 text-teal-400" />
-        <FinanceCard label="Premium" amount={premNum} colorClass="bg-gray-800 border-gray-700 text-gray-300" />
+        <FinanceCard label="Premium" amount={premNum} colorClass="bg-zinc-800 border-zinc-700 text-zinc-300" />
         <FinanceCard label="Amount Paid" amount={amountPaid || null} colorClass="bg-orange-900/30 border-orange-800 text-orange-400" />
         <FinanceCard label="Balance" amount={balance || null} colorClass="bg-red-900/30 border-red-800 text-red-400" />
       </div>
 
       {/* Agent Fields */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
-          <h2 className="text-lg font-bold text-[#d4af37]">Agent Financial Fields</h2>
+          <span className="w-6 h-6 rounded-full bg-[#fbbf24]/20 text-[#fbbf24] text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Agent Financial Fields</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Power Number</label>
+            <label className="block text-xs text-zinc-400 mb-1">Power Number</label>
             {powerLoading ? (
-              <p className="text-xs text-gray-500 py-2">Loading powers...</p>
+              <p className="text-xs text-zinc-500 py-2">Loading powers...</p>
             ) : assignedPower ? (
               <div className="flex items-center gap-2">
-                <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white">
+                <div className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
                   <span className="font-medium">{assignedPower.power_number}</span>
-                  <span className="text-gray-400 ml-2">— {assignedPower.surety} — ${Number(assignedPower.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-zinc-400 ml-2">— {assignedPower.surety} — ${Number(assignedPower.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
                 <button
                   onClick={unassignPower}
@@ -335,7 +335,7 @@ export default function FinancesTab({
                   if (e.target.value) assignPower(e.target.value);
                 }}
                 disabled={assigning || openPowers.length === 0}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24] disabled:opacity-50"
               >
                 <option value="">
                   {openPowers.length === 0 ? 'No open powers' : 'Select a power...'}
@@ -368,10 +368,10 @@ export default function FinancesTab({
       </div>
 
       {/* Payment Plan Toggle */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
-          <h2 className="text-lg font-bold text-[#d4af37]">Payment Plan</h2>
+          <span className="w-6 h-6 rounded-full bg-[#fbbf24]/20 text-[#fbbf24] text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Payment Plan</h2>
         </div>
 
         <div className="flex gap-4 mb-4">
@@ -381,9 +381,9 @@ export default function FinancesTab({
               name="paymentMode"
               checked={paymentMode === 'full'}
               onChange={() => setPaymentMode('full')}
-              className="accent-[#d4af37]"
+              className="accent-[#fbbf24]"
             />
-            <span className="text-sm text-gray-300">Pay in Full</span>
+            <span className="text-sm text-zinc-300">Pay in Full</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -391,9 +391,9 @@ export default function FinancesTab({
               name="paymentMode"
               checked={paymentMode === 'plan'}
               onChange={() => setPaymentMode('plan')}
-              className="accent-[#d4af37]"
+              className="accent-[#fbbf24]"
             />
-            <span className="text-sm text-gray-300">Pay Over Time</span>
+            <span className="text-sm text-zinc-300">Pay Over Time</span>
           </label>
         </div>
 
@@ -433,41 +433,41 @@ export default function FinancesTab({
 
             {/* Generate/Restructure Plan Form */}
             {showPlanForm && (
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                <h3 className="text-sm font-bold text-[#d4af37] mb-3">
+              <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
+                <h3 className="text-sm font-bold text-[#fbbf24] mb-3">
                   {payments.length > 0 ? 'Restructure Payment Plan' : 'Create Payment Plan'}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Total Amount ($)</label>
-                    <input type="number" value={planTotal} onChange={(e) => setPlanTotal(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37]" />
+                    <label className="block text-xs text-zinc-400 mb-1">Total Amount ($)</label>
+                    <input type="number" value={planTotal} onChange={(e) => setPlanTotal(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Down Payment ($)</label>
-                    <input type="number" value={planDown} onChange={(e) => setPlanDown(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37]" />
+                    <label className="block text-xs text-zinc-400 mb-1">Down Payment ($)</label>
+                    <input type="number" value={planDown} onChange={(e) => setPlanDown(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Per Payment ($)</label>
-                    <input type="number" value={planPayment} onChange={(e) => setPlanPayment(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37]" />
+                    <label className="block text-xs text-zinc-400 mb-1">Per Payment ($)</label>
+                    <input type="number" value={planPayment} onChange={(e) => setPlanPayment(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Frequency</label>
-                    <select value={planFreq} onChange={(e) => setPlanFreq(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37]">
+                    <label className="block text-xs text-zinc-400 mb-1">Frequency</label>
+                    <select value={planFreq} onChange={(e) => setPlanFreq(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24]">
                       <option value="weekly">Weekly</option>
                       <option value="biweekly">Biweekly</option>
                       <option value="monthly">Monthly</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Start Date</label>
-                    <input type="date" value={planStart} onChange={(e) => setPlanStart(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37]" />
+                    <label className="block text-xs text-zinc-400 mb-1">Start Date</label>
+                    <input type="date" value={planStart} onChange={(e) => setPlanStart(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3">
-                  <button onClick={createPlan} disabled={planCreating} className="bg-[#d4af37] text-gray-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors disabled:opacity-50">
+                  <button onClick={createPlan} disabled={planCreating} className="bg-[#fbbf24] text-zinc-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors disabled:opacity-50">
                     {planCreating ? 'Creating...' : 'Create Plan'}
                   </button>
-                  <button onClick={() => setShowPlanForm(false)} className="text-xs text-gray-400 hover:text-white px-3 py-2 transition-colors">Cancel</button>
+                  <button onClick={() => setShowPlanForm(false)} className="text-xs text-zinc-400 hover:text-white px-3 py-2 transition-colors">Cancel</button>
                 </div>
               </div>
             )}
@@ -477,10 +477,10 @@ export default function FinancesTab({
 
       {/* Payment Line Items */}
       {payments.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
-            <h2 className="text-lg font-bold text-[#d4af37]">Payments</h2>
+            <span className="w-6 h-6 rounded-full bg-[#fbbf24]/20 text-[#fbbf24] text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
+            <h2 className="text-lg font-bold text-[#fbbf24]">Payments</h2>
             {hasOverdue && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-900/60 text-red-400 uppercase">
                 {pendingPayments.filter(p => p.due_date && new Date(p.due_date + 'T00:00:00') < new Date()).length} overdue
@@ -501,7 +501,7 @@ export default function FinancesTab({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-500 uppercase border-b border-gray-800">
+                <tr className="text-xs text-zinc-500 uppercase border-b border-zinc-800">
                   <th className="text-left py-2 pr-4">Due Date</th>
                   <th className="text-left py-2 pr-4">Description</th>
                   <th className="text-right py-2 pr-4">Amount</th>
@@ -514,11 +514,11 @@ export default function FinancesTab({
                 {payments.map((p) => {
                   const isOverdue = p.status === 'pending' && p.due_date && new Date(p.due_date + 'T00:00:00') < new Date();
                   return (
-                    <tr key={p.id} className={`border-b border-gray-800/50 ${isOverdue ? 'bg-red-900/10' : ''}`}>
-                      <td className="py-2.5 pr-4 text-gray-300">
+                    <tr key={p.id} className={`border-b border-zinc-800/50 ${isOverdue ? 'bg-red-900/10' : ''}`}>
+                      <td className="py-2.5 pr-4 text-zinc-300">
                         {p.due_date ? new Date(p.due_date + 'T00:00:00').toLocaleDateString() : '—'}
                       </td>
-                      <td className="py-2.5 pr-4 text-gray-400">{p.description || '—'}</td>
+                      <td className="py-2.5 pr-4 text-zinc-400">{p.description || '—'}</td>
                       <td className="py-2.5 pr-4 text-right text-white font-medium">${fmt(Number(p.amount))}</td>
                       <td className="py-2.5 pr-4">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full uppercase ${statusBadgeClass(p.status)}`}>
@@ -538,7 +538,7 @@ export default function FinancesTab({
                             <button onClick={() => markPaymentPaid(p.id)} className="text-xs text-green-400 hover:text-green-300 transition-colors">
                               Mark Paid
                             </button>
-                            <button onClick={() => cancelPayment(p.id)} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+                            <button onClick={() => cancelPayment(p.id)} className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
                               Cancel
                             </button>
                           </div>
@@ -554,10 +554,10 @@ export default function FinancesTab({
       )}
 
       {/* Card Management */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">4</span>
-          <h2 className="text-lg font-bold text-[#d4af37]">Card on File</h2>
+          <span className="w-6 h-6 rounded-full bg-[#fbbf24]/20 text-[#fbbf24] text-xs font-bold flex items-center justify-center flex-shrink-0">4</span>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Card on File</h2>
         </div>
 
         {!cardLoading && !cardInfo?.has_card && (
@@ -570,20 +570,20 @@ export default function FinancesTab({
         )}
 
         {cardLoading ? (
-          <p className="text-sm text-gray-500">Loading card info...</p>
+          <p className="text-sm text-zinc-500">Loading card info...</p>
         ) : cardInfo?.has_card ? (
           <div className="flex items-center gap-3 mb-4">
-            <div className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 flex items-center gap-3">
+            <div className="bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 flex items-center gap-3">
               <span className="text-sm font-semibold text-white capitalize">{cardInfo.brand} ending in {cardInfo.last4}</span>
-              <span className="text-xs text-gray-400">exp {cardInfo.exp_month}/{cardInfo.exp_year}</span>
+              <span className="text-xs text-zinc-400">exp {cardInfo.exp_month}/{cardInfo.exp_year}</span>
             </div>
-            <button onClick={() => setShowCardForm(true)} className="text-xs text-[#d4af37] hover:text-[#e5c55a] transition-colors">Replace Card</button>
+            <button onClick={() => setShowCardForm(true)} className="text-xs text-[#fbbf24] hover:text-[#fcd34d] transition-colors">Replace Card</button>
           </div>
         ) : (
           <div className="flex items-center gap-3 mb-4">
-            <p className="text-sm text-gray-500">No card on file</p>
+            <p className="text-sm text-zinc-500">No card on file</p>
             {!showCardForm && (
-              <button onClick={() => setShowCardForm(true)} className="text-xs bg-[#d4af37] text-gray-900 font-bold px-3 py-1.5 rounded-lg hover:bg-[#e5c55a] transition-colors">Add Card</button>
+              <button onClick={() => setShowCardForm(true)} className="text-xs bg-[#fbbf24] text-zinc-900 font-bold px-3 py-1.5 rounded-lg hover:bg-[#fcd34d] transition-colors">Add Card</button>
             )}
           </div>
         )}
@@ -591,19 +591,19 @@ export default function FinancesTab({
         {showCardForm && (
           <div className="mb-4 max-w-md">
             <CardCollectForm applicationId={applicationId} variant="dark" onSuccess={onCardSuccess} />
-            <button onClick={() => setShowCardForm(false)} className="text-xs text-gray-500 hover:text-gray-300 mt-2 transition-colors">Cancel</button>
+            <button onClick={() => setShowCardForm(false)} className="text-xs text-zinc-500 hover:text-zinc-300 mt-2 transition-colors">Cancel</button>
           </div>
         )}
 
         {cardInfo?.has_card && (
-          <div className="border-t border-gray-800 pt-4">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3">Charge Card</h3>
+          <div className="border-t border-zinc-800 pt-4">
+            <h3 className="text-sm font-semibold text-zinc-400 mb-3">Charge Card</h3>
             <div className="flex items-end gap-3 max-w-md">
               <div className="flex-1">
-                <label className="block text-xs text-gray-400 mb-1">Amount ($)</label>
-                <input type="number" step="0.01" min="0.50" value={chargeAmount} onChange={(e) => setChargeAmount(e.target.value)} placeholder={paymentAmount || '0.00'} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]" />
+                <label className="block text-xs text-zinc-400 mb-1">Amount ($)</label>
+                <input type="number" step="0.01" min="0.50" value={chargeAmount} onChange={(e) => setChargeAmount(e.target.value)} placeholder={paymentAmount || '0.00'} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
               </div>
-              <button onClick={onChargeCard} disabled={charging} className="bg-[#d4af37] text-gray-900 font-bold text-sm px-5 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors disabled:opacity-50">
+              <button onClick={onChargeCard} disabled={charging} className="bg-[#fbbf24] text-zinc-900 font-bold text-sm px-5 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors disabled:opacity-50">
                 {charging ? 'Charging...' : 'Charge Now'}
               </button>
             </div>
@@ -618,7 +618,7 @@ export default function FinancesTab({
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => setShowRecordForm(true)} className="bg-[#d4af37] text-gray-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors">
+        <button onClick={() => setShowRecordForm(true)} className="bg-[#fbbf24] text-zinc-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors">
           Record Payment
         </button>
         {payments.length > 0 && (
@@ -647,16 +647,16 @@ export default function FinancesTab({
 
       {/* Record Payment Form */}
       {showRecordForm && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-sm font-bold text-[#d4af37] mb-3">Record Manual Payment</h3>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <h3 className="text-sm font-bold text-[#fbbf24] mb-3">Record Manual Payment</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl">
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Amount ($)</label>
-              <input type="number" step="0.01" value={recordAmount} onChange={(e) => setRecordAmount(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37]" />
+              <label className="block text-xs text-zinc-400 mb-1">Amount ($)</label>
+              <input type="number" step="0.01" value={recordAmount} onChange={(e) => setRecordAmount(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Method</label>
-              <select value={recordMethod} onChange={(e) => setRecordMethod(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37]">
+              <label className="block text-xs text-zinc-400 mb-1">Method</label>
+              <select value={recordMethod} onChange={(e) => setRecordMethod(e.target.value)} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#fbbf24]">
                 <option value="cash">Cash</option>
                 <option value="check">Check</option>
                 <option value="card">Card</option>
@@ -664,15 +664,15 @@ export default function FinancesTab({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Description</label>
-              <input type="text" value={recordDesc} onChange={(e) => setRecordDesc(e.target.value)} placeholder="Optional" className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]" />
+              <label className="block text-xs text-zinc-400 mb-1">Description</label>
+              <input type="text" value={recordDesc} onChange={(e) => setRecordDesc(e.target.value)} placeholder="Optional" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
             </div>
           </div>
           <div className="flex gap-2 mt-3">
-            <button onClick={recordManualPayment} disabled={recordingPayment} className="bg-[#d4af37] text-gray-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#e5c55a] transition-colors disabled:opacity-50">
+            <button onClick={recordManualPayment} disabled={recordingPayment} className="bg-[#fbbf24] text-zinc-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors disabled:opacity-50">
               {recordingPayment ? 'Saving...' : 'Save Payment'}
             </button>
-            <button onClick={() => setShowRecordForm(false)} className="text-xs text-gray-400 hover:text-white px-3 py-2 transition-colors">Cancel</button>
+            <button onClick={() => setShowRecordForm(false)} className="text-xs text-zinc-400 hover:text-white px-3 py-2 transition-colors">Cancel</button>
           </div>
         </div>
       )}

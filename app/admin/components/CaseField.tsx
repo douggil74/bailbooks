@@ -81,7 +81,7 @@ export default function CaseField({
 }) {
   return (
     <div>
-      <label className="block text-xs text-gray-300 mb-1 flex items-center gap-1">
+      <label className="block text-xs text-zinc-300 mb-1 flex items-center gap-1">
         {label}
         {required && <span className="text-red-400">*</span>}
       </label>
@@ -93,11 +93,11 @@ export default function CaseField({
           onBlur={() => onBlur(field)}
           disabled={disabled}
           placeholder={placeholder}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24] disabled:opacity-50"
         />
         {statusDot}
         {fieldSaveState === 'saving' && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 border-2 border-gray-500 border-t-[#d4af37] rounded-full animate-spin" />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 border-2 border-zinc-500 border-t-[#fbbf24] rounded-full animate-spin" />
         )}
         {fieldSaveState === 'saved' && (
           <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -76,7 +76,7 @@ function statusBadge(status: string) {
   switch (status) {
     case 'complete': return 'bg-green-900/60 text-green-400';
     case 'in_progress': return 'bg-yellow-900/60 text-yellow-400';
-    default: return 'bg-gray-700 text-gray-400';
+    default: return 'bg-zinc-700 text-zinc-400';
   }
 }
 
@@ -251,7 +251,7 @@ export default function IndemnitorTab({
 
   const DOT_COLORS: Record<PhoneStatus, string> = {
     idle: '',
-    checking: 'bg-gray-400 animate-pulse',
+    checking: 'bg-zinc-400 animate-pulse',
     valid: 'bg-green-500',
     voip: 'bg-red-500',
     error: 'bg-yellow-500',
@@ -261,7 +261,7 @@ export default function IndemnitorTab({
   function renderField(indId: string, label: string, field: string, value: string | null, type = 'text') {
     return (
       <div key={`${indId}-${field}`}>
-        <label className="block text-xs text-gray-300 mb-1">{label}</label>
+        <label className="block text-xs text-zinc-300 mb-1">{label}</label>
         <input
           type={type}
           value={getEditValue(indId, field, value || '')}
@@ -271,7 +271,7 @@ export default function IndemnitorTab({
             if (val !== (value || null)) saveIndemnitorField(indId, field, val);
           }}
           disabled={savingField}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24] disabled:opacity-50"
         />
       </div>
     );
@@ -282,7 +282,7 @@ export default function IndemnitorTab({
     const { status, detail } = getPhoneStatus(key);
     return (
       <div key={key}>
-        <label className="block text-xs text-gray-300 mb-1">{label}</label>
+        <label className="block text-xs text-zinc-300 mb-1">{label}</label>
         <div className="relative">
           <input
             type="tel"
@@ -295,12 +295,12 @@ export default function IndemnitorTab({
               if (phone) verifyPhone(phone, key);
             }}
             disabled={savingField}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] disabled:opacity-50"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24] disabled:opacity-50"
           />
           {status !== 'idle' && (
             <span
               className={`absolute right-2 bottom-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                status === 'checking' ? 'bg-gray-700 text-gray-400 animate-pulse' :
+                status === 'checking' ? 'bg-zinc-700 text-zinc-400 animate-pulse' :
                 status === 'valid' ? 'bg-green-900/60 text-green-400' :
                 status === 'voip' ? 'bg-red-900/60 text-red-400' :
                 'bg-yellow-900/60 text-yellow-400'
@@ -318,13 +318,13 @@ export default function IndemnitorTab({
   return (
     <div className="space-y-6">
       {/* Indemnitors Section */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#d4af37]">Indemnitors / Co-Signers</h2>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Indemnitors / Co-Signers</h2>
           <button
             onClick={openWizard}
             disabled={indemnitors.length >= 3}
-            className="text-xs font-bold px-3 py-1.5 rounded-lg bg-[#1a4d2e] text-white hover:bg-[#256b3e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="text-xs font-bold px-3 py-1.5 rounded-lg bg-[#fbbf24] text-[#0a0a0a] hover:bg-[#fcd34d] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             + Add Indemnitor
           </button>
@@ -337,9 +337,9 @@ export default function IndemnitorTab({
         )}
 
         {indemnitors.length === 0 && !showWizard ? (
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-            <p className="text-sm text-gray-400">No indemnitors on file.</p>
-            <p className="text-xs text-gray-600 mt-1">
+          <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
+            <p className="text-sm text-zinc-400">No indemnitors on file.</p>
+            <p className="text-xs text-zinc-600 mt-1">
               Add a co-signer and send them a link to complete their information.
             </p>
           </div>
@@ -351,23 +351,23 @@ export default function IndemnitorTab({
               const indDocs = documents.filter(d => d.indemnitor_id === ind.id) as DocumentWithUrl[];
 
               return (
-                <div key={ind.id} className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <div key={ind.id} className="bg-zinc-800 rounded-xl border border-zinc-700 overflow-hidden">
                   {/* Header */}
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : ind.id)}
                     className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-750 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-[#d4af37]">
+                      <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold text-[#fbbf24]">
                         {ind.first_name[0]}{ind.last_name[0]}
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-white">{ind.first_name} {ind.last_name}</p>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <div className="flex items-center gap-2 text-xs text-zinc-400">
                           <span>{ind.phone || 'No phone'}</span>
                           {ind.email && (
                             <>
-                              <span className="text-gray-600">|</span>
+                              <span className="text-zinc-600">|</span>
                               <span className="truncate max-w-[150px]">{ind.email}</span>
                             </>
                           )}
@@ -378,20 +378,20 @@ export default function IndemnitorTab({
                       {ind.status !== 'complete' && ind.phone && (
                         <span
                           onClick={(e) => { e.stopPropagation(); sendInvite(ind.id); }}
-                          className="text-[10px] font-bold px-2 py-1 rounded bg-[#d4af37] text-gray-900 hover:bg-[#e5c55a] transition-colors cursor-pointer"
+                          className="text-[10px] font-bold px-2 py-1 rounded bg-[#fbbf24] text-zinc-900 hover:bg-[#fcd34d] transition-colors cursor-pointer"
                         >
                           {ind.invite_sent_at ? 'Resend' : 'Invite'}
                         </span>
                       )}
                       {ind.invite_sent_at && !isExpanded && (
-                        <span className="text-[10px] text-gray-600 hidden sm:inline">
+                        <span className="text-[10px] text-zinc-600 hidden sm:inline">
                           Invited {new Date(ind.invite_sent_at).toLocaleDateString()}
                         </span>
                       )}
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${statusBadge(ind.status)}`}>
                         {ind.status.replace('_', ' ')}
                       </span>
-                      <svg className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-4 h-4 text-zinc-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </div>
@@ -399,10 +399,10 @@ export default function IndemnitorTab({
 
                   {/* Expanded content */}
                   {isExpanded && (
-                    <div className="border-t border-gray-700 p-4 space-y-5">
+                    <div className="border-t border-zinc-700 p-4 space-y-5">
                       {/* Personal Info */}
                       <div>
-                        <p className="text-xs font-semibold text-[#d4af37] mb-3">Personal Information</p>
+                        <p className="text-xs font-semibold text-[#fbbf24] mb-3">Personal Information</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {renderField(ind.id, 'First Name', 'first_name', ind.first_name)}
                           {renderField(ind.id, 'Last Name', 'last_name', ind.last_name)}
@@ -416,7 +416,7 @@ export default function IndemnitorTab({
 
                       {/* Address */}
                       <div>
-                        <p className="text-xs font-semibold text-[#d4af37] mb-3">Address</p>
+                        <p className="text-xs font-semibold text-[#fbbf24] mb-3">Address</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           <div className="sm:col-span-2 lg:col-span-3">
                             {renderField(ind.id, 'Street Address', 'address', ind.address)}
@@ -429,7 +429,7 @@ export default function IndemnitorTab({
 
                       {/* Vehicle */}
                       <div>
-                        <p className="text-xs font-semibold text-[#d4af37] mb-3">Vehicle</p>
+                        <p className="text-xs font-semibold text-[#fbbf24] mb-3">Vehicle</p>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                           {renderField(ind.id, 'Make', 'car_make', ind.car_make)}
                           {renderField(ind.id, 'Model', 'car_model', ind.car_model)}
@@ -440,7 +440,7 @@ export default function IndemnitorTab({
 
                       {/* Employment */}
                       <div>
-                        <p className="text-xs font-semibold text-[#d4af37] mb-3">Employment</p>
+                        <p className="text-xs font-semibold text-[#fbbf24] mb-3">Employment</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {renderField(ind.id, 'Employer', 'employer_name', ind.employer_name)}
                           {renderPhoneField(ind.id, 'Employer Phone', 'employer_phone', ind.employer_phone)}
@@ -450,16 +450,16 @@ export default function IndemnitorTab({
                       {/* Documents */}
                       {indDocs.length > 0 && (
                         <div>
-                          <p className="text-xs font-semibold text-[#d4af37] mb-3">Documents</p>
+                          <p className="text-xs font-semibold text-[#fbbf24] mb-3">Documents</p>
                           <div className="grid grid-cols-3 gap-3">
                             {indDocs.map(doc => (
-                              <div key={doc.id} className="bg-gray-700 rounded-lg overflow-hidden">
+                              <div key={doc.id} className="bg-zinc-700 rounded-lg overflow-hidden">
                                 {doc.signed_url ? (
                                   <img src={doc.signed_url} alt={doc.doc_type.replace(/_/g, ' ')} className="w-full h-24 object-cover" />
                                 ) : (
-                                  <div className="w-full h-24 flex items-center justify-center text-gray-500 text-xs">No preview</div>
+                                  <div className="w-full h-24 flex items-center justify-center text-zinc-500 text-xs">No preview</div>
                                 )}
-                                <p className="text-[10px] text-gray-400 p-1.5 capitalize text-center">{doc.doc_type.replace(/_/g, ' ')}</p>
+                                <p className="text-[10px] text-zinc-400 p-1.5 capitalize text-center">{doc.doc_type.replace(/_/g, ' ')}</p>
                               </div>
                             ))}
                           </div>
@@ -469,17 +469,17 @@ export default function IndemnitorTab({
                       {/* Signature */}
                       {indSigs.length > 0 && (
                         <div>
-                          <p className="text-xs font-semibold text-[#d4af37] mb-3">Signature</p>
+                          <p className="text-xs font-semibold text-[#fbbf24] mb-3">Signature</p>
                           {indSigs.map(sig => (
                             <div key={sig.id} className="flex items-center gap-3">
                               {sig.signature_data ? (
                                 <img src={sig.signature_data} alt="signature" className="h-12 bg-white rounded px-2" />
                               ) : (
-                                <span className="text-xs text-gray-500">No signature image</span>
+                                <span className="text-xs text-zinc-500">No signature image</span>
                               )}
                               <div>
-                                <p className="text-xs text-gray-300">{sig.signer_name}</p>
-                                <p className="text-[10px] text-gray-500">{new Date(sig.signed_at).toLocaleString()}</p>
+                                <p className="text-xs text-zinc-300">{sig.signer_name}</p>
+                                <p className="text-[10px] text-zinc-500">{new Date(sig.signed_at).toLocaleString()}</p>
                               </div>
                             </div>
                           ))}
@@ -487,16 +487,16 @@ export default function IndemnitorTab({
                       )}
 
                       {/* Actions */}
-                      <div className="flex gap-2 pt-2 border-t border-gray-700">
+                      <div className="flex gap-2 pt-2 border-t border-zinc-700">
                         <button
                           onClick={() => sendInvite(ind.id)}
                           disabled={!ind.phone}
-                          className="text-xs font-bold px-4 py-2 rounded-lg bg-[#d4af37] text-gray-900 hover:bg-[#e5c55a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="text-xs font-bold px-4 py-2 rounded-lg bg-[#fbbf24] text-zinc-900 hover:bg-[#fcd34d] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           {ind.invite_sent_at ? 'Resend Invite' : 'Send Invite'}
                         </button>
                         {ind.invite_sent_at && (
-                          <span className="text-[10px] text-gray-500 self-center">
+                          <span className="text-[10px] text-zinc-500 self-center">
                             Sent {new Date(ind.invite_sent_at).toLocaleDateString()}
                           </span>
                         )}
@@ -505,7 +505,7 @@ export default function IndemnitorTab({
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-red-400">Delete?</span>
                             <button onClick={() => deleteIndemnitor(ind.id)} className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors">Yes</button>
-                            <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">No</button>
+                            <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">No</button>
                           </div>
                         ) : (
                           <button onClick={() => setConfirmDeleteId(ind.id)} className="text-xs text-red-500 hover:text-red-400 transition-colors">Delete</button>
@@ -521,19 +521,19 @@ export default function IndemnitorTab({
       </div>
 
       {/* References Section */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">References</h2>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <h2 className="text-lg font-bold text-[#fbbf24] mb-4">References</h2>
 
         {references.length === 0 ? (
-          <p className="text-sm text-gray-500">No references on file.</p>
+          <p className="text-sm text-zinc-500">No references on file.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {references.map((ref) => (
-              <div key={ref.id} className="bg-gray-800 rounded-lg p-4">
+              <div key={ref.id} className="bg-zinc-800 rounded-lg p-4">
                 <p className="text-sm font-semibold">{ref.full_name}</p>
-                <p className="text-xs text-gray-400">{ref.relationship}</p>
-                <p className="text-xs text-gray-400 mt-1">{ref.phone}</p>
-                {ref.address && <p className="text-xs text-gray-500 mt-0.5">{ref.address}</p>}
+                <p className="text-xs text-zinc-400">{ref.relationship}</p>
+                <p className="text-xs text-zinc-400 mt-1">{ref.phone}</p>
+                {ref.address && <p className="text-xs text-zinc-500 mt-0.5">{ref.address}</p>}
               </div>
             ))}
           </div>
@@ -544,7 +544,7 @@ export default function IndemnitorTab({
       {showWizard && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Progress dots */}
@@ -553,17 +553,17 @@ export default function IndemnitorTab({
                 <div
                   key={i}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    i === wizardStep ? 'bg-[#d4af37]' : i < wizardStep ? 'bg-[#d4af37]/40' : 'bg-gray-700'
+                    i === wizardStep ? 'bg-[#fbbf24]' : i < wizardStep ? 'bg-[#fbbf24]/40' : 'bg-zinc-700'
                   }`}
                 />
               ))}
             </div>
             <h3 className="text-lg font-bold text-white mb-1">{currentWizardStep.title}</h3>
-            <p className="text-sm text-gray-400 mb-5">{currentWizardStep.description}</p>
+            <p className="text-sm text-zinc-400 mb-5">{currentWizardStep.description}</p>
             <div className="space-y-3">
               {currentWizardStep.fields.map((f, i) => (
                 <div key={f.key}>
-                  <label className="block text-xs text-gray-400 mb-1">{f.label}</label>
+                  <label className="block text-xs text-zinc-400 mb-1">{f.label}</label>
                   <input
                     type={f.type || 'text'}
                     value={wizardData[f.key] || ''}
@@ -571,31 +571,31 @@ export default function IndemnitorTab({
                     placeholder={f.placeholder}
                     autoFocus={i === 0}
                     onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
                   />
                 </div>
               ))}
             </div>
             <div className="flex gap-3 mt-6">
               {wizardStep > 0 && (
-                <button onClick={wizardBack} className="px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm">
+                <button onClick={wizardBack} className="px-4 py-2.5 border border-zinc-700 rounded-lg text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors text-sm">
                   Back
                 </button>
               )}
-              <button onClick={wizardSkip} className="px-4 py-2.5 text-gray-500 hover:text-gray-300 transition-colors text-sm">
+              <button onClick={wizardSkip} className="px-4 py-2.5 text-zinc-500 hover:text-zinc-300 transition-colors text-sm">
                 {isLastWizardStep ? 'Skip & Finish' : 'Skip'}
               </button>
               <button
                 onClick={wizardNext}
                 disabled={wizardSaving}
-                className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e5c55a] transition-colors text-sm disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-[#fbbf24] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#fcd34d] transition-colors text-sm disabled:opacity-50"
               >
                 {wizardSaving ? 'Saving...' : isLastWizardStep ? 'Done' : 'Next'}
               </button>
             </div>
             <button
               onClick={() => { setShowWizard(false); setWizardStep(0); setWizardData({}); }}
-              className="w-full text-center text-xs text-gray-600 hover:text-gray-400 mt-4 transition-colors"
+              className="w-full text-center text-xs text-zinc-600 hover:text-zinc-400 mt-4 transition-colors"
             >
               Cancel
             </button>

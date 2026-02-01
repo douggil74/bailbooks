@@ -8,7 +8,7 @@ import type { PhoneStatus } from '@/hooks/usePhoneVerify';
 
 const PILL_STYLES: Record<PhoneStatus, string> = {
   idle: '',
-  checking: 'bg-gray-700 text-gray-400 animate-pulse',
+  checking: 'bg-zinc-700 text-zinc-400 animate-pulse',
   valid: 'bg-green-900/60 text-green-400',
   voip: 'bg-red-900/60 text-red-400',
   error: 'bg-yellow-900/60 text-yellow-400',
@@ -82,8 +82,8 @@ export default function DefendantTab({
         onClick={() => toggleSection(id)}
         className="w-full flex items-center justify-between mb-4"
       >
-        <h3 className="text-sm font-bold text-[#d4af37]">{title}</h3>
-        <svg className={`w-4 h-4 text-gray-500 transition-transform ${collapsed[id] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h3 className="text-sm font-bold text-[#fbbf24]">{title}</h3>
+        <svg className={`w-4 h-4 text-zinc-500 transition-transform ${collapsed[id] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -93,13 +93,13 @@ export default function DefendantTab({
   return (
     <div className="space-y-4">
       {/* Defendant Information — primary, always open */}
-      <div className="bg-gray-900 border border-gray-800 border-l-2 border-l-[#d4af37] rounded-xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 border-l-2 border-l-[#fbbf24] rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-[#d4af37]">Defendant Information</h2>
+          <h2 className="text-lg font-bold text-[#fbbf24]">Defendant Information</h2>
           {isDraft && (
             <button
               onClick={onRunWizard}
-              className="text-xs text-[#d4af37] hover:text-[#e5c55a] transition-colors"
+              className="text-xs text-[#fbbf24] hover:text-[#fcd34d] transition-colors"
             >
               Run Setup Wizard
             </button>
@@ -115,7 +115,7 @@ export default function DefendantTab({
               <button
                 onClick={onSendCheckin}
                 disabled={checkinSending}
-                className="absolute right-0 -bottom-5 text-[10px] text-[#d4af37] hover:text-[#e5c55a] font-semibold transition-colors disabled:opacity-50"
+                className="absolute right-0 -bottom-5 text-[10px] text-[#fbbf24] hover:text-[#fcd34d] font-semibold transition-colors disabled:opacity-50"
               >
                 {checkinSending ? 'Sending...' : 'Send Check-in'}
               </button>
@@ -129,7 +129,7 @@ export default function DefendantTab({
       </div>
 
       {/* Address — collapsible */}
-      <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
         <SectionHeader id="address" title="Address" />
         {!collapsed.address && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -144,7 +144,7 @@ export default function DefendantTab({
       </div>
 
       {/* Employment — collapsible */}
-      <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
         <SectionHeader id="employment" title="Employment" />
         {!collapsed.employment && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -155,7 +155,7 @@ export default function DefendantTab({
       </div>
 
       {/* Vehicle — collapsible */}
-      <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
         <SectionHeader id="vehicle" title="Vehicle Information" />
         {!collapsed.vehicle && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -168,8 +168,8 @@ export default function DefendantTab({
       </div>
 
       {/* Charges & Court — primary, always open */}
-      <div className="bg-gray-900 border border-gray-800 border-l-2 border-l-[#d4af37] rounded-xl p-6">
-        <h3 className="text-sm font-bold text-[#d4af37] mb-4">Charges & Court</h3>
+      <div className="bg-zinc-900 border border-zinc-800 border-l-2 border-l-[#fbbf24] rounded-xl p-6">
+        <h3 className="text-sm font-bold text-[#fbbf24] mb-4">Charges & Court</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="sm:col-span-2 lg:col-span-3">
             <CaseField label="Charges" value={caseInfo.charge_description} field="charge_description" onChange={updateCaseInfo} onBlur={blurSaveCaseInfo} disabled={saving} placeholder="Description of charges" required fieldSaveState={fieldState('charge_description')} />
