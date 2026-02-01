@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
 
       const resend = getResend();
       await resend.emails.send({
-        from: 'Bailbonds Financed <noreply@bailmade.simple>',
+        from: 'BailBonds Made Easy <noreply@bailmade.simple>',
         to: app.defendant_email,
         subject,
         html,

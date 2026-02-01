@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     ` : '';
 
     await getResend().emails.send({
-      from: 'Bailbonds Financed <leads@resend.dev>',
+      from: 'BailBonds Made Easy <leads@resend.dev>',
       to: 'doug.cag@gmail.com',
       subject: `New Lead: ${name} - ${urgency === 'urgent' ? 'URGENT' : 'Normal'}${amt > 0 ? ` - $${amt.toLocaleString()} bond` : ''}`,
       html: `

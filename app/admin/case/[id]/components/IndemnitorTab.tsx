@@ -261,7 +261,7 @@ export default function IndemnitorTab({
   function renderField(indId: string, label: string, field: string, value: string | null, type = 'text') {
     return (
       <div key={`${indId}-${field}`}>
-        <label className="block text-xs text-gray-400 mb-1">{label}</label>
+        <label className="block text-xs text-gray-300 mb-1">{label}</label>
         <input
           type={type}
           value={getEditValue(indId, field, value || '')}
@@ -282,7 +282,7 @@ export default function IndemnitorTab({
     const { status, detail } = getPhoneStatus(key);
     return (
       <div key={key}>
-        <label className="block text-xs text-gray-400 mb-1">{label}</label>
+        <label className="block text-xs text-gray-300 mb-1">{label}</label>
         <div className="relative">
           <input
             type="tel"
@@ -299,9 +299,16 @@ export default function IndemnitorTab({
           />
           {status !== 'idle' && (
             <span
-              className={`w-2 h-2 rounded-full absolute right-3 bottom-[11px] ${DOT_COLORS[status]}`}
+              className={`absolute right-2 bottom-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                status === 'checking' ? 'bg-gray-700 text-gray-400 animate-pulse' :
+                status === 'valid' ? 'bg-green-900/60 text-green-400' :
+                status === 'voip' ? 'bg-red-900/60 text-red-400' :
+                'bg-yellow-900/60 text-yellow-400'
+              }`}
               title={detail || status}
-            />
+            >
+              {status === 'checking' ? '...' : status === 'valid' ? 'Verified' : status === 'voip' ? 'VOIP' : 'Error'}
+            </span>
           )}
         </div>
       </div>
@@ -356,10 +363,31 @@ export default function IndemnitorTab({
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-white">{ind.first_name} {ind.last_name}</p>
-                        <p className="text-xs text-gray-400">{ind.phone || 'No phone'}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <span>{ind.phone || 'No phone'}</span>
+                          {ind.email && (
+                            <>
+                              <span className="text-gray-600">|</span>
+                              <span className="truncate max-w-[150px]">{ind.email}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      {ind.status !== 'complete' && ind.phone && (
+                        <span
+                          onClick={(e) => { e.stopPropagation(); sendInvite(ind.id); }}
+                          className="text-[10px] font-bold px-2 py-1 rounded bg-[#d4af37] text-gray-900 hover:bg-[#e5c55a] transition-colors cursor-pointer"
+                        >
+                          {ind.invite_sent_at ? 'Resend' : 'Invite'}
+                        </span>
+                      )}
+                      {ind.invite_sent_at && !isExpanded && (
+                        <span className="text-[10px] text-gray-600 hidden sm:inline">
+                          Invited {new Date(ind.invite_sent_at).toLocaleDateString()}
+                        </span>
+                      )}
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${statusBadge(ind.status)}`}>
                         {ind.status.replace('_', ' ')}
                       </span>

@@ -208,7 +208,10 @@ export default function FinancesTab({
 
       {/* Agent Fields */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">Agent Financial Fields</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
+          <h2 className="text-lg font-bold text-[#d4af37]">Agent Financial Fields</h2>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <EditField
             label="Power Number"
@@ -238,7 +241,10 @@ export default function FinancesTab({
 
       {/* Payment Plan Toggle */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">Payment Plan</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
+          <h2 className="text-lg font-bold text-[#d4af37]">Payment Plan</h2>
+        </div>
 
         <div className="flex gap-4 mb-4">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -344,7 +350,15 @@ export default function FinancesTab({
       {/* Payment Line Items */}
       {payments.length > 0 && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold text-[#d4af37] mb-4">Payments</h2>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
+            <h2 className="text-lg font-bold text-[#d4af37]">Payments</h2>
+            {hasOverdue && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-900/60 text-red-400 uppercase">
+                {pendingPayments.filter(p => p.due_date && new Date(p.due_date + 'T00:00:00') < new Date()).length} overdue
+              </span>
+            )}
+          </div>
 
           {/* Warnings */}
           {hasOverdue && (
@@ -413,7 +427,10 @@ export default function FinancesTab({
 
       {/* Card Management */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">Card on File</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="w-6 h-6 rounded-full bg-[#d4af37]/20 text-[#d4af37] text-xs font-bold flex items-center justify-center flex-shrink-0">4</span>
+          <h2 className="text-lg font-bold text-[#d4af37]">Card on File</h2>
+        </div>
 
         {!cardLoading && !cardInfo?.has_card && (
           <div className="bg-red-900/30 border border-red-800 rounded-lg p-3 flex items-center gap-2 mb-4">
@@ -532,32 +549,6 @@ export default function FinancesTab({
         </div>
       )}
 
-      {/* Balance Summary */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-sm font-bold text-[#d4af37] mb-3">Balance Summary</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <p className="text-xs text-gray-500">Total Due</p>
-            <p className="text-lg font-bold text-white">
-              {totalDue > 0 ? `$${fmt(totalDue)}` : payments.length > 0 ? `$${fmt(totalScheduled)}` : '—'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Amount Paid</p>
-            <p className="text-lg font-bold text-white">${fmt(amountPaid)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Balance</p>
-            <p className={`text-lg font-bold ${balance > 0 ? 'text-red-400' : 'text-green-400'}`}>
-              ${fmt(balance)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Down Payment</p>
-            <p className="text-lg font-bold text-white">{dpNum > 0 ? `$${fmt(dpNum)}` : '—'}</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

@@ -133,19 +133,22 @@ export default function OverviewTab({
         </svg>
         <div>
           <p className="font-bold text-sm">
-            {allComplete ? 'Status: Good to go!' : `Action Needed — ${checklist.length - completedCount} item${checklist.length - completedCount > 1 ? 's' : ''} remaining`}
+            {allComplete ? 'Case Ready — All steps complete' : `${checklist.length - completedCount} step${checklist.length - completedCount > 1 ? 's' : ''} to complete before posting bond`}
           </p>
           <p className="text-xs opacity-70 mt-0.5">
             {allComplete
-              ? 'All case requirements have been met.'
-              : 'Complete the items below to finalize this case.'}
+              ? 'All case requirements have been met. This bond can be posted.'
+              : 'Complete each item below. Gold buttons show next actions.'}
           </p>
         </div>
       </div>
 
       {/* Activity Checklist */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-[#d4af37] mb-4">Overview</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-[#d4af37]">Overview</h2>
+          <span className="text-xs text-gray-500">{completedCount}/{checklist.length} complete</span>
+        </div>
         <div className="space-y-3">
           {checklist.map((item) => (
             <div
@@ -173,7 +176,11 @@ export default function OverviewTab({
               </div>
               <button
                 onClick={() => onNavigateTab(item.targetTab)}
-                className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-800 text-[#d4af37] hover:bg-gray-700 transition-colors"
+                className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  item.complete
+                    ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-300'
+                    : 'bg-[#d4af37] text-gray-900 hover:bg-[#e5c55a]'
+                }`}
               >
                 {item.actionLabel}
               </button>

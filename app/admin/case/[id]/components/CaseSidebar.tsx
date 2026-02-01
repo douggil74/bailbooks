@@ -40,7 +40,7 @@ export default function CaseSidebar({
       </nav>
 
       {/* Mobile horizontal tabs */}
-      <div className="lg:hidden overflow-x-auto -mx-4 px-4 mb-4">
+      <div className="lg:hidden overflow-x-auto -mx-4 px-4 mb-4 sticky top-0 z-30 bg-gray-950 pb-2 pt-2 border-b border-gray-800/50">
         <div className="flex gap-1 min-w-max">
           {TABS.map((tab) => (
             <button
@@ -48,7 +48,7 @@ export default function CaseSidebar({
               onClick={() => onTabChange(tab.id)}
               className={`px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-gray-800 text-[#d4af37]'
+                  ? 'bg-gray-800 text-[#d4af37] border-b-2 border-[#d4af37]'
                   : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
               }`}
             >

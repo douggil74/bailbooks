@@ -71,7 +71,7 @@ export default function QuotePage() {
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <Shield className="w-8 h-8 text-[#d4af37]" />
             <span className="text-xl font-bold text-white">
-              Bailbonds <span className="text-[#d4af37]">Financed</span>
+              BailBonds <span className="text-[#d4af37]">Made Easy</span>
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-white mb-2">Get a Free Quote</h1>

@@ -11,8 +11,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL('https://bailbondsfinanced.com'),
   title: {
-    default: 'Bailbonds Financed | St. Tammany Parish Bail Bonds | 24/7 Service',
-    template: '%s | Bailbonds Financed'
+    default: 'BailBonds Made Easy | St. Tammany Parish Bail Bonds | 24/7 Service',
+    template: '%s | BailBonds Made Easy'
   },
   description: 'Fast, affordable bail bonds in St. Tammany Parish, Louisiana. 24/7 emergency service, flexible payment plans, ICE releases. Serving Covington, Mandeville, Slidell. Call now: 985-264-9519. Licensed Louisiana Bail Agents.',
   keywords: [
@@ -29,19 +29,19 @@ export const metadata: Metadata = {
     'jail release St. Tammany Parish',
     'Louisiana bail agents'
   ],
-  authors: [{ name: 'Bailbonds Financed' }],
-  creator: 'Bailbonds Financed',
-  publisher: 'Bailbonds Financed',
+  authors: [{ name: 'BailBonds Made Easy' }],
+  creator: 'BailBonds Made Easy',
+  publisher: 'BailBonds Made Easy',
   formatDetection: {
     email: true,
     address: true,
     telephone: true,
   },
   openGraph: {
-    title: 'Bailbonds Financed | 24/7 Bail Bonds St. Tammany Parish',
+    title: 'BailBonds Made Easy | 24/7 Bail Bonds St. Tammany Parish',
     description: 'Fast, affordable bail bonds in St. Tammany Parish, Louisiana. 24/7 service, flexible payments, ICE releases. Call 985-264-9519',
     url: 'https://bailbondsfinanced.com',
-    siteName: 'Bailbonds Financed',
+    siteName: 'BailBonds Made Easy',
     locale: 'en_US',
     type: 'website',
     images: [
@@ -49,13 +49,13 @@ export const metadata: Metadata = {
         url: '/og-image',
         width: 1200,
         height: 630,
-        alt: 'Bailbonds Financed - St. Tammany Parish Bail Bonds',
+        alt: 'BailBonds Made Easy - St. Tammany Parish Bail Bonds',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bailbonds Financed | 24/7 Bail Bonds St. Tammany Parish',
+    title: 'BailBonds Made Easy | 24/7 Bail Bonds St. Tammany Parish',
     description: 'Fast bail bonds in St. Tammany Parish. 24/7 service. Call 985-264-9519',
     images: ['/og-image'],
   },
@@ -88,7 +88,7 @@ const jsonLd = {
     {
       '@type': 'LocalBusiness',
       '@id': 'https://bailbondsfinanced.com/#business',
-      name: 'Bailbonds Financed',
+      name: 'BailBonds Made Easy',
       description: 'Professional bail bond services in St. Tammany Parish, Louisiana. 24/7 emergency service, flexible payment plans, ICE releases.',
       url: 'https://bailbondsfinanced.com',
       telephone: '+1-985-264-9519',
@@ -163,7 +163,7 @@ const jsonLd = {
       '@type': 'WebSite',
       '@id': 'https://bailbondsfinanced.com/#website',
       url: 'https://bailbondsfinanced.com',
-      name: 'Bailbonds Financed',
+      name: 'BailBonds Made Easy',
       description: 'St. Tammany Parish Bail Bonds - 24/7 Service',
       publisher: { '@id': 'https://bailbondsfinanced.com/#business' },
     },

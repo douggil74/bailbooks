@@ -132,7 +132,7 @@ export default function AdminPage() {
         <div className="flex items-center gap-3">
           <Shield className="w-8 h-8 text-[#d4af37]" />
           <div>
-            <h1 className="text-xl font-bold">Bailbonds <span className="text-[#d4af37]">Financed</span> <span className="text-green-200 font-normal text-base">— Agent Control Panel</span></h1>
+            <h1 className="text-xl font-bold">BailBonds <span className="text-[#d4af37]">Made Easy</span> <span className="text-green-200 font-normal text-base">— Agent Control Panel</span></h1>
             <p className="text-sm text-green-200">Case Management Dashboard</p>
           </div>
         </div>
@@ -211,11 +211,15 @@ export default function AdminPage() {
           <p className="text-gray-400">No cases match your criteria.</p>
         ) : (
           <div className="space-y-3">
-            {filtered.map((app) => (
+            {filtered.map((app) => {
+              const needsAttention = app.indemnitor_status === 'pending' || app.indemnitor_status === 'request_sent';
+              return (
               <a
                 key={app.id}
                 href={`/admin/case/${app.id}`}
-                className="block bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-gray-600 hover:bg-gray-900/80 transition-colors"
+                className={`block bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-gray-600 hover:bg-gray-900/80 transition-colors ${
+                  needsAttention ? 'border-l-2 border-l-orange-500' : ''
+                }`}
               >
                 {/* Desktop layout */}
                 <div className="hidden sm:flex items-center gap-4">
@@ -253,8 +257,14 @@ export default function AdminPage() {
                   </span>
 
                   {app.bond_amount && (
-                    <span className="text-sm font-medium text-gray-300 w-28 text-right">
+                    <span className="text-sm font-bold text-white w-28 text-right tabular-nums">
                       ${Number(app.bond_amount).toLocaleString()}
+                    </span>
+                  )}
+
+                  {needsAttention && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-900/60 text-orange-400 border border-orange-800/50 whitespace-nowrap">
+                      {app.indemnitor_status === 'request_sent' ? 'Awaiting Response' : 'Indemnitor Pending'}
                     </span>
                   )}
 
@@ -294,7 +304,8 @@ export default function AdminPage() {
                   </div>
                 </div>
               </a>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

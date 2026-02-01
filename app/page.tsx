@@ -45,7 +45,7 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <Shield className="w-8 h-8 text-[#d4af37]" />
               <span className="text-xl sm:text-2xl font-bold text-white">
-                Bailbonds <span className="text-[#d4af37]">Financed</span>
+                BailBonds <span className="text-[#d4af37]">Made Easy</span>
               </span>
             </div>
             <a
@@ -256,7 +256,7 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
-                Why Choose <span className="text-[#d4af37]">Bailbonds Financed?</span>
+                Why Choose <span className="text-[#d4af37]">BailBonds Made Easy?</span>
               </h2>
               <p className="text-gray-400 text-lg mb-8">
                 As an affiliate of Louisiana Bail Agents, we bring professional
@@ -496,7 +496,7 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <Shield className="w-6 h-6 text-[#d4af37]" />
               <span className="text-lg font-bold text-white">
-                Bailbonds <span className="text-[#d4af37]">Financed</span>
+                BailBonds <span className="text-[#d4af37]">Made Easy</span>
               </span>
             </div>
 
@@ -553,7 +553,7 @@ export default function Home() {
               </button>
             </div>
             <div className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} Bailbonds Financed. All rights reserved. Licensed Louisiana Bail Bond Agents.
+              © {new Date().getFullYear()} BailBonds Made Easy. All rights reserved. Licensed Louisiana Bail Bond Agents.
             </div>
           </div>
         </div>

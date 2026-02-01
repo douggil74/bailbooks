@@ -31,7 +31,7 @@ function layout(title: string, body: string): string {
     <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a;">
       <!-- Nav bar -->
       <div style="background: #0a0a0a; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 16px 24px; text-align: center;">
-        <span style="font-size: 20px; font-weight: 800; color: #ffffff;">Bailbonds </span><span style="font-size: 20px; font-weight: 800; color: #d4af37;">Financed</span>
+        <span style="font-size: 20px; font-weight: 800; color: #ffffff;">BailBonds </span><span style="font-size: 20px; font-weight: 800; color: #d4af37;">Made Easy</span>
       </div>
 
       <!-- Hero header -->
@@ -51,7 +51,7 @@ function layout(title: string, body: string): string {
 
       <!-- Bottom footer -->
       <div style="padding: 20px 24px; text-align: center; background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.1);">
-        <p style="margin: 0 0 4px 0; color: #ffffff; font-size: 13px; font-weight: 600;">Bailbonds <span style="color: #d4af37;">Financed</span></p>
+        <p style="margin: 0 0 4px 0; color: #ffffff; font-size: 13px; font-weight: 600;">BailBonds <span style="color: #d4af37;">Made Easy</span></p>
         <p style="margin: 0 0 4px 0; color: #9ca3af; font-size: 12px;">Affiliate of Louisiana Bail Agents</p>
         <p style="margin: 0; color: #6b7280; font-size: 12px;">Serving St. Tammany Parish, Louisiana</p>
       </div>
@@ -133,7 +133,7 @@ export function checkinReminderEmail({ defendantFirst, checkinUrl }: CheckinRemi
     subject: 'Check-in Reminder — Action Required',
     html: layout('Check-in Reminder', `
       <p style="color: #d1d5db; font-size: 15px; line-height: 1.6;">Hi ${defendantFirst},</p>
-      <p style="color: #d1d5db; font-size: 15px; line-height: 1.6;">It&rsquo;s time for your scheduled check-in with Bailbonds Financed.</p>
+      <p style="color: #d1d5db; font-size: 15px; line-height: 1.6;">It&rsquo;s time for your scheduled check-in with BailBonds Made Easy.</p>
 
       <div style="text-align: center; margin: 28px 0;">
         <a href="${checkinUrl}" style="display: inline-block; background: #d4af37; color: #0a0a0a; padding: 14px 32px; text-decoration: none; border-radius: 50px; font-weight: 700; font-size: 18px;">Check In Now</a>

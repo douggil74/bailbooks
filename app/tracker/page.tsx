@@ -369,7 +369,7 @@ export default function TrackerPage() {
     doc.setFontSize(22);
     doc.setTextColor(212, 175, 55); // Gold color
     doc.setFont('helvetica', 'bold');
-    doc.text('Bailbonds Financed', 14, 18);
+    doc.text('BailBonds Made Easy', 14, 18);
 
     // Address and contact
     doc.setFontSize(10);
@@ -490,7 +490,7 @@ export default function TrackerPage() {
     doc.line(14, certY, pageWidth - 14, certY);
     doc.setFontSize(8);
     doc.setTextColor(100);
-    doc.text('This report is certified accurate by Bailbonds Financed, St. Tammany Parish, Louisiana.', 14, certY + 6);
+    doc.text('This report is certified accurate by BailBonds Made Easy, St. Tammany Parish, Louisiana.', 14, certY + 6);
     doc.text('Licensed Louisiana Bail Bond Agent | Affiliate of Louisiana Bail Agents | 985-264-9519', 14, certY + 11);
 
     // Save PDF
@@ -507,7 +507,7 @@ export default function TrackerPage() {
           <div className="flex items-center justify-center gap-2 mb-6">
             <Shield className="w-8 h-8 text-[#d4af37]" />
             <span className="text-xl font-bold text-white">
-              Bailbonds <span className="text-[#d4af37]">Financed</span>
+              BailBonds <span className="text-[#d4af37]">Made Easy</span>
             </span>
           </div>
 
