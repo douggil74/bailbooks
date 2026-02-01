@@ -643,12 +643,29 @@ export default function AdminPage() {
           >
             <h3 className="text-lg font-bold text-white mb-4">Load Power</h3>
 
-            {/* Document Scanner */}
-            <label className={`block border-2 border-dashed rounded-xl p-4 mb-4 text-center cursor-pointer transition-colors ${
-              extracting
-                ? 'border-[#fbbf24]/50 bg-[#fbbf24]/5'
-                : 'border-zinc-700 hover:border-zinc-500'
-            }`}>
+            {/* Document Scanner — click or drag & drop */}
+            <label
+              className={`block border-2 border-dashed rounded-xl p-4 mb-4 text-center cursor-pointer transition-colors ${
+                extracting
+                  ? 'border-[#fbbf24]/50 bg-[#fbbf24]/5'
+                  : 'border-zinc-700 hover:border-zinc-500'
+              }`}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (extracting) return;
+                const file = e.dataTransfer.files?.[0];
+                if (file) {
+                  if (file.size > 4 * 1024 * 1024) {
+                    setExtractError('File too large. Maximum 4 MB.');
+                    return;
+                  }
+                  extractFromFile(file);
+                }
+              }}
+            >
               {extracting ? (
                 <div className="flex items-center justify-center gap-2 text-[#fbbf24]">
                   <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -659,8 +676,8 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <>
-                  <p className="text-sm text-zinc-400">Upload power document to auto-fill</p>
-                  <p className="text-xs text-zinc-600 mt-1">Photo or PDF</p>
+                  <p className="text-sm text-zinc-400">Drop power document here or click to upload</p>
+                  <p className="text-xs text-zinc-600 mt-1">Photo or PDF, max 4 MB</p>
                 </>
               )}
               <input
@@ -670,7 +687,14 @@ export default function AdminPage() {
                 disabled={extracting}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) extractFromFile(file);
+                  if (file) {
+                    if (file.size > 4 * 1024 * 1024) {
+                      setExtractError('File too large. Maximum 4 MB.');
+                      e.target.value = '';
+                      return;
+                    }
+                    extractFromFile(file);
+                  }
                   e.target.value = '';
                 }}
               />

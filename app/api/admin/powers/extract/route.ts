@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+export const config = {
+  api: { bodyParser: false },
+};
+
+const MAX_SIZE = 4 * 1024 * 1024; // 4 MB — Vercel serverless body limit is ~4.5 MB
 const ALLOWED_TYPES = [
   'image/png',
   'image/jpeg',
@@ -27,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: 'File too large. Maximum 10 MB.' },
+        { error: 'File too large. Maximum 4 MB.' },
         { status: 400 },
       );
     }
