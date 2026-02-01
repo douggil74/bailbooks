@@ -787,7 +787,9 @@ export default function CaseDetailPage() {
       {showWizard && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div
-            className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className={`bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full shadow-2xl max-h-[90vh] overflow-y-auto ${
+              currentWizardStep.type === 'indemnitor' ? 'max-w-2xl' : 'max-w-md'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-center gap-2 mb-5">
@@ -885,79 +887,60 @@ export default function CaseDetailPage() {
                       Co-signer added successfully
                     </div>
                   )}
-                  <div>
-                    <label className="block text-xs text-zinc-400 mb-1">First Name</label>
-                    <input
-                      type="text"
-                      value={indemnitorFirst}
-                      onChange={(e) => setIndemnitorFirst(e.target.value)}
-                      placeholder="First name"
-                      autoFocus
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-zinc-400 mb-1">Last Name</label>
-                    <input
-                      type="text"
-                      value={indemnitorLast}
-                      onChange={(e) => setIndemnitorLast(e.target.value)}
-                      placeholder="Last name"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-zinc-400 mb-1">Phone</label>
-                    <input
-                      type="tel"
-                      value={indemnitorPhone}
-                      onChange={(e) => setIndemnitorPhone(e.target.value)}
-                      placeholder="(985) 555-1234"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-zinc-400 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={indemnitorEmail}
-                      onChange={(e) => setIndemnitorEmail(e.target.value)}
-                      placeholder="name@example.com"
-                      onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]"
-                    />
-                  </div>
-
-                  {/* Information to Collect */}
-                  <div className="border-t border-zinc-700 pt-4 mt-4">
-                    <p className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1">Information to Collect</p>
-                    <p className="text-xs text-zinc-500 mb-3">What should the co-signer provide?</p>
-                    <div className="space-y-2">
-                      {([
-                        { key: 'personal', label: 'Personal Details', desc: 'DOB, SSN, DL#' },
-                        { key: 'address', label: 'Home Address', desc: 'Street, city, state, zip' },
-                        { key: 'vehicle', label: 'Vehicle Info', desc: 'Make, model, year, color' },
-                        { key: 'employer', label: 'Current Employer', desc: 'Name, phone' },
-                        { key: 'id_photos', label: 'ID & Photos', desc: 'DL front/back, selfie' },
-                      ] as const).map((cat) => (
-                        <div key={cat.key} className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5">
-                          <div>
-                            <p className="text-sm text-white">{cat.label}</p>
-                            <p className="text-xs text-zinc-500">{cat.desc}</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setInfoCategories((prev) => ({ ...prev, [cat.key]: !prev[cat.key] }))}
-                            className={`relative w-11 h-6 rounded-full transition-colors ${infoCategories[cat.key] ? 'bg-[#fbbf24]' : 'bg-zinc-600'}`}
-                          >
-                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${infoCategories[cat.key] ? 'translate-x-5' : ''}`} />
-                          </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Left column: contact fields */}
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1">First Name</label>
+                          <input type="text" value={indemnitorFirst} onChange={(e) => setIndemnitorFirst(e.target.value)} placeholder="First name" autoFocus className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
                         </div>
-                      ))}
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1">Last Name</label>
+                          <input type="text" value={indemnitorLast} onChange={(e) => setIndemnitorLast(e.target.value)} placeholder="Last name" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-zinc-400 mb-1">Phone</label>
+                        <input type="tel" value={indemnitorPhone} onChange={(e) => setIndemnitorPhone(e.target.value)} placeholder="(985) 555-1234" className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-zinc-400 mb-1">Email</label>
+                        <input type="email" value={indemnitorEmail} onChange={(e) => setIndemnitorEmail(e.target.value)} placeholder="name@example.com" onKeyDown={(e) => { if (e.key === 'Enter') wizardNext(); }} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#fbbf24]" />
+                      </div>
+                      <div className="pt-1 space-y-1">
+                        <p className="text-xs text-zinc-500">&#10003; Name &amp; contact &mdash; always required</p>
+                        <p className="text-xs text-zinc-500">&#10003; Signature &mdash; always required</p>
+                      </div>
                     </div>
-                    <div className="mt-3 space-y-1">
-                      <p className="text-xs text-zinc-500">&#10003; Name &amp; contact &mdash; always required</p>
-                      <p className="text-xs text-zinc-500">&#10003; Signature &mdash; always required</p>
+
+                    {/* Right column: info toggles */}
+                    <div>
+                      <p className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1">Information to Collect</p>
+                      <p className="text-xs text-zinc-500 mb-2">What should the co-signer provide?</p>
+                      <div className="space-y-1.5">
+                        {([
+                          { key: 'personal', label: 'Personal Details', desc: 'DOB, SSN, DL#' },
+                          { key: 'address', label: 'Home Address', desc: 'Street, city, state, zip' },
+                          { key: 'vehicle', label: 'Vehicle Info', desc: 'Make, model, year, color' },
+                          { key: 'employer', label: 'Current Employer', desc: 'Name, phone' },
+                          { key: 'id_photos', label: 'ID & Photos', desc: 'DL front/back, selfie' },
+                        ] as const).map((cat) => (
+                          <div key={cat.key} className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2">
+                            <div>
+                              <p className="text-sm text-white">{cat.label}</p>
+                              <p className="text-[10px] text-zinc-500">{cat.desc}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setInfoCategories((prev) => ({ ...prev, [cat.key]: !prev[cat.key] }))}
+                              className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${infoCategories[cat.key] ? 'bg-[#fbbf24]' : 'bg-zinc-600'}`}
+                            >
+                              <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${infoCategories[cat.key] ? 'translate-x-5' : ''}`} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </>
