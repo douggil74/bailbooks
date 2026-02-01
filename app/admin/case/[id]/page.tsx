@@ -425,13 +425,14 @@ export default function CaseDetailPage() {
       down_payment: plan.downPayment,
       payment_amount: plan.paymentAmount,
     });
-    // Auto-create the payment schedule
+    // Auto-create the payment schedule — delete old pending payments first
     const startDate = new Date();
     startDate.setDate(startDate.getDate() + (plan.frequency === 'weekly' ? 7 : plan.frequency === 'biweekly' ? 14 : 30));
     const start = startDate.toISOString().split('T')[0];
     setNextPaymentDate(start);
     await saveField({ next_payment_date: start });
     try {
+      await fetch(`/api/admin/payments/plan?application_id=${id}`, { method: 'DELETE' });
       await fetch('/api/admin/payments/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
