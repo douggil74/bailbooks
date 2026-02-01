@@ -28,7 +28,20 @@ interface AppRow {
   indemnitor_status: ActivityStatus;
 }
 
+interface PowerRow {
+  id: string;
+  power_number: string;
+  amount: number;
+  surety: string;
+  status: 'open' | 'active' | 'voided';
+  application_id: string | null;
+  assigned_at: string | null;
+  created_at: string;
+  defendant_name: string | null;
+}
+
 const STATUS_OPTIONS = ['all', 'draft', 'submitted', 'approved', 'active', 'completed'] as const;
+const POWER_STATUS_FILTERS = ['all', 'open', 'active', 'voided'] as const;
 
 function caseStatusBadge(status: string) {
   const styles: Record<string, string> = {
@@ -39,6 +52,19 @@ function caseStatusBadge(status: string) {
     draft: 'bg-gray-800 text-gray-400',
   };
   return styles[status] || styles.draft;
+}
+
+function powerStatusBadge(status: string) {
+  switch (status) {
+    case 'open':
+      return 'bg-green-900/60 text-green-400';
+    case 'active':
+      return 'bg-blue-900/60 text-blue-400';
+    case 'voided':
+      return 'bg-gray-700 text-gray-400';
+    default:
+      return 'bg-gray-700 text-gray-400';
+  }
 }
 
 function DateBadge({ dateStr, status }: { dateStr: string | null; status: string }) {
@@ -68,6 +94,7 @@ function DateBadge({ dateStr, status }: { dateStr: string | null; status: string
 }
 
 export default function AdminPage() {
+  // Cases state
   const [apps, setApps] = useState<AppRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -77,6 +104,19 @@ export default function AdminPage() {
   const [newLast, setNewLast] = useState('');
   const [creating, setCreating] = useState(false);
 
+  // Powers state
+  const [powers, setPowers] = useState<PowerRow[]>([]);
+  const [powersLoading, setPowersLoading] = useState(true);
+  const [powerStatusFilter, setPowerStatusFilter] = useState<string>('all');
+  const [powerSearch, setPowerSearch] = useState('');
+  const [showPowerModal, setShowPowerModal] = useState(false);
+  const [newNumber, setNewNumber] = useState('');
+  const [newAmount, setNewAmount] = useState('');
+  const [newSurety, setNewSurety] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState('');
+  const [recentlyAdded, setRecentlyAdded] = useState<PowerRow[]>([]);
+
   useEffect(() => {
     fetch('/api/admin/applications')
       .then((r) => r.json())
@@ -85,6 +125,19 @@ export default function AdminPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  }, []);
+
+  async function fetchPowers() {
+    try {
+      const res = await fetch('/api/admin/powers');
+      const data = await res.json();
+      setPowers(data.powers || []);
+    } catch { /* ignore */ }
+    setPowersLoading(false);
+  }
+
+  useEffect(() => {
+    fetchPowers();
   }, []);
 
   async function createCase() {
@@ -109,6 +162,45 @@ export default function AdminPage() {
     setCreating(false);
   }
 
+  async function addPower() {
+    if (!newNumber.trim() || !newAmount.trim() || !newSurety.trim()) return;
+    setAdding(true);
+    setAddError('');
+    try {
+      const res = await fetch('/api/admin/powers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          power_number: newNumber.trim(),
+          amount: parseFloat(newAmount),
+          surety: newSurety.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAddError(data.error || 'Failed to add power');
+        setAdding(false);
+        return;
+      }
+      setRecentlyAdded((prev) => [data.power, ...prev]);
+      setPowers((prev) => [data.power, ...prev]);
+      setNewNumber('');
+      setNewAmount('');
+    } catch {
+      setAddError('Network error');
+    }
+    setAdding(false);
+  }
+
+  async function voidPower(id: string) {
+    await fetch('/api/admin/powers', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    fetchPowers();
+  }
+
   const filtered = useMemo(() => {
     return apps.filter((app) => {
       const name = `${app.defendant_first} ${app.defendant_last}`.toLowerCase();
@@ -127,6 +219,23 @@ export default function AdminPage() {
     };
   }, [apps]);
 
+  const filteredPowers = useMemo(() => {
+    return powers.filter((p) => {
+      const matchesStatus = powerStatusFilter === 'all' || p.status === powerStatusFilter;
+      const matchesSearch =
+        !powerSearch || p.power_number.toLowerCase().includes(powerSearch.toLowerCase());
+      return matchesStatus && matchesSearch;
+    });
+  }, [powers, powerStatusFilter, powerSearch]);
+
+  const powerStats = useMemo(() => {
+    return {
+      total: powers.length,
+      open: powers.filter((p) => p.status === 'open').length,
+      active: powers.filter((p) => p.status === 'active').length,
+    };
+  }, [powers]);
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <header className="bg-[#1a4d2e] px-6 py-4 flex items-center justify-between">
@@ -144,193 +253,309 @@ export default function AdminPage() {
           >
             + New Case
           </button>
-          <a
-            href="/admin/powers"
-            className="text-sm font-semibold text-green-200 hover:text-white transition-colors"
-          >
-            Powers
-          </a>
           <a href="/" className="text-sm text-green-200 underline">
             Back to Site
           </a>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-white">{stats.total}</p>
-            <p className="text-xs text-gray-400 mt-1">Total Cases</p>
-          </div>
-          <div className="bg-gray-900 border border-yellow-900/50 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-yellow-400">{stats.submitted}</p>
-            <p className="text-xs text-gray-400 mt-1">Submitted</p>
-          </div>
-          <div className="bg-gray-900 border border-blue-900/50 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-blue-400">{stats.active}</p>
-            <p className="text-xs text-gray-400 mt-1">Active</p>
-          </div>
-          <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-gray-400">{stats.completed}</p>
-            <p className="text-xs text-gray-400 mt-1">Completed</p>
-          </div>
-        </div>
+      <main className="max-w-[1600px] mx-auto px-4 py-8">
+        <div className="flex gap-6">
+          {/* ── Left Column: Cases ── */}
+          <div className="flex-1 min-w-0">
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-white">{stats.total}</p>
+                <p className="text-xs text-gray-400 mt-1">Total Cases</p>
+              </div>
+              <div className="bg-gray-900 border border-yellow-900/50 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-yellow-400">{stats.submitted}</p>
+                <p className="text-xs text-gray-400 mt-1">Submitted</p>
+              </div>
+              <div className="bg-gray-900 border border-blue-900/50 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-blue-400">{stats.active}</p>
+                <p className="text-xs text-gray-400 mt-1">Active</p>
+              </div>
+              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
+                <p className="text-2xl font-bold text-gray-400">{stats.completed}</p>
+                <p className="text-xs text-gray-400 mt-1">Completed</p>
+              </div>
+            </div>
 
-        {/* Search & Filter */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <input
-            type="text"
-            placeholder="Search by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]"
-          />
-          <div className="flex gap-2 flex-wrap">
-            {STATUS_OPTIONS.map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize transition-colors ${
-                  statusFilter === s
-                    ? 'bg-[#1a4d2e] text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Customer Management Header */}
-        <div className="mb-6">
-          <h2 className="text-lg font-bold text-[#d4af37]">Customer Management</h2>
-          <p className="text-sm text-gray-400">
-            Manage customers, communications, and their status in the bail bond process.
-          </p>
-        </div>
-
-        {/* Case Cards */}
-        {loading ? (
-          <p className="text-gray-400">Loading cases...</p>
-        ) : filtered.length === 0 ? (
-          <p className="text-gray-400">No cases match your criteria.</p>
-        ) : (
-          <div className="space-y-3">
-            {filtered.map((app) => {
-              const needsAttention = app.indemnitor_status === 'pending' || app.indemnitor_status === 'request_sent';
-              return (
-              <a
-                key={app.id}
-                href={`/admin/case/${app.id}`}
-                className={`block bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-gray-600 hover:bg-gray-900/80 transition-colors ${
-                  needsAttention ? 'border-l-2 border-l-orange-500' : ''
-                }`}
-              >
-                {/* Desktop layout */}
-                <div className="hidden sm:flex items-center gap-4">
-                  <DateBadge
-                    dateStr={app.bond_date || app.created_at?.split('T')[0]}
-                    status={app.status}
-                  />
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-sm text-white truncate">
-                        {app.defendant_first} {app.defendant_last}
-                      </p>
-                      {app.power_number && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-900/60 text-teal-400 border border-teal-800/50 whitespace-nowrap">
-                          {app.power_number}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-x-3 text-xs text-gray-500 mt-0.5">
-                      {app.county && <span>County: {app.county}</span>}
-                      {!app.county && app.court_name && <span>{app.court_name}</span>}
-                      {app.bond_date && (
-                        <span>
-                          Bond Date:{' '}
-                          {new Date(app.bond_date + 'T00:00:00').toLocaleDateString()}
-                        </span>
-                      )}
-                      {!app.bond_date && app.court_date && (
-                        <span>
-                          Court:{' '}
-                          {new Date(app.court_date + 'T00:00:00').toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${caseStatusBadge(app.status)}`}
+            {/* Search & Filter */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]"
+              />
+              <div className="flex gap-2 flex-wrap">
+                {STATUS_OPTIONS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(s)}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize transition-colors ${
+                      statusFilter === s
+                        ? 'bg-[#1a4d2e] text-white'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    }`}
                   >
-                    {app.status}
-                  </span>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                  {app.bond_amount && (
-                    <span className="text-sm font-bold text-white w-28 text-right tabular-nums">
-                      ${Number(app.bond_amount).toLocaleString()}
-                    </span>
-                  )}
+            {/* Customer Management Header */}
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-[#d4af37]">Customer Management</h2>
+              <p className="text-sm text-gray-400">
+                Manage customers, communications, and their status in the bail bond process.
+              </p>
+            </div>
 
-                  {needsAttention && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-900/60 text-orange-400 border border-orange-800/50 whitespace-nowrap">
-                      {app.indemnitor_status === 'request_sent' ? 'Awaiting Response' : 'Indemnitor Pending'}
-                    </span>
-                  )}
+            {/* Case Cards */}
+            {loading ? (
+              <p className="text-gray-400">Loading cases...</p>
+            ) : filtered.length === 0 ? (
+              <p className="text-gray-400">No cases match your criteria.</p>
+            ) : (
+              <div className="space-y-3">
+                {filtered.map((app) => {
+                  const needsAttention = app.indemnitor_status === 'pending' || app.indemnitor_status === 'request_sent';
+                  return (
+                  <a
+                    key={app.id}
+                    href={`/admin/case/${app.id}`}
+                    className={`block bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-gray-600 hover:bg-gray-900/80 transition-colors ${
+                      needsAttention ? 'border-l-2 border-l-orange-500' : ''
+                    }`}
+                  >
+                    {/* Desktop layout */}
+                    <div className="hidden sm:flex items-center gap-4">
+                      <DateBadge
+                        dateStr={app.bond_date || app.created_at?.split('T')[0]}
+                        status={app.status}
+                      />
 
-                  <div className="flex gap-2">
-                    <StatusBadge label="Indemnitor" status={app.indemnitor_status} />
-                    <StatusBadge label="Defendant" status={app.defendant_status} />
-                  </div>
-                </div>
-
-                {/* Mobile layout */}
-                <div className="sm:hidden">
-                  <div className="flex items-start gap-3 mb-3">
-                    <DateBadge
-                      dateStr={app.bond_date || app.created_at?.split('T')[0]}
-                      status={app.status}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-sm text-white truncate">
-                          {app.defendant_first} {app.defendant_last}
-                        </p>
-                        {app.power_number && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-teal-900/60 text-teal-400 border border-teal-800/50 whitespace-nowrap">
-                            {app.power_number}
-                          </span>
-                        )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-sm text-white truncate">
+                            {app.defendant_first} {app.defendant_last}
+                          </p>
+                          {app.power_number && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-900/60 text-teal-400 border border-teal-800/50 whitespace-nowrap">
+                              {app.power_number}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-x-3 text-xs text-gray-500 mt-0.5">
+                          {app.county && <span>County: {app.county}</span>}
+                          {!app.county && app.court_name && <span>{app.court_name}</span>}
+                          {app.bond_date && (
+                            <span>
+                              Bond Date:{' '}
+                              {new Date(app.bond_date + 'T00:00:00').toLocaleDateString()}
+                            </span>
+                          )}
+                          {!app.bond_date && app.court_date && (
+                            <span>
+                              Court:{' '}
+                              {new Date(app.court_date + 'T00:00:00').toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-x-2 text-xs text-gray-500 mt-0.5">
-                        {app.county && <span>{app.county}</span>}
-                        {app.bond_amount && (
-                          <span>${Number(app.bond_amount).toLocaleString()}</span>
-                        )}
+
+                      <span
+                        className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${caseStatusBadge(app.status)}`}
+                      >
+                        {app.status}
+                      </span>
+
+                      {app.bond_amount && (
+                        <span className="text-sm font-bold text-white w-24 text-right tabular-nums">
+                          ${Number(app.bond_amount).toLocaleString()}
+                        </span>
+                      )}
+
+                      {needsAttention && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-900/60 text-orange-400 border border-orange-800/50 whitespace-nowrap">
+                          {app.indemnitor_status === 'request_sent' ? 'Awaiting Response' : 'Indemnitor Pending'}
+                        </span>
+                      )}
+
+                      <div className="flex gap-2">
+                        <StatusBadge label="Indemnitor" status={app.indemnitor_status} />
+                        <StatusBadge label="Defendant" status={app.defendant_status} />
                       </div>
                     </div>
-                    <span
-                      className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${caseStatusBadge(app.status)}`}
-                    >
-                      {app.status}
-                    </span>
-                  </div>
-                  <div className="flex gap-2 justify-end">
-                    <StatusBadge label="Indemnitor" status={app.indemnitor_status} />
-                    <StatusBadge label="Defendant" status={app.defendant_status} />
-                  </div>
-                </div>
-              </a>
-              );
-            })}
+
+                    {/* Mobile layout */}
+                    <div className="sm:hidden">
+                      <div className="flex items-start gap-3 mb-3">
+                        <DateBadge
+                          dateStr={app.bond_date || app.created_at?.split('T')[0]}
+                          status={app.status}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-sm text-white truncate">
+                              {app.defendant_first} {app.defendant_last}
+                            </p>
+                            {app.power_number && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-teal-900/60 text-teal-400 border border-teal-800/50 whitespace-nowrap">
+                                {app.power_number}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-x-2 text-xs text-gray-500 mt-0.5">
+                            {app.county && <span>{app.county}</span>}
+                            {app.bond_amount && (
+                              <span>${Number(app.bond_amount).toLocaleString()}</span>
+                            )}
+                          </div>
+                        </div>
+                        <span
+                          className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${caseStatusBadge(app.status)}`}
+                        >
+                          {app.status}
+                        </span>
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        <StatusBadge label="Indemnitor" status={app.indemnitor_status} />
+                        <StatusBadge label="Defendant" status={app.defendant_status} />
+                      </div>
+                    </div>
+                  </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* ── Right Column: Powers ── */}
+          <div className="w-[420px] flex-shrink-0 hidden lg:block">
+            <div className="sticky top-6">
+              {/* Powers Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-[#d4af37]">Powers</h2>
+                <button
+                  onClick={() => {
+                    setShowPowerModal(true);
+                    setRecentlyAdded([]);
+                    setAddError('');
+                  }}
+                  className="bg-[#d4af37] text-[#0a0a0a] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#e5c55a] transition-colors"
+                >
+                  + Load Power
+                </button>
+              </div>
+
+              {/* Power Stats */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-white">{powerStats.total}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Total</p>
+                </div>
+                <div className="bg-gray-900 border border-green-900/50 rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-green-400">{powerStats.open}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Open</p>
+                </div>
+                <div className="bg-gray-900 border border-blue-900/50 rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-blue-400">{powerStats.active}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Active</p>
+                </div>
+              </div>
+
+              {/* Power Search & Filter */}
+              <div className="space-y-2 mb-4">
+                <input
+                  type="text"
+                  placeholder="Search powers..."
+                  value={powerSearch}
+                  onChange={(e) => setPowerSearch(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]"
+                />
+                <div className="flex gap-2">
+                  {POWER_STATUS_FILTERS.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setPowerStatusFilter(s)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
+                        powerStatusFilter === s
+                          ? 'bg-[#1a4d2e] text-white'
+                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Powers List */}
+              <div className="max-h-[calc(100vh-340px)] overflow-y-auto space-y-2 pr-1">
+                {powersLoading ? (
+                  <p className="text-gray-400 text-sm">Loading powers...</p>
+                ) : filteredPowers.length === 0 ? (
+                  <p className="text-gray-400 text-sm">No powers found.</p>
+                ) : (
+                  filteredPowers.map((p) => (
+                    <div
+                      key={p.id}
+                      className="bg-gray-900 border border-gray-800 rounded-xl p-3 flex items-center gap-3 hover:border-gray-600 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-sm text-white">
+                            {p.power_number}
+                          </p>
+                          <span className="text-xs text-gray-400 truncate">{p.surety}</span>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${powerStatusBadge(p.status)}`}
+                          >
+                            {p.status}
+                          </span>
+                        </div>
+                        {p.status === 'active' && p.defendant_name && (
+                          <a
+                            href={`/admin/case/${p.application_id}`}
+                            className="text-xs text-blue-400 hover:text-blue-300 mt-0.5 inline-block"
+                          >
+                            {p.defendant_name}
+                          </a>
+                        )}
+                      </div>
+
+                      <span className="text-sm font-bold text-teal-400 tabular-nums whitespace-nowrap">
+                        ${Number(p.amount).toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+
+                      {p.status === 'open' && (
+                        <button
+                          onClick={() => voidPower(p.id)}
+                          className="text-[10px] text-gray-500 hover:text-red-400 transition-colors"
+                        >
+                          Void
+                        </button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
 
+      {/* New Case Modal */}
       {showNewCase && (
         <div
           className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
@@ -374,6 +599,96 @@ export default function AdminPage() {
                 {creating ? 'Creating...' : 'Create'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Load Power Modal */}
+      {showPowerModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowPowerModal(false)}
+        >
+          <div
+            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-white mb-4">Load Power</h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Power Number"
+                value={newNumber}
+                onChange={(e) => setNewNumber(e.target.value)}
+                autoFocus
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+              />
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Amount"
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+              />
+              <input
+                type="text"
+                placeholder="Surety / Agency"
+                value={newSurety}
+                onChange={(e) => setNewSurety(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addPower()}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+              />
+            </div>
+            {addError && (
+              <p className="text-sm text-red-400 mt-2">{addError}</p>
+            )}
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => setShowPowerModal(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm"
+              >
+                Done
+              </button>
+              <button
+                onClick={addPower}
+                disabled={
+                  adding ||
+                  !newNumber.trim() ||
+                  !newAmount.trim() ||
+                  !newSurety.trim()
+                }
+                className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e5c55a] transition-colors text-sm disabled:opacity-50"
+              >
+                {adding ? 'Adding...' : 'Add'}
+              </button>
+            </div>
+
+            {/* Recently added */}
+            {recentlyAdded.length > 0 && (
+              <div className="mt-4 border-t border-gray-800 pt-3">
+                <p className="text-xs text-gray-500 mb-2">Just added:</p>
+                <div className="space-y-1">
+                  {recentlyAdded.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between text-xs bg-gray-800/50 rounded-lg px-3 py-2"
+                    >
+                      <span className="text-white font-medium">
+                        {p.power_number}
+                      </span>
+                      <span className="text-gray-400">{p.surety}</span>
+                      <span className="text-teal-400 font-bold">
+                        ${Number(p.amount).toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
