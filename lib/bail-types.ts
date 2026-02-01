@@ -133,6 +133,7 @@ export interface Checkin {
   longitude: number | null;
   accuracy: number | null;
   ip_address: string | null;
+  selfie_path: string | null;
   method: 'sms_link' | 'manual';
   checked_in_at: string;
 }
@@ -278,6 +279,7 @@ export interface RecordCheckinRequest {
   latitude: number;
   longitude: number;
   accuracy?: number;
+  selfie_path?: string;
   token?: string;
 }
 

@@ -1,7 +1,12 @@
+import { useState } from 'react';
 import type { Checkin, SmsLogEntry, ReminderSent, Application, Signature, Document } from '@/lib/bail-types';
 
 interface DocumentWithUrl extends Document {
   signed_url: string | null;
+}
+
+interface CheckinWithUrl extends Checkin {
+  selfie_url: string | null;
 }
 
 interface TimelineEvent {
@@ -136,7 +141,7 @@ export default function LogsTab({
   onSendCheckin,
 }: {
   application: Application;
-  checkins: Checkin[];
+  checkins: CheckinWithUrl[];
   sms_log: SmsLogEntry[];
   reminders_sent: ReminderSent[];
   signatures: Signature[];
@@ -144,10 +149,29 @@ export default function LogsTab({
   checkinSending: boolean;
   onSendCheckin: () => void;
 }) {
+  const [selfieLightbox, setSelfieLightbox] = useState<string | null>(null);
   const timeline = buildTimeline(application, signatures, documents, checkins, reminders_sent, sms_log);
 
   return (
     <div className="space-y-6">
+      {/* Selfie Lightbox */}
+      {selfieLightbox && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setSelfieLightbox(null)}
+        >
+          <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setSelfieLightbox(null)}
+              className="absolute -top-10 right-0 text-gray-400 hover:text-white text-sm"
+            >
+              Close
+            </button>
+            <img src={selfieLightbox} alt="Check-in selfie" className="w-full rounded-lg shadow-2xl" />
+          </div>
+        </div>
+      )}
+
       {/* Check-in Schedule */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
@@ -186,6 +210,7 @@ export default function LogsTab({
                   <th className="text-left py-2 pr-4">Date / Time</th>
                   <th className="text-left py-2 pr-4">Location</th>
                   <th className="text-left py-2 pr-4">Accuracy</th>
+                  <th className="text-left py-2 pr-4">Selfie</th>
                   <th className="text-left py-2 pr-4">Method</th>
                   <th className="text-left py-2">Status</th>
                 </tr>
@@ -198,6 +223,19 @@ export default function LogsTab({
                       {ci.latitude && ci.longitude ? `${ci.latitude.toFixed(4)}, ${ci.longitude.toFixed(4)}` : '—'}
                     </td>
                     <td className="py-2 pr-4 text-gray-400">{ci.accuracy ? `${ci.accuracy.toFixed(0)}m` : '—'}</td>
+                    <td className="py-2 pr-4">
+                      {ci.selfie_url ? (
+                        <button onClick={() => setSelfieLightbox(ci.selfie_url)}>
+                          <img
+                            src={ci.selfie_url}
+                            alt="Selfie"
+                            className="w-8 h-8 rounded-full object-cover border border-gray-700 hover:border-[#d4af37] transition-colors cursor-pointer"
+                          />
+                        </button>
+                      ) : (
+                        <span className="text-gray-600 text-xs">—</span>
+                      )}
+                    </td>
                     <td className="py-2 pr-4 text-gray-400 capitalize">{ci.method?.replace(/_/g, ' ') || '—'}</td>
                     <td className={`py-2 font-semibold ${ci.latitude && ci.longitude ? 'text-green-400' : 'text-yellow-400'}`}>
                       {ci.latitude && ci.longitude ? 'Responded' : 'Pending'}

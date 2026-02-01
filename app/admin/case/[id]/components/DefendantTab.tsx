@@ -20,6 +20,8 @@ export default function DefendantTab({
   saving,
   isDraft,
   onRunWizard,
+  checkinSending,
+  onSendCheckin,
 }: {
   caseInfo: CaseInfoFields;
   updateCaseInfo: (key: keyof CaseInfoFields, val: string) => void;
@@ -27,6 +29,8 @@ export default function DefendantTab({
   saving: boolean;
   isDraft: boolean;
   onRunWizard: () => void;
+  checkinSending?: boolean;
+  onSendCheckin?: () => void;
 }) {
   const { verify, getStatus } = usePhoneVerify();
 
@@ -63,7 +67,18 @@ export default function DefendantTab({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <CaseField label="First Name" value={caseInfo.defendant_first} field="defendant_first" onChange={updateCaseInfo} onBlur={blurSaveCaseInfo} disabled={saving} placeholder="First" />
           <CaseField label="Last Name" value={caseInfo.defendant_last} field="defendant_last" onChange={updateCaseInfo} onBlur={blurSaveCaseInfo} disabled={saving} placeholder="Last" />
-          <CaseField label="Phone" value={caseInfo.defendant_phone} field="defendant_phone" onChange={updateCaseInfo} onBlur={handlePhoneBlur} disabled={saving} type="tel" placeholder="(985) 555-1234" statusDot={phoneDot('defendant_phone')} />
+          <div className="relative">
+            <CaseField label="Phone" value={caseInfo.defendant_phone} field="defendant_phone" onChange={updateCaseInfo} onBlur={handlePhoneBlur} disabled={saving} type="tel" placeholder="(985) 555-1234" statusDot={phoneDot('defendant_phone')} />
+            {onSendCheckin && caseInfo.defendant_phone && (
+              <button
+                onClick={onSendCheckin}
+                disabled={checkinSending}
+                className="absolute right-0 -bottom-6 text-[10px] text-[#1a4d2e] hover:text-green-400 font-semibold transition-colors disabled:opacity-50"
+              >
+                {checkinSending ? 'Sending...' : 'Send Check-in'}
+              </button>
+            )}
+          </div>
           <CaseField label="Email" value={caseInfo.defendant_email} field="defendant_email" onChange={updateCaseInfo} onBlur={blurSaveCaseInfo} disabled={saving} type="email" placeholder="email@example.com" />
           <CaseField label="Date of Birth" value={caseInfo.defendant_dob} field="defendant_dob" onChange={updateCaseInfo} onBlur={blurSaveCaseInfo} disabled={saving} type="date" />
           <CaseField label="SSN (last 4)" value={caseInfo.defendant_ssn_last4} field="defendant_ssn_last4" onChange={updateCaseInfo} onBlur={blurSaveCaseInfo} disabled={saving} placeholder="1234" />

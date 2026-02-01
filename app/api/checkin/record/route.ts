@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
         latitude: body.latitude,
         longitude: body.longitude,
         accuracy: body.accuracy || null,
+        selfie_path: body.selfie_path || null,
         ip_address: ip,
         method: 'sms_link',
       })

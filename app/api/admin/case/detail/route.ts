@@ -74,12 +74,24 @@ export async function GET(req: NextRequest) {
       })
     );
 
+    // Generate signed URLs for checkin selfie thumbnails
+    const checkins = checkinsResult.data || [];
+    const checkinsWithUrls = await Promise.all(
+      checkins.map(async (ci) => {
+        if (!ci.selfie_path) return { ...ci, selfie_url: null };
+        const { data: signedUrlData } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(ci.selfie_path, 3600);
+        return { ...ci, selfie_url: signedUrlData?.signedUrl || null };
+      })
+    );
+
     return NextResponse.json({
       application: appResult.data,
       references: refsResult.data || [],
       signatures: sigsResult.data || [],
       documents: documentsWithUrls,
-      checkins: checkinsResult.data || [],
+      checkins: checkinsWithUrls,
       sms_log: smsResult.data || [],
       reminders_sent: remindersResult.data || [],
       payments: paymentsResult.data || [],

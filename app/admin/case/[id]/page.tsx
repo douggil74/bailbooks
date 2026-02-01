@@ -31,12 +31,16 @@ interface DocumentWithUrl extends Document {
   signed_url: string | null;
 }
 
+interface CheckinWithUrl extends Checkin {
+  selfie_url: string | null;
+}
+
 interface CaseData {
   application: Application;
   references: ApplicationReference[];
   signatures: Signature[];
   documents: DocumentWithUrl[];
-  checkins: Checkin[];
+  checkins: CheckinWithUrl[];
   sms_log: SmsLogEntry[];
   reminders_sent: ReminderSent[];
   payments: Payment[];
@@ -365,7 +369,7 @@ export default function CaseDetailPage() {
   async function sendCheckin() {
     setCheckinSending(true);
     try {
-      const res = await fetch('/api/checkin/request', {
+      const res = await fetch('/api/checkin/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ application_id: id }),
@@ -374,7 +378,8 @@ export default function CaseDetailPage() {
       if (!res.ok) {
         setSaveMsg(`Check-in error: ${json.error}`);
       } else {
-        setSaveMsg('Check-in request sent');
+        const channels = (json.channels_sent as string[]).join(' + ');
+        setSaveMsg(`Check-in sent via ${channels}`);
         setTimeout(() => setSaveMsg(''), 3000);
         fetchCase();
       }
@@ -429,6 +434,8 @@ export default function CaseDetailPage() {
             saving={saving}
             isDraft={data.application.status === 'draft'}
             onRunWizard={() => { setShowWizard(true); setWizardStep(0); }}
+            checkinSending={checkinSending}
+            onSendCheckin={sendCheckin}
           />
         );
       case 'indemnitors':

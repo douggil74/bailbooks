@@ -201,7 +201,7 @@ export async function GET(req: NextRequest) {
     (async () => {
       const { data: cases } = await supabase
         .from('applications')
-        .select('id, defendant_first, defendant_last, defendant_phone, defendant_email, sms_consent, checkin_frequency')
+        .select('id, defendant_first, defendant_last, defendant_phone, defendant_email, sms_consent, checkin_frequency, created_at')
         .in('status', ['approved', 'active'])
         .eq('sms_consent', true);
 
@@ -220,9 +220,10 @@ export async function GET(req: NextRequest) {
           .order('checked_in_at', { ascending: false })
           .limit(1);
 
-        if (!lastCheckins || lastCheckins.length === 0) continue;
-
-        const lastDate = new Date(lastCheckins[0].checked_in_at);
+        // If no check-ins exist, use application created_at as baseline
+        const lastDate = lastCheckins && lastCheckins.length > 0
+          ? new Date(lastCheckins[0].checked_in_at)
+          : new Date(c.created_at);
         const freqDays = c.checkin_frequency === 'weekly' ? 7 : c.checkin_frequency === 'biweekly' ? 14 : 30;
         const nextDue = new Date(lastDate.getTime() + freqDays * 24 * 60 * 60 * 1000);
         const nextDueStr = dateString(nextDue);
