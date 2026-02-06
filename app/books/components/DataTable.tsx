@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { useTheme } from './ThemeProvider';
 
 export interface Column<T = Record<string, unknown>> {
   key: string;
@@ -26,6 +27,8 @@ export default function DataTable<T extends Record<string, any> = Record<string,
 }) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const { theme } = useTheme();
+  const light = theme === 'light';
 
   function handleSort(key: string) {
     if (sortKey === key) {
@@ -50,23 +53,29 @@ export default function DataTable<T extends Record<string, any> = Record<string,
 
   if (data.length === 0) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-        <p className="text-gray-400 text-sm">{emptyMessage}</p>
+      <div className={`border rounded-xl p-8 text-center ${
+        light ? 'bg-white border-gray-200' : 'bg-gray-900 border-gray-800'
+      }`}>
+        <p className={`text-sm ${light ? 'text-gray-400' : 'text-gray-400'}`}>{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <div className={`border rounded-xl overflow-hidden ${
+      light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'
+    }`}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className={`border-b ${light ? 'border-gray-100' : 'border-gray-800'}`}>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 ${
-                    col.sortable ? 'cursor-pointer select-none hover:text-gray-300' : ''
+                  className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${
+                    light ? 'text-gray-400' : 'text-gray-500'
+                  } ${
+                    col.sortable ? `cursor-pointer select-none ${light ? 'hover:text-gray-700' : 'hover:text-gray-300'}` : ''
                   } ${col.className || ''}`}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
                 >
@@ -80,17 +89,19 @@ export default function DataTable<T extends Record<string, any> = Record<string,
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800/50">
+          <tbody className={`divide-y ${light ? 'divide-gray-50' : 'divide-gray-800/50'}`}>
             {sorted.map((row, i) => (
               <tr
                 key={i}
                 className={`transition-colors ${
-                  onRowClick ? 'cursor-pointer hover:bg-gray-800/50' : ''
+                  onRowClick
+                    ? `cursor-pointer ${light ? 'hover:bg-gray-50' : 'hover:bg-gray-800/50'}`
+                    : ''
                 }`}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={`px-4 py-3 text-gray-300 ${col.className || ''}`}>
+                  <td key={col.key} className={`px-4 py-3 ${light ? 'text-gray-700' : 'text-gray-300'} ${col.className || ''}`}>
                     {col.render ? col.render(row) : (row[col.key] as React.ReactNode) ?? '—'}
                   </td>
                 ))}

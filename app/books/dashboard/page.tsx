@@ -14,6 +14,7 @@ import {
 import KPICard from '../components/KPICard';
 import CashFlowChart from '../components/CashFlowChart';
 import DataTable, { type Column } from '../components/DataTable';
+import AIAdvisor from '../components/AIAdvisor';
 import type { DashboardData, RecentPayment, OverduePayment, UpcomingCourt } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -160,6 +161,9 @@ export default function DashboardPage() {
         <KPICard label="Net Income" value={data.net_income} icon={TrendingUp} colorClass="border-emerald-500/30" />
         <KPICard label="Overdue" value={data.overdue_payments} icon={AlertTriangle} format="number" colorClass={data.overdue_payments > 0 ? 'border-red-500/30' : 'border-gray-800'} />
       </div>
+
+      {/* AI Financial Advisor */}
+      <AIAdvisor data={data} />
 
       {/* Cash Flow Chart */}
       <CashFlowChart data={data.cash_flow} />
