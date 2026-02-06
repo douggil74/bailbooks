@@ -53,6 +53,8 @@ export interface Application {
   gps_consent: boolean;
   checkin_frequency: 'weekly' | 'biweekly' | 'monthly';
   indemnitor_info_categories: string | null;
+  originals_signed: boolean;
+  checklist_overrides: string | null;
   created_at: string;
   updated_at: string;
 }

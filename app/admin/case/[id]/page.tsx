@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Shield } from 'lucide-react';
+import CommandBar from '@/app/command/components/CommandBar';
 import type {
   Application,
   ApplicationReference,
@@ -657,6 +658,8 @@ export default function CaseDetailPage() {
             payments={data.payments}
             indemnitors={data.indemnitors}
             onNavigateTab={navigateFromOverview}
+            onSaveField={saveField}
+            onRefresh={fetchCase}
           />
         );
       case 'defendant':
@@ -765,6 +768,7 @@ export default function CaseDetailPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
+      <CommandBar />
       {/* Lightbox */}
       {lightboxUrl && (
         <div

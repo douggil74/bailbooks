@@ -39,6 +39,8 @@ const ALLOWED_FIELDS = [
   'sms_consent',
   'gps_consent',
   'indemnitor_info_categories',
+  'originals_signed',
+  'checklist_overrides',
 ];
 
 export async function PUT(req: NextRequest) {
