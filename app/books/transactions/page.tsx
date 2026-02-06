@@ -1,0 +1,355 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
+import DataTable, { type Column } from '../components/DataTable';
+import type { Transaction, BankAccount } from '@/lib/books-types';
+
+const ORG_ID_KEY = 'bailbooks_org_id';
+
+function fmt(n: number) {
+  return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function fmtDate(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+const TYPE_META: Record<string, { label: string; icon: typeof ArrowUpRight; color: string }> = {
+  deposit: { label: 'Deposit', icon: ArrowDownLeft, color: 'text-emerald-400' },
+  withdrawal: { label: 'Withdrawal', icon: ArrowUpRight, color: 'text-red-400' },
+  transfer: { label: 'Transfer', icon: ArrowLeftRight, color: 'text-blue-400' },
+  adjustment: { label: 'Adjustment', icon: Sliders, color: 'text-yellow-400' },
+};
+
+export default function TransactionsPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [accountFilter, setAccountFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+
+  const fetchData = useCallback(() => {
+    const orgId = localStorage.getItem(ORG_ID_KEY);
+    if (!orgId) { setLoading(false); return; }
+    setLoading(true);
+
+    const params = new URLSearchParams({ org_id: orgId, page: String(page), per_page: '25' });
+    if (accountFilter) params.set('bank_account_id', accountFilter);
+
+    fetch(`/api/books/transactions?${params}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) throw new Error(d.error);
+        setTransactions(d.data || []);
+        setTotal(d.total || 0);
+        setTotalPages(d.total_pages || 1);
+      })
+      .catch(() => setTransactions([]))
+      .finally(() => setLoading(false));
+  }, [accountFilter, page]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    const orgId = localStorage.getItem(ORG_ID_KEY);
+    if (!orgId) return;
+    fetch(`/api/books/bank-accounts?org_id=${orgId}`)
+      .then((r) => r.json())
+      .then((d) => setBankAccounts(d.accounts || []))
+      .catch(() => {});
+  }, []);
+
+  const columns: Column<Transaction>[] = [
+    {
+      key: 'transaction_date',
+      label: 'Date',
+      sortable: true,
+      render: (r) => fmtDate(r.transaction_date),
+    },
+    {
+      key: 'transaction_type',
+      label: 'Type',
+      render: (r) => {
+        const meta = TYPE_META[r.transaction_type] || TYPE_META.deposit;
+        const Icon = meta.icon;
+        return (
+          <div className="flex items-center gap-1.5">
+            <Icon className={`w-3.5 h-3.5 ${meta.color}`} />
+            <span className={`text-xs font-medium ${meta.color}`}>{meta.label}</span>
+          </div>
+        );
+      },
+    },
+    { key: 'description', label: 'Description', sortable: true },
+    { key: 'payee', label: 'Payee' },
+    {
+      key: 'bank_account_name',
+      label: 'Account',
+      render: (r) => <span className="text-gray-400">{r.bank_account_name || '—'}</span>,
+    },
+    {
+      key: 'amount',
+      label: 'Amount',
+      sortable: true,
+      className: 'text-right',
+      render: (r) => {
+        const isDebit = r.transaction_type === 'withdrawal';
+        return (
+          <span className={`font-medium ${isDebit ? 'text-red-400' : 'text-emerald-400'}`}>
+            {isDebit ? '-' : '+'}{fmt(r.amount)}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'is_reconciled',
+      label: '',
+      className: 'w-8',
+      render: (r) => r.is_reconciled ? (
+        <span className="w-2 h-2 rounded-full bg-emerald-400 block mx-auto" title="Reconciled" />
+      ) : (
+        <span className="w-2 h-2 rounded-full bg-gray-600 block mx-auto" title="Unreconciled" />
+      ),
+    },
+    { key: 'reference_number', label: 'Ref #' },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Transactions</h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-1.5 px-3 py-2 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg text-sm hover:bg-[#e5c55a] transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Transaction
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-3 items-center">
+        <select
+          value={accountFilter}
+          onChange={(e) => { setAccountFilter(e.target.value); setPage(1); }}
+          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+        >
+          <option value="">All Accounts</option>
+          {bankAccounts.map((a) => (
+            <option key={a.id} value={a.id}>{a.account_name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
+          <p className="text-gray-400 text-sm animate-pulse">Loading transactions...</p>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={transactions}
+          emptyMessage="No transactions recorded yet"
+        />
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-gray-500">
+            Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total}
+          </p>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Transaction Modal */}
+      {showForm && (
+        <TransactionForm
+          bankAccounts={bankAccounts}
+          onClose={() => setShowForm(false)}
+          onSaved={() => { setShowForm(false); fetchData(); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function TransactionForm({
+  bankAccounts,
+  onClose,
+  onSaved,
+}: {
+  bankAccounts: BankAccount[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    transaction_type: 'deposit',
+    bank_account_id: '',
+    amount: '',
+    description: '',
+    payee: '',
+    reference_number: '',
+    transaction_date: new Date().toISOString().split('T')[0],
+    notes: '',
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const orgId = localStorage.getItem(ORG_ID_KEY);
+    if (!orgId) return;
+
+    const res = await fetch('/api/books/transactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        org_id: orgId,
+        ...form,
+        amount: parseFloat(form.amount) || 0,
+        bank_account_id: form.bank_account_id || null,
+      }),
+    });
+    const data = await res.json();
+    setSaving(false);
+    if (data.error) { alert(data.error); return; }
+    onSaved();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4">
+        <h2 className="text-lg font-bold text-white">Add Transaction</h2>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Type</label>
+            <select
+              value={form.transaction_type}
+              onChange={(e) => setForm({ ...form, transaction_type: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none appearance-none"
+            >
+              <option value="deposit">Deposit</option>
+              <option value="withdrawal">Withdrawal</option>
+              <option value="transfer">Transfer</option>
+              <option value="adjustment">Adjustment</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Date</label>
+            <input
+              type="date"
+              value={form.transaction_date}
+              onChange={(e) => setForm({ ...form, transaction_date: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-400 block mb-1">Bank Account</label>
+          <select
+            value={form.bank_account_id}
+            onChange={(e) => setForm({ ...form, bank_account_id: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none appearance-none"
+          >
+            <option value="">Select account...</option>
+            {bankAccounts.map((a) => (
+              <option key={a.id} value={a.id}>{a.account_name} ({a.bank_name})</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-400 block mb-1">Amount</label>
+          <input
+            type="number"
+            step="0.01"
+            value={form.amount}
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            placeholder="0.00"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-400 block mb-1">Description</label>
+          <input
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            placeholder="What was this for?"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Payee</label>
+            <input
+              value={form.payee}
+              onChange={(e) => setForm({ ...form, payee: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              placeholder="Who was paid?"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Reference #</label>
+            <input
+              value={form.reference_number}
+              onChange={(e) => setForm({ ...form, reference_number: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              placeholder="Check #, etc."
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-400 block mb-1">Notes</label>
+          <textarea
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none resize-none"
+            rows={2}
+          />
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-800 text-gray-400 rounded-lg text-sm font-medium hover:text-white transition-colors">
+            Cancel
+          </button>
+          <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg text-sm disabled:opacity-50 hover:bg-[#e5c55a] transition-colors">
+            {saving ? 'Saving...' : 'Add Transaction'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

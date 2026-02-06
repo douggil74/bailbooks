@@ -4,6 +4,7 @@ export type ActivityStatus = 'complete' | 'information' | 'request_sent' | 'pend
 
 export interface Application {
   id: string;
+  org_id?: string;
   status: 'draft' | 'submitted' | 'approved' | 'active' | 'completed';
   defendant_first: string;
   defendant_last: string;
@@ -27,6 +28,11 @@ export interface Application {
   county: string | null;
   bond_date: string | null;
   premium: number | null;
+  forfeiture_status: string | null;
+  forfeiture_date: string | null;
+  forfeiture_deadline: string | null;
+  forfeiture_amount: number | null;
+  forfeiture_notes: string | null;
   down_payment: number | null;
   payment_plan: string | null;
   payment_amount: number | null;
@@ -53,6 +59,7 @@ export interface Application {
 
 export interface Indemnitor {
   id: string;
+  org_id?: string;
   application_id: string;
   first_name: string;
   last_name: string;
@@ -81,6 +88,7 @@ export interface Indemnitor {
 
 export interface Payment {
   id: string;
+  org_id?: string;
   application_id: string;
   amount: number;
   type: 'scheduled' | 'manual' | 'down_payment';
@@ -160,6 +168,7 @@ export interface ReminderSent {
 
 export interface Power {
   id: string;
+  org_id?: string;
   power_number: string;
   amount: number;
   surety: string;
