@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, Building2, CreditCard, PiggyBank, Landmark, Wallet, Star, Trash2, Pencil } from 'lucide-react';
 import type { BankAccount } from '@/lib/books-types';
 import { useTheme } from '../components/ThemeProvider';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
+import { useOrg } from '../components/OrgContext';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -22,13 +21,13 @@ const ACCOUNT_TYPE_META: Record<string, { label: string; icon: typeof Building2;
 export default function BankingPage() {
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<BankAccount | null>(null);
 
   const fetchAccounts = useCallback(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) { setLoading(false); return; }
     setLoading(true);
     fetch(`/api/books/bank-accounts?org_id=${orgId}`)
@@ -39,7 +38,7 @@ export default function BankingPage() {
       })
       .catch(() => setAccounts([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [orgId]);
 
   useEffect(() => { fetchAccounts(); }, [fetchAccounts]);
 
@@ -170,10 +169,11 @@ function BankAccountForm({
 
   const inputCls = `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none ${light ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-700 text-white'}`;
 
+  const orgId = useOrg();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) { setSaving(false); alert('No organization configured. Go to Settings first.'); return; }
 
     try {

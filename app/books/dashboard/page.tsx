@@ -16,9 +16,8 @@ import CashFlowChart from '../components/CashFlowChart';
 import DataTable, { type Column } from '../components/DataTable';
 import AIAdvisor from '../components/AIAdvisor';
 import { useTheme } from '../components/ThemeProvider';
+import { useOrg } from '../components/OrgContext';
 import type { DashboardData, RecentPayment, OverduePayment, UpcomingCourt } from '@/lib/books-types';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -101,18 +100,20 @@ const courtCols: Column<UpcomingCourt>[] = [
 export default function DashboardPage() {
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) {
       setError('No organization configured. Go to Settings to set up.');
       setLoading(false);
       return;
     }
 
+    setLoading(true);
+    setError(null);
     fetch(`/api/books/dashboard?org_id=${orgId}`)
       .then((r) => r.json())
       .then((d) => {
@@ -121,7 +122,7 @@ export default function DashboardPage() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [orgId]);
 
   if (loading) {
     return (

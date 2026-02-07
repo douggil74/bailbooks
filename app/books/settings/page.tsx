@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Trash2, UserPlus, Building2, Check } from 'lucide-react';
 import type { Organization, OrgUser, ExpenseCategory } from '@/lib/books-types';
 import { useTheme } from '../components/ThemeProvider';
+import { useOrg } from '../components/OrgContext';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
 
@@ -51,32 +52,17 @@ export default function SettingsPage() {
   const cardCls = `border rounded-xl p-4 ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`;
   const sectionHeading = `text-sm font-semibold mb-4 ${light ? 'text-gray-900' : 'text-white'}`;
 
+  const contextOrgId = useOrg();
+
   useEffect(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
-    if (orgId) {
-      loadData(orgId);
+    if (contextOrgId) {
+      loadData(contextOrgId);
       return;
     }
-    // No org_id in localStorage — try to reconnect to existing org
-    fetch('/api/books/org?discover=true')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.organizations && d.organizations.length > 0) {
-          // Auto-reconnect to the most recent org
-          const found = d.organizations[0];
-          localStorage.setItem(ORG_ID_KEY, found.id);
-          setMessage(`Reconnected to "${found.name}"`);
-          loadData(found.id);
-        } else {
-          setShowSetup(true);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        setShowSetup(true);
-        setLoading(false);
-      });
-  }, []);
+    // No org_id available — show setup form
+    setShowSetup(true);
+    setLoading(false);
+  }, [contextOrgId]);
 
   async function loadData(orgId: string) {
     setLoading(true);

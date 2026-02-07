@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, FileText } from 'lucide-react';
 import type { ChartOfAccount } from '@/lib/books-types';
 import { useTheme } from '../components/ThemeProvider';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
+import { useOrg } from '../components/OrgContext';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -54,9 +53,9 @@ export default function ChartOfAccountsPage() {
   const [seeding, setSeeding] = useState(false);
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
 
   const fetchAccounts = useCallback(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) { setLoading(false); return; }
     setLoading(true);
     fetch(`/api/books/chart-of-accounts?org_id=${orgId}`)
@@ -67,12 +66,11 @@ export default function ChartOfAccountsPage() {
       })
       .catch(() => setAccounts([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [orgId]);
 
   useEffect(() => { fetchAccounts(); }, [fetchAccounts]);
 
   async function seedDefaults() {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
     setSeeding(true);
     for (const acct of DEFAULT_ACCOUNTS) {
@@ -187,6 +185,7 @@ function ChartAccountForm({ onClose, onSaved }: { onClose: () => void; onSaved: 
   });
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
 
   const inputCls = light
     ? 'w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none'
@@ -195,7 +194,6 @@ function ChartAccountForm({ onClose, onSaved }: { onClose: () => void; onSaved: 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
 
     const res = await fetch('/api/books/chart-of-accounts', {

@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import DataTable, { type Column } from '../components/DataTable';
 import { useTheme } from '../components/ThemeProvider';
+import { useOrg } from '../components/OrgContext';
 import type { BondLedgerEntry, PaginatedResponse } from '@/lib/books-types';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -100,6 +99,7 @@ export default function LedgerPage() {
   const router = useRouter();
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [data, setData] = useState<PaginatedResponse<BondLedgerEntry> | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -107,7 +107,6 @@ export default function LedgerPage() {
   const [page, setPage] = useState(1);
 
   const fetchData = useCallback(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) {
       setLoading(false);
       return;
@@ -126,7 +125,7 @@ export default function LedgerPage() {
       })
       .catch(() => setData(null))
       .finally(() => setLoading(false));
-  }, [search, statusFilter, page]);
+  }, [orgId, search, statusFilter, page]);
 
   useEffect(() => {
     fetchData();

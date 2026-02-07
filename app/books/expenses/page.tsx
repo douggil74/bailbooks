@@ -5,9 +5,8 @@ import { Plus, ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import DataTable, { type Column } from '../components/DataTable';
 import ExpenseForm from '../components/ExpenseForm';
 import { useTheme } from '../components/ThemeProvider';
+import { useOrg } from '../components/OrgContext';
 import type { Expense, ExpenseCategory } from '@/lib/books-types';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -24,6 +23,7 @@ function fmtDate(d: string) {
 export default function ExpensesPage() {
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
@@ -36,7 +36,6 @@ export default function ExpensesPage() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const fetchData = useCallback(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) {
       setLoading(false);
       return;
@@ -56,7 +55,7 @@ export default function ExpensesPage() {
       })
       .catch(() => setExpenses([]))
       .finally(() => setLoading(false));
-  }, [categoryFilter, page]);
+  }, [orgId, categoryFilter, page]);
 
   useEffect(() => {
     fetchData();
@@ -64,13 +63,12 @@ export default function ExpensesPage() {
 
   // Load categories for filter
   useEffect(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
     fetch(`/api/books/expense-categories?org_id=${orgId}`)
       .then((r) => r.json())
       .then((d) => setCategories(d.categories || []))
       .catch(() => {});
-  }, []);
+  }, [orgId]);
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this expense?')) return;

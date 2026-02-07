@@ -7,8 +7,7 @@ import { ArrowLeft, DollarSign, Calendar, AlertTriangle } from 'lucide-react';
 import KPICard from '../../components/KPICard';
 import DataTable, { type Column } from '../../components/DataTable';
 import { useTheme } from '../../components/ThemeProvider';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
+import { useOrg } from '../../components/OrgContext';
 
 interface BondDetail {
   id: string;
@@ -100,12 +99,12 @@ export default function BondDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [bond, setBond] = useState<BondDetail | null>(null);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId || !id) return;
 
     Promise.all([

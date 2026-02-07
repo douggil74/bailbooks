@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import ReportShell from '../../components/ReportShell';
 import { useTheme } from '../../components/ThemeProvider';
+import { useOrg } from '../../components/OrgContext';
 import type { ProfitLossReport } from '@/lib/books-types';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -14,6 +13,7 @@ function fmt(n: number) {
 export default function ProfitLossPage() {
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [report, setReport] = useState<ProfitLossReport | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,6 @@ export default function ProfitLossPage() {
   const [endDate, setEndDate] = useState(now.toISOString().split('T')[0]);
 
   function fetchReport(start: string, end: string) {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) {
       setLoading(false);
       return;
@@ -41,7 +40,7 @@ export default function ProfitLossPage() {
 
   useEffect(() => {
     fetchReport(startDate, endDate);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [orgId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ReportShell

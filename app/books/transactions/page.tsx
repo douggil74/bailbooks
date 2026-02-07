@@ -4,9 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, Sliders, ChevronLeft, ChevronRight, PiggyBank } from 'lucide-react';
 import DataTable, { type Column } from '../components/DataTable';
 import { useTheme } from '../components/ThemeProvider';
+import { useOrg } from '../components/OrgContext';
 import type { Transaction, BankAccount } from '@/lib/books-types';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -30,6 +29,7 @@ const TYPE_META: Record<string, { label: string; icon: typeof ArrowUpRight; colo
 export default function TransactionsPage() {
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
@@ -42,7 +42,6 @@ export default function TransactionsPage() {
   const [showDeposit, setShowDeposit] = useState(false);
 
   const fetchData = useCallback(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) { setLoading(false); return; }
     setLoading(true);
 
@@ -59,18 +58,17 @@ export default function TransactionsPage() {
       })
       .catch(() => setTransactions([]))
       .finally(() => setLoading(false));
-  }, [accountFilter, page]);
+  }, [orgId, accountFilter, page]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
   useEffect(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
     fetch(`/api/books/bank-accounts?org_id=${orgId}`)
       .then((r) => r.json())
       .then((d) => setBankAccounts(d.accounts || []))
       .catch(() => {});
-  }, []);
+  }, [orgId]);
 
   const columns: Column<Transaction>[] = [
     {
@@ -244,6 +242,7 @@ function TransactionForm({
   const { theme } = useTheme();
   const light = theme === 'light';
 
+  const orgId = useOrg();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     transaction_type: 'deposit',
@@ -261,7 +260,6 @@ function TransactionForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
 
     const res = await fetch('/api/books/transactions', {
@@ -404,6 +402,7 @@ function DepositForm({
   const { theme } = useTheme();
   const light = theme === 'light';
 
+  const orgId = useOrg();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     bank_account_id: '',
@@ -419,7 +418,6 @@ function DepositForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
 
     const res = await fetch('/api/books/transactions', {

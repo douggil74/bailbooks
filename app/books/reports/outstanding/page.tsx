@@ -6,9 +6,8 @@ import DataTable, { type Column } from '../../components/DataTable';
 import KPICard from '../../components/KPICard';
 import { Shield, DollarSign } from 'lucide-react';
 import { useTheme } from '../../components/ThemeProvider';
+import { useOrg } from '../../components/OrgContext';
 import type { OutstandingBondReport } from '@/lib/books-types';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -78,11 +77,11 @@ const columns: Column<BondRow>[] = [
 export default function OutstandingPage() {
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [report, setReport] = useState<OutstandingBondReport | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) {
       setLoading(false);
       return;
@@ -96,7 +95,7 @@ export default function OutstandingPage() {
       })
       .catch(() => setReport(null))
       .finally(() => setLoading(false));
-  }, []);
+  }, [orgId]);
 
   return (
     <ReportShell title="Outstanding Bond Liability" showDateRange={false}>

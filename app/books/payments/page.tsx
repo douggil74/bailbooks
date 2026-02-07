@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import DataTable, { type Column } from '../components/DataTable';
 import { useTheme } from '../components/ThemeProvider';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
+import { useOrg } from '../components/OrgContext';
 
 function fmt(n: number) {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -97,6 +96,7 @@ export default function PaymentsPage() {
   const router = useRouter();
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [data, setData] = useState<PaymentEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -107,7 +107,6 @@ export default function PaymentsPage() {
   const [page, setPage] = useState(1);
 
   const fetchData = useCallback(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) {
       setLoading(false);
       return;
@@ -128,7 +127,7 @@ export default function PaymentsPage() {
       })
       .catch(() => setData([]))
       .finally(() => setLoading(false));
-  }, [statusFilter, search, page]);
+  }, [orgId, statusFilter, search, page]);
 
   useEffect(() => {
     fetchData();

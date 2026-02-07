@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
+import { useOrg } from './OrgContext';
 import type { ExpenseCategory, Expense } from '@/lib/books-types';
-
-const ORG_ID_KEY = 'bailbooks_org_id';
 
 interface ExpenseFormProps {
   expense?: Expense | null;
@@ -16,6 +15,7 @@ interface ExpenseFormProps {
 export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormProps) {
   const { theme } = useTheme();
   const light = theme === 'light';
+  const orgId = useOrg();
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,17 +32,15 @@ export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormPr
   });
 
   useEffect(() => {
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
     fetch(`/api/books/expense-categories?org_id=${orgId}`)
       .then((r) => r.json())
       .then((d) => setCategories(d.categories || []))
       .catch(() => {});
-  }, []);
+  }, [orgId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const orgId = localStorage.getItem(ORG_ID_KEY);
     if (!orgId) return;
 
     setSaving(true);
