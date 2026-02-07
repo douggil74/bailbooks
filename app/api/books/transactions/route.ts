@@ -36,10 +36,28 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Compute running balance: fetch all transactions sorted oldest-first
+    let balQuery = supabase
+      .from('transactions')
+      .select('id, amount, transaction_type')
+      .eq('org_id', orgId);
+    if (bankAccountId) balQuery = balQuery.eq('bank_account_id', bankAccountId);
+    balQuery = balQuery.order('transaction_date', { ascending: true }).order('created_at', { ascending: true });
+
+    const { data: allForBalance } = await balQuery;
+    const balanceMap = new Map<string, number>();
+    let runningBal = 0;
+    for (const t of allForBalance || []) {
+      const signed = t.transaction_type === 'withdrawal' ? -(Number(t.amount) || 0) : (Number(t.amount) || 0);
+      runningBal += signed;
+      balanceMap.set(t.id, runningBal);
+    }
+
     const result = (transactions || []).map((t) => ({
       ...t,
       bank_account_name: (t.bank_accounts as unknown as { account_name: string } | null)?.account_name || null,
       chart_account_name: (t.chart_of_accounts as unknown as { account_name: string } | null)?.account_name || null,
+      balance: balanceMap.get(t.id) ?? null,
       bank_accounts: undefined,
       chart_of_accounts: undefined,
     }));

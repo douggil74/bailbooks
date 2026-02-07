@@ -74,6 +74,10 @@ export default function ProfitLossPage() {
                 <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Payments Collected</span>
                 <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.payments_collected)}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Deposits</span>
+                <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.deposits)}</span>
+              </div>
               <div className={`flex justify-between text-sm font-semibold border-t ${light ? 'border-gray-200' : 'border-gray-800'} pt-2 mt-2`}>
                 <span className={`${light ? 'text-gray-900' : 'text-white'}`}>Total Revenue</span>
                 <span className="text-emerald-400">{fmt(report.revenue.total_revenue)}</span>

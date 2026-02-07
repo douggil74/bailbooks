@@ -134,6 +134,7 @@ export interface ProfitLossReport {
   revenue: {
     premiums_earned: number;
     payments_collected: number;
+    deposits: number;
     total_revenue: number;
   };
   expenses_by_category: { category: string; amount: number }[];
@@ -237,4 +238,6 @@ export interface Transaction {
   // Joined fields
   bank_account_name?: string;
   chart_account_name?: string;
+  // Computed
+  balance?: number;
 }

@@ -44,6 +44,28 @@ export async function GET(req: NextRequest) {
       .gte('expense_date', startDate)
       .lte('expense_date', endDate);
 
+    // Deposits from transactions table in the period
+    const { data: deposits } = await supabase
+      .from('transactions')
+      .select('amount')
+      .eq('org_id', orgId)
+      .eq('transaction_type', 'deposit')
+      .gte('transaction_date', startDate)
+      .lte('transaction_date', endDate);
+
+    const depositsTotal = (deposits || []).reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+
+    // Withdrawals from transactions table (as additional expenses)
+    const { data: withdrawals } = await supabase
+      .from('transactions')
+      .select('amount')
+      .eq('org_id', orgId)
+      .eq('transaction_type', 'withdrawal')
+      .gte('transaction_date', startDate)
+      .lte('transaction_date', endDate);
+
+    const withdrawalsTotal = (withdrawals || []).reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
+
     const categoryTotals = new Map<string, number>();
     let totalExpenses = 0;
     for (const e of expenses || []) {
@@ -54,11 +76,17 @@ export async function GET(req: NextRequest) {
       totalExpenses += amt;
     }
 
+    // Include withdrawals as expenses
+    if (withdrawalsTotal > 0) {
+      categoryTotals.set('Withdrawals', (categoryTotals.get('Withdrawals') || 0) + withdrawalsTotal);
+      totalExpenses += withdrawalsTotal;
+    }
+
     const expensesByCategory = Array.from(categoryTotals.entries())
       .map(([category, amount]) => ({ category, amount }))
       .sort((a, b) => b.amount - a.amount);
 
-    const totalRevenue = paymentsCollected;
+    const totalRevenue = paymentsCollected + depositsTotal;
 
     return NextResponse.json({
       period_start: startDate,
@@ -66,6 +94,7 @@ export async function GET(req: NextRequest) {
       revenue: {
         premiums_earned: premiumsEarned,
         payments_collected: paymentsCollected,
+        deposits: depositsTotal,
         total_revenue: totalRevenue,
       },
       expenses_by_category: expensesByCategory,
