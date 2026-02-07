@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('expenses')
       .select('*, expense_categories(name)', { count: 'exact' })
-      .eq('org_id', orgId);
+      .or(`org_id.eq.${orgId},org_id.is.null`);
 
     if (categoryId) query = query.eq('category_id', categoryId);
     if (startDate) query = query.gte('expense_date', startDate);

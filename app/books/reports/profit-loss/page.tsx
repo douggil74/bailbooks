@@ -67,17 +67,21 @@ export default function ProfitLossPage() {
             <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-3">Revenue</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Premiums Earned (bonds created in period)</span>
-                <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.premiums_earned)}</span>
+                <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Premiums Earned (bonds in period)</span>
+                <span className={`italic ${light ? 'text-gray-400' : 'text-gray-500'}`}>{fmt(report.revenue.premiums_earned)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Payments Collected</span>
-                <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.payments_collected)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Deposits</span>
-                <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.deposits)}</span>
-              </div>
+              {report.revenue.payments_collected > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Payments Collected</span>
+                  <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.payments_collected)}</span>
+                </div>
+              )}
+              {report.revenue.deposits > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Bank Deposits</span>
+                  <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.deposits)}</span>
+                </div>
+              )}
               <div className={`flex justify-between text-sm font-semibold border-t ${light ? 'border-gray-200' : 'border-gray-800'} pt-2 mt-2`}>
                 <span className={`${light ? 'text-gray-900' : 'text-white'}`}>Total Revenue</span>
                 <span className="text-emerald-400">{fmt(report.revenue.total_revenue)}</span>

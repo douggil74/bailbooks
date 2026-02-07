@@ -16,10 +16,12 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = createServerClient();
 
+    const orgFilter = `org_id.eq.${orgId},org_id.is.null`;
+
     let query = supabase
       .from('transactions')
       .select('*, bank_accounts(account_name), chart_of_accounts(account_name)', { count: 'exact' })
-      .eq('org_id', orgId);
+      .or(orgFilter);
 
     if (bankAccountId) query = query.eq('bank_account_id', bankAccountId);
     if (startDate) query = query.gte('transaction_date', startDate);
@@ -40,7 +42,7 @@ export async function GET(req: NextRequest) {
     let balQuery = supabase
       .from('transactions')
       .select('id, amount, transaction_type')
-      .eq('org_id', orgId);
+      .or(orgFilter);
     if (bankAccountId) balQuery = balQuery.eq('bank_account_id', bankAccountId);
     balQuery = balQuery.order('transaction_date', { ascending: true }).order('created_at', { ascending: true });
 
@@ -48,7 +50,10 @@ export async function GET(req: NextRequest) {
     const balanceMap = new Map<string, number>();
     let runningBal = 0;
     for (const t of allForBalance || []) {
-      const signed = t.transaction_type === 'withdrawal' ? -(Number(t.amount) || 0) : (Number(t.amount) || 0);
+      const amt = Number(t.amount) || 0;
+      // Deposits add, withdrawals/transfers subtract, adjustments can be either
+      const signed = (t.transaction_type === 'withdrawal' || t.transaction_type === 'transfer')
+        ? -amt : amt;
       runningBal += signed;
       balanceMap.set(t.id, runningBal);
     }
@@ -109,11 +114,23 @@ export async function POST(req: NextRequest) {
 
     // Update bank account balance
     if (bank_account_id) {
-      const balanceChange = transaction_type === 'deposit' ? amount : -amount;
+      const balanceChange = (transaction_type === 'deposit' || transaction_type === 'adjustment')
+        ? amount : -amount;
       try {
         await supabase.rpc('increment_balance', { account_id: bank_account_id, delta: balanceChange });
       } catch {
-        // Fallback: manual update if RPC not available
+        // Fallback: manual balance update
+        const { data: acct } = await supabase
+          .from('bank_accounts')
+          .select('current_balance')
+          .eq('id', bank_account_id)
+          .single();
+        if (acct) {
+          await supabase
+            .from('bank_accounts')
+            .update({ current_balance: (Number(acct.current_balance) || 0) + balanceChange })
+            .eq('id', bank_account_id);
+        }
       }
     }
 

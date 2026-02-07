@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       .from('applications')
       .select('id, defendant_first, defendant_last, bond_amount, premium, status, bond_date, forfeiture_status')
       .or(`org_id.eq.${orgId},org_id.is.null`)
-      .in('status', ['active', 'approved']);
+      .in('status', ['active', 'approved', 'completed']);
 
     if (!bonds || bonds.length === 0) {
       return NextResponse.json({

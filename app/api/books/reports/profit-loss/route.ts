@@ -13,58 +13,59 @@ export async function GET(req: NextRequest) {
 
   try {
     const supabase = createServerClient();
+    const orgFilter = `org_id.eq.${orgId},org_id.is.null`;
 
-    // Revenue: paid payments in the period
-    const { data: payments } = await supabase
-      .from('payments')
-      .select('amount, paid_at')
-      .or(`org_id.eq.${orgId},org_id.is.null`)
-      .eq('status', 'paid')
-      .gte('paid_at', startDate)
-      .lte('paid_at', endDate + 'T23:59:59');
-
-    const paymentsCollected = (payments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-
-    // Premiums earned: sum of premium from bonds created/active in the period
+    // Premiums earned: from bonds created in the period (informational — accrual basis)
     const { data: bonds } = await supabase
       .from('applications')
       .select('premium')
-      .or(`org_id.eq.${orgId},org_id.is.null`)
+      .or(orgFilter)
       .in('status', ['active', 'approved', 'completed'])
       .gte('created_at', startDate)
       .lte('created_at', endDate + 'T23:59:59');
 
     const premiumsEarned = (bonds || []).reduce((sum, b) => sum + (Number(b.premium) || 0), 0);
 
-    // Expenses by category
-    const { data: expenses } = await supabase
-      .from('expenses')
-      .select('amount, category_id, expense_categories(name)')
-      .or(`org_id.eq.${orgId},org_id.is.null`)
-      .gte('expense_date', startDate)
-      .lte('expense_date', endDate);
+    // Payments collected (from payments table — for reference)
+    const { data: payments } = await supabase
+      .from('payments')
+      .select('amount, paid_at')
+      .or(orgFilter)
+      .eq('status', 'paid')
+      .gte('paid_at', startDate)
+      .lte('paid_at', endDate + 'T23:59:59');
 
-    // Deposits from transactions table in the period
+    const paymentsCollected = (payments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+    // Bank deposits (from transactions table — cash basis revenue)
     const { data: deposits } = await supabase
       .from('transactions')
       .select('amount')
-      .or(`org_id.eq.${orgId},org_id.is.null`)
+      .or(orgFilter)
       .eq('transaction_type', 'deposit')
       .gte('transaction_date', startDate)
       .lte('transaction_date', endDate);
 
     const depositsTotal = (deposits || []).reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
 
-    // Withdrawals from transactions table (as additional expenses)
+    // Withdrawals from transactions (cash out)
     const { data: withdrawals } = await supabase
       .from('transactions')
       .select('amount')
-      .or(`org_id.eq.${orgId},org_id.is.null`)
+      .or(orgFilter)
       .eq('transaction_type', 'withdrawal')
       .gte('transaction_date', startDate)
       .lte('transaction_date', endDate);
 
     const withdrawalsTotal = (withdrawals || []).reduce((sum, w) => sum + (Number(w.amount) || 0), 0);
+
+    // Expenses by category
+    const { data: expenses } = await supabase
+      .from('expenses')
+      .select('amount, category_id, expense_categories(name)')
+      .or(orgFilter)
+      .gte('expense_date', startDate)
+      .lte('expense_date', endDate);
 
     const categoryTotals = new Map<string, number>();
     let totalExpenses = 0;
@@ -76,7 +77,6 @@ export async function GET(req: NextRequest) {
       totalExpenses += amt;
     }
 
-    // Include withdrawals as expenses
     if (withdrawalsTotal > 0) {
       categoryTotals.set('Withdrawals', (categoryTotals.get('Withdrawals') || 0) + withdrawalsTotal);
       totalExpenses += withdrawalsTotal;
@@ -86,7 +86,9 @@ export async function GET(req: NextRequest) {
       .map(([category, amount]) => ({ category, amount }))
       .sort((a, b) => b.amount - a.amount);
 
-    const totalRevenue = paymentsCollected + depositsTotal;
+    // Revenue = whichever is greater: deposits or payments collected
+    // This prevents double-counting while ensuring all revenue is captured
+    const totalRevenue = Math.max(depositsTotal, paymentsCollected);
 
     return NextResponse.json({
       period_start: startDate,
