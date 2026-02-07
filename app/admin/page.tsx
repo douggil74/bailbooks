@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Shield } from 'lucide-react';
 import StatusBadge from './components/StatusBadge';
+import CommandBar from '@/app/command/components/CommandBar';
 import type { ActivityStatus } from '@/lib/bail-types';
 
 interface AppRow {
@@ -265,12 +266,13 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
+      <CommandBar />
       <header className="bg-[#18181b] border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Shield className="w-8 h-8 text-[#fbbf24]" />
           <div>
-            <h1 className="text-xl font-bold">BailBonds <span className="text-[#fbbf24]">Made Easy</span> <span className="text-zinc-500 font-normal text-base">— Agent Control Panel</span></h1>
-            <p className="text-sm text-violet-400">Case Management Dashboard</p>
+            <h1 className="text-xl font-bold">Case <span className="text-[#fbbf24]">Management</span></h1>
+            <p className="text-sm text-violet-400">Agent Control Panel</p>
           </div>
         </div>
         <div className="flex items-center gap-4">

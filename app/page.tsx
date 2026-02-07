@@ -1,33 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { Phone, Clock, MapPin, Shield, Scale, Users, CheckCircle, ArrowRight, Mail, FileText, Handshake, Lock, Calculator } from 'lucide-react';
 
 const PHONE_NUMBER = '985-264-9519';
 const PHONE_HREF = 'tel:+19852649519';
 
 export default function Home() {
-  const [protectedTarget, setProtectedTarget] = useState<{ label: string; href: string } | null>(null);
-  const [appPassword, setAppPassword] = useState('');
-  const [appError, setAppError] = useState(false);
-
-  const openProtected = (label: string, href: string) => {
-    setProtectedTarget({ label, href });
-    setAppPassword('');
-    setAppError(false);
-  };
-
-  const handleAppAccess = () => {
-    if (appPassword === '4461' && protectedTarget) {
-      window.open(protectedTarget.href, '_blank');
-      setProtectedTarget(null);
-      setAppPassword('');
-      setAppError(false);
-    } else {
-      setAppError(true);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <style>{`
@@ -519,39 +497,14 @@ export default function Home() {
           </div>
 
           <div className="mt-8 pt-8 border-t border-white/10 flex flex-col items-center gap-4">
-            <div className="flex flex-wrap justify-center gap-4">
-              <button
-                onClick={() => openProtected('Bail Bond Application', '/Elite-Bail-Bonds-Application.pdf')}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Application</span>
-              </button>
-              <span className="text-gray-600">|</span>
-              <button
-                onClick={() => openProtected('Bond Calculator', '/app')}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Calculator</span>
-              </button>
-              <span className="text-gray-600">|</span>
-              <button
-                onClick={() => openProtected('Bond Tracker', '/tracker')}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Tracker</span>
-              </button>
-              <span className="text-gray-600">|</span>
-              <button
-                onClick={() => openProtected('Bail Made Simple', 'https://bailmadesimple.vercel.app')}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-[#d4af37] text-sm transition-colors"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Case Manager</span>
-              </button>
-            </div>
+            <a
+              href="/command"
+              className="flex items-center gap-2 text-gray-500 hover:text-[#d4af37] text-sm transition-colors group"
+            >
+              <Lock className="w-3.5 h-3.5 group-hover:hidden" />
+              <Shield className="w-3.5 h-3.5 hidden group-hover:block text-[#d4af37]" />
+              <span>Agent Portal</span>
+            </a>
             <div className="text-gray-500 text-sm">
               © {new Date().getFullYear()} BailBonds Made Easy. All rights reserved. Licensed Louisiana Bail Bond Agents.
             </div>
@@ -559,48 +512,6 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Password Modal for Protected Links */}
-      {protectedTarget && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setProtectedTarget(null)}>
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 max-w-sm w-full mx-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#d4af37]/20 rounded-full flex items-center justify-center">
-                <Lock className="w-5 h-5 text-[#d4af37]" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">{protectedTarget.label}</h3>
-                <p className="text-gray-400 text-sm">Enter access code to continue</p>
-              </div>
-            </div>
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={4}
-              value={appPassword}
-              onChange={e => { setAppPassword(e.target.value); setAppError(false); }}
-              onKeyDown={e => e.key === 'Enter' && handleAppAccess()}
-              placeholder="Enter code"
-              autoFocus
-              className={`w-full bg-[#0a0a0a] border ${appError ? 'border-red-500' : 'border-white/20'} rounded-xl px-4 py-3 text-white text-center text-lg tracking-widest placeholder-gray-600 focus:outline-none focus:border-[#d4af37] transition-colors`}
-            />
-            {appError && <p className="text-red-400 text-sm mt-2 text-center">Incorrect code</p>}
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setProtectedTarget(null)}
-                className="flex-1 px-4 py-2.5 border border-white/10 rounded-xl text-gray-400 hover:text-white hover:border-white/30 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAppAccess}
-                className="flex-1 px-4 py-2.5 bg-[#d4af37] hover:bg-[#e5c55a] text-[#0a0a0a] font-bold rounded-xl transition-colors"
-              >
-                Access
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

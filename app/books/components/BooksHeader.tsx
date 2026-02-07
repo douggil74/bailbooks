@@ -29,12 +29,6 @@ export default function BooksHeader() {
               : <Sun className="w-4 h-4 text-[#d4af37]" />
             }
           </button>
-          <Link
-            href="/admin"
-            className="text-sm text-white/70 hover:text-white transition-colors"
-          >
-            Back to Admin
-          </Link>
         </div>
       </div>
     </header>

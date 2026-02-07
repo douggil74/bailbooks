@@ -32,9 +32,9 @@ export default function BooksFooter() {
             <Link href="/books/settings" className={`hover:text-[#d4af37] transition-colors ${light ? 'text-gray-600' : 'text-gray-400'}`}>
               Settings
             </Link>
-            <Link href="/admin" className={`flex items-center gap-1 hover:text-[#d4af37] transition-colors ${light ? 'text-gray-600' : 'text-gray-400'}`}>
+            <Link href="/command" className={`flex items-center gap-1 hover:text-[#d4af37] transition-colors ${light ? 'text-gray-600' : 'text-gray-400'}`}>
               <ExternalLink className="w-3 h-3" />
-              Admin
+              Bail Command
             </Link>
           </div>
 

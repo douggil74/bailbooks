@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Plus, Trash2, Lock, Download, Save, FileText, X, Check, Sparkles, CheckCircle, Phone, Star } from 'lucide-react';
+import { Shield, Plus, Trash2, Download, Save, FileText, X, Check, Sparkles, CheckCircle, Phone, Star } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -16,11 +16,8 @@ interface BondRow {
   status: 'active' | 'paid_off';
 }
 
-const PASSWORD = '4461';
-
 export default function TrackerPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [error, setError] = useState('');
   const [rows, setRows] = useState<BondRow[]>([]);
   const [saveMessage, setSaveMessage] = useState('');
@@ -35,13 +32,7 @@ export default function TrackerPage() {
 
   // Load data from database on mount
   useEffect(() => {
-    const auth = sessionStorage.getItem('bailbonds-auth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-      fetchBonds();
-    } else {
-      setLoading(false);
-    }
+    fetchBonds();
   }, []);
 
   // Auto-refresh every 5 seconds to sync across devices
@@ -83,17 +74,6 @@ export default function TrackerPage() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === PASSWORD) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('bailbonds-auth', 'true');
-      setError('');
-      fetchBonds();
-    } else {
-      setError('Incorrect password');
-    }
-  };
 
   const addRow = async () => {
     const newRow: BondRow = {
@@ -498,48 +478,6 @@ export default function TrackerPage() {
     doc.save(fileName);
     setShowPdfModal(false);
   };
-
-  // Password screen
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-sm">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Shield className="w-8 h-8 text-[#d4af37]" />
-            <span className="text-xl font-bold text-white">
-              BailBonds <span className="text-[#d4af37]">Made Easy</span>
-            </span>
-          </div>
-
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-[#d4af37]/20 rounded-full flex items-center justify-center">
-              <Lock className="w-8 h-8 text-[#d4af37]" />
-            </div>
-          </div>
-
-          <h2 className="text-lg font-semibold text-white text-center mb-6">Enter Password</h2>
-
-          <form onSubmit={handleLogin}>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full bg-[#0a0a0a] border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#d4af37] mb-4"
-              autoFocus
-            />
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <button
-              type="submit"
-              className="w-full bg-[#d4af37] hover:bg-[#e5c55a] text-[#0a0a0a] font-bold py-3 rounded-lg transition-colors"
-            >
-              Access Tracker
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   // Main tracker
   return (
