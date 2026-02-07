@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Plus, Trash2, Download, Save, FileText, X, Check, Sparkles, CheckCircle, Phone, Star } from 'lucide-react';
+import { Shield, Plus, Trash2, Download, Save, FileText, X, Check, Sparkles, CheckCircle, Phone, Star, ArrowRight } from 'lucide-react';
 import CommandBar from '@/app/command/components/CommandBar';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -30,6 +30,7 @@ export default function TrackerPage() {
   const [recommendations, setRecommendations] = useState<Record<number, { recommendation: number; reason: string }>>({});
   const [showThankYou, setShowThankYou] = useState<BondRow | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paid_off'>('active');
+  const [creatingCase, setCreatingCase] = useState<number | null>(null);
 
   // Load data from database on mount
   useEffect(() => {
@@ -231,6 +232,50 @@ export default function TrackerPage() {
     } catch (err) {
       console.error('Failed to mark as paid off:', err);
       fetchBonds();
+    }
+  };
+
+  const startCase = async (row: BondRow) => {
+    setCreatingCase(row.id);
+    try {
+      // Split name into first/last
+      const parts = row.name.trim().split(/\s+/);
+      const first = parts[0] || 'Unknown';
+      const last = parts.slice(1).join(' ') || 'Unknown';
+
+      // 1. Create the case
+      const res = await fetch('/api/onboard/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ defendant_first: first, defendant_last: last }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.id) {
+        alert('Failed to create case');
+        setCreatingCase(null);
+        return;
+      }
+
+      // 2. Populate with tracker data
+      const calc = calculateValues(row.amt, row.down, row.jailFee);
+      await fetch('/api/admin/case', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          application_id: data.id,
+          bond_amount: row.amt,
+          premium: calc.twelvePercent,
+          down_payment: row.down,
+          defendant_phone: row.phone || null,
+          bond_date: row.date || null,
+        }),
+      });
+
+      // 3. Navigate to the new case
+      window.location.href = `/admin/case/${data.id}`;
+    } catch {
+      alert('Failed to create case');
+      setCreatingCase(null);
     }
   };
 
@@ -668,6 +713,23 @@ export default function TrackerPage() {
                           {formatCurrency(calc.ga)}
                         </td>
                         <td className="px-2 py-2 text-center whitespace-nowrap">
+                          {!isPaidOff && row.name && (
+                            <button
+                              onClick={() => startCase(row)}
+                              disabled={creatingCase === row.id}
+                              className="text-gray-500 hover:text-[#d4af37] transition-colors p-1 mr-1"
+                              title="Start Case in Case Management"
+                            >
+                              {creatingCase === row.id ? (
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                </svg>
+                              ) : (
+                                <ArrowRight className="w-4 h-4" />
+                              )}
+                            </button>
+                          )}
                           {!isPaidOff && (
                             <button
                               onClick={() => markAsPaidOff(row)}

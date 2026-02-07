@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { TrendingUp, Shield, Clock } from 'lucide-react';
+import { useTheme } from '../components/ThemeProvider';
 
 const REPORTS = [
   {
@@ -28,9 +29,12 @@ const REPORTS = [
 ];
 
 export default function ReportsPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Reports</h1>
+      <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Reports</h1>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {REPORTS.map((r) => {
           const Icon = r.icon;
@@ -38,13 +42,19 @@ export default function ReportsPage() {
             <Link
               key={r.href}
               href={r.href}
-              className="bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors group"
+              className={`border rounded-xl p-5 transition-colors group ${
+                light
+                  ? 'bg-white border-gray-200 shadow-sm hover:border-gray-300'
+                  : 'bg-gray-900 border-gray-800 hover:border-gray-700'
+              }`}
             >
               <Icon className={`w-6 h-6 ${r.color} mb-3`} />
-              <h3 className="text-white font-semibold group-hover:text-[#d4af37] transition-colors">
+              <h3 className={`font-semibold group-hover:text-[#d4af37] transition-colors ${
+                light ? 'text-gray-900' : 'text-white'
+              }`}>
                 {r.title}
               </h3>
-              <p className="text-sm text-gray-400 mt-1">{r.description}</p>
+              <p className={`text-sm mt-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>{r.description}</p>
             </Link>
           );
         })}

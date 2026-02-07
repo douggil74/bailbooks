@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, FileText } from 'lucide-react';
 import type { ChartOfAccount } from '@/lib/books-types';
+import { useTheme } from '../components/ThemeProvider';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
 
@@ -51,6 +52,8 @@ export default function ChartOfAccountsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const { theme } = useTheme();
+  const light = theme === 'light';
 
   const fetchAccounts = useCallback(() => {
     const orgId = localStorage.getItem(ORG_ID_KEY);
@@ -94,13 +97,13 @@ export default function ChartOfAccountsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Chart of Accounts</h1>
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Chart of Accounts</h1>
         <div className="flex gap-2">
           {accounts.length === 0 && !loading && (
             <button
               onClick={seedDefaults}
               disabled={seeding}
-              className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 text-gray-300 font-medium rounded-lg text-sm hover:bg-gray-700 transition-colors disabled:opacity-50"
+              className={`flex items-center gap-1.5 px-3 py-2 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 ${light ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
             >
               {seeding ? 'Setting up...' : 'Load Bail Bond Defaults'}
             </button>
@@ -118,14 +121,14 @@ export default function ChartOfAccountsPage() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-4 h-24 animate-pulse" />
+            <div key={i} className={`border rounded-xl p-4 h-24 animate-pulse ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`} />
           ))}
         </div>
       ) : accounts.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
-          <FileText className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 font-medium">No chart of accounts set up</p>
-          <p className="text-gray-600 text-sm mt-1">Click &quot;Load Bail Bond Defaults&quot; to start with a standard chart of accounts</p>
+        <div className={`border rounded-xl p-12 text-center ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
+          <FileText className={`w-10 h-10 mx-auto mb-3 ${light ? 'text-gray-300' : 'text-gray-600'}`} />
+          <p className={`font-medium ${light ? 'text-gray-500' : 'text-gray-400'}`}>No chart of accounts set up</p>
+          <p className={`text-sm mt-1 ${light ? 'text-gray-300' : 'text-gray-600'}`}>Click &quot;Load Bail Bond Defaults&quot; to start with a standard chart of accounts</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -135,23 +138,23 @@ export default function ChartOfAccountsPage() {
                 <h2 className={`text-sm font-semibold ${group.color.split(' ')[0]}`}>{group.label}</h2>
                 <span className={`text-sm font-bold ${group.color.split(' ')[0]}`}>{fmt(group.total)}</span>
               </div>
-              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div className={`border rounded-xl overflow-hidden ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-800">
-                      <th className="text-left text-[10px] uppercase tracking-wider text-gray-500 px-4 py-2 font-semibold w-24">No.</th>
-                      <th className="text-left text-[10px] uppercase tracking-wider text-gray-500 px-4 py-2 font-semibold">Account Name</th>
-                      <th className="text-left text-[10px] uppercase tracking-wider text-gray-500 px-4 py-2 font-semibold">Sub-type</th>
-                      <th className="text-right text-[10px] uppercase tracking-wider text-gray-500 px-4 py-2 font-semibold w-32">Balance</th>
+                    <tr className={`border-b ${light ? 'border-gray-200' : 'border-gray-800'}`}>
+                      <th className={`text-left text-[10px] uppercase tracking-wider px-4 py-2 font-semibold w-24 ${light ? 'text-gray-400' : 'text-gray-500'}`}>No.</th>
+                      <th className={`text-left text-[10px] uppercase tracking-wider px-4 py-2 font-semibold ${light ? 'text-gray-400' : 'text-gray-500'}`}>Account Name</th>
+                      <th className={`text-left text-[10px] uppercase tracking-wider px-4 py-2 font-semibold ${light ? 'text-gray-400' : 'text-gray-500'}`}>Sub-type</th>
+                      <th className={`text-right text-[10px] uppercase tracking-wider px-4 py-2 font-semibold w-32 ${light ? 'text-gray-400' : 'text-gray-500'}`}>Balance</th>
                     </tr>
                   </thead>
                   <tbody>
                     {group.accounts.map((acct) => (
-                      <tr key={acct.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/30 transition-colors">
+                      <tr key={acct.id} className={`border-b last:border-0 transition-colors ${light ? 'border-gray-100 hover:bg-gray-50' : 'border-gray-800/50 hover:bg-gray-800/30'}`}>
                         <td className="px-4 py-2.5 text-sm text-gray-500 font-mono">{acct.account_number}</td>
-                        <td className="px-4 py-2.5 text-sm text-white font-medium">{acct.account_name}</td>
+                        <td className={`px-4 py-2.5 text-sm font-medium ${light ? 'text-gray-900' : 'text-white'}`}>{acct.account_name}</td>
                         <td className="px-4 py-2.5 text-sm text-gray-500">{acct.sub_type || '—'}</td>
-                        <td className="px-4 py-2.5 text-sm text-right font-medium text-white tabular-nums">{fmt(Number(acct.balance))}</td>
+                        <td className={`px-4 py-2.5 text-sm text-right font-medium tabular-nums ${light ? 'text-gray-900' : 'text-white'}`}>{fmt(Number(acct.balance))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -182,6 +185,12 @@ function ChartAccountForm({ onClose, onSaved }: { onClose: () => void; onSaved: 
     sub_type: '',
     description: '',
   });
+  const { theme } = useTheme();
+  const light = theme === 'light';
+
+  const inputCls = light
+    ? 'w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none'
+    : 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -202,26 +211,26 @@ function ChartAccountForm({ onClose, onSaved }: { onClose: () => void; onSaved: 
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4">
-        <h2 className="text-lg font-bold text-white">Add Account</h2>
+      <form onSubmit={handleSubmit} className={`border rounded-2xl p-6 w-full max-w-md space-y-4 ${light ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-900 border-gray-700'}`}>
+        <h2 className={`text-lg font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Add Account</h2>
 
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Account #</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Account #</label>
             <input
               value={form.account_number}
               onChange={(e) => setForm({ ...form, account_number: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none font-mono"
+              className={`${inputCls} font-mono`}
               placeholder="1000"
               required
             />
           </div>
           <div className="col-span-2">
-            <label className="text-xs text-gray-400 block mb-1">Account Name</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Account Name</label>
             <input
               value={form.account_name}
               onChange={(e) => setForm({ ...form, account_name: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
               placeholder="e.g. Cash on Hand"
               required
             />
@@ -230,11 +239,11 @@ function ChartAccountForm({ onClose, onSaved }: { onClose: () => void; onSaved: 
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Type</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Type</label>
             <select
               value={form.account_type}
               onChange={(e) => setForm({ ...form, account_type: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none appearance-none"
+              className={`${inputCls} appearance-none`}
             >
               <option value="asset">Asset</option>
               <option value="liability">Liability</option>
@@ -244,28 +253,28 @@ function ChartAccountForm({ onClose, onSaved }: { onClose: () => void; onSaved: 
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Sub-type</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Sub-type</label>
             <input
               value={form.sub_type}
               onChange={(e) => setForm({ ...form, sub_type: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
               placeholder="e.g. Current Asset"
             />
           </div>
         </div>
 
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Description</label>
+          <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Description</label>
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none resize-none"
+            className={`${inputCls} resize-none`}
             rows={2}
           />
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-800 text-gray-400 rounded-lg text-sm font-medium hover:text-white transition-colors">
+          <button type="button" onClick={onClose} className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
             Cancel
           </button>
           <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg text-sm disabled:opacity-50 hover:bg-[#e5c55a] transition-colors">

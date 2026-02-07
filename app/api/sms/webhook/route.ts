@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { sendSMS } from '@/lib/twilio-server';
 
 /** Strip phone to digits-only for flexible matching */
 function stripPhone(phone: string): string {
@@ -95,7 +96,33 @@ export async function POST(req: NextRequest) {
       console.error('[SMS Webhook] sms_log insert error:', insertErr);
     }
 
-    // Return TwiML empty response (no auto-reply for now)
+    // Check for YES reply to a pending quote
+    const trimmed = (body || '').trim().toUpperCase();
+    if (trimmed === 'YES' || trimmed === 'Y') {
+      try {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bailmadesimple.vercel.app';
+        const acceptRes = await fetch(`${siteUrl}/api/quote/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: from }),
+        });
+        const acceptData = await acceptRes.json();
+
+        if (acceptRes.ok && acceptData.application_id) {
+          // Confirm to customer
+          await sendSMS(
+            from,
+            `Great news, ${acceptData.defendant}! Your bail bond case has been started. ` +
+            `An agent will contact you shortly. — BailBonds Made Easy 985-264-9519`,
+          );
+          console.log(`[SMS Webhook] Quote accepted — case ${acceptData.application_id} created for ${from}`);
+        }
+      } catch (err) {
+        console.error('[SMS Webhook] Quote accept error:', err);
+      }
+    }
+
+    // Return TwiML empty response
     return new NextResponse('<Response></Response>', {
       status: 200,
       headers: { 'Content-Type': 'text/xml' },

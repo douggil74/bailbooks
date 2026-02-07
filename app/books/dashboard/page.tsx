@@ -15,6 +15,7 @@ import KPICard from '../components/KPICard';
 import CashFlowChart from '../components/CashFlowChart';
 import DataTable, { type Column } from '../components/DataTable';
 import AIAdvisor from '../components/AIAdvisor';
+import { useTheme } from '../components/ThemeProvider';
 import type { DashboardData, RecentPayment, OverduePayment, UpcomingCourt } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -98,6 +99,8 @@ const courtCols: Column<UpcomingCourt>[] = [
 ];
 
 export default function DashboardPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -123,10 +126,10 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Dashboard</h1>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-4 h-20 animate-pulse" />
+            <div key={i} className={`border rounded-xl p-4 h-20 animate-pulse ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`} />
           ))}
         </div>
       </div>
@@ -136,9 +139,9 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400">{error}</p>
+        <h1 className={`text-2xl font-bold mb-6 ${light ? 'text-gray-900' : 'text-white'}`}>Dashboard</h1>
+        <div className={`border rounded-xl p-8 text-center ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
+          <p className={light ? 'text-gray-500' : 'text-gray-400'}>{error}</p>
         </div>
       </div>
     );
@@ -148,7 +151,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+      <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Dashboard</h1>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -172,7 +175,7 @@ export default function DashboardPage() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Payments */}
         <div>
-          <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <h2 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${light ? 'text-gray-900' : 'text-white'}`}>
             <DollarSign className="w-4 h-4 text-emerald-400" />
             Recent Payments
           </h2>
@@ -185,7 +188,7 @@ export default function DashboardPage() {
 
         {/* Overdue Payments */}
         <div>
-          <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <h2 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${light ? 'text-gray-900' : 'text-white'}`}>
             <AlertTriangle className="w-4 h-4 text-red-400" />
             Overdue Payments
           </h2>
@@ -200,7 +203,7 @@ export default function DashboardPage() {
       {/* Upcoming Court Dates */}
       {(data.upcoming_courts?.length ?? 0) > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <h2 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${light ? 'text-gray-900' : 'text-white'}`}>
             <Calendar className="w-4 h-4 text-blue-400" />
             Upcoming Court Dates (Next 30 Days)
           </h2>

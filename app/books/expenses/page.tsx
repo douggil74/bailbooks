@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import DataTable, { type Column } from '../components/DataTable';
 import ExpenseForm from '../components/ExpenseForm';
+import { useTheme } from '../components/ThemeProvider';
 import type { Expense, ExpenseCategory } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -21,6 +22,9 @@ function fmtDate(d: string) {
 }
 
 export default function ExpensesPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [total, setTotal] = useState(0);
@@ -75,6 +79,7 @@ export default function ExpensesPage() {
   }
 
   const columns: Column<Expense>[] = [
+    { key: 'vendor', label: 'Vendor', sortable: true },
     {
       key: 'expense_date',
       label: 'Date',
@@ -90,7 +95,6 @@ export default function ExpensesPage() {
       className: 'text-right',
       render: (r) => <span className="text-red-400 font-medium">{fmt(r.amount)}</span>,
     },
-    { key: 'vendor', label: 'Vendor' },
     { key: 'payment_method', label: 'Method' },
     {
       key: 'id',
@@ -104,7 +108,7 @@ export default function ExpensesPage() {
               setEditingExpense(r);
               setShowForm(true);
             }}
-            className="p-1 text-gray-500 hover:text-white transition-colors"
+            className={`p-1 ${light ? 'text-gray-400 hover:text-gray-900' : 'text-gray-500 hover:text-white'} transition-colors`}
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
@@ -113,7 +117,7 @@ export default function ExpensesPage() {
               e.stopPropagation();
               handleDelete(r.id);
             }}
-            className="p-1 text-gray-500 hover:text-red-400 transition-colors"
+            className={`p-1 ${light ? 'text-gray-400 hover:text-red-400' : 'text-gray-500 hover:text-red-400'} transition-colors`}
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -127,7 +131,7 @@ export default function ExpensesPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Expenses</h1>
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Expenses</h1>
         <button
           onClick={() => {
             setEditingExpense(null);
@@ -148,7 +152,7 @@ export default function ExpensesPage() {
             setCategoryFilter(e.target.value);
             setPage(1);
           }}
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+          className={`${light ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-700 text-white'} border rounded-lg px-3 py-2 text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none`}
         >
           <option value="">All Categories</option>
           {categories.map((c) => (
@@ -158,7 +162,7 @@ export default function ExpensesPage() {
           ))}
         </select>
         {expenses.length > 0 && (
-          <p className="text-xs text-gray-500">
+          <p className={`text-xs ${light ? 'text-gray-400' : 'text-gray-500'}`}>
             Page total: <span className="text-red-400 font-medium">{fmt(totalAmount)}</span>
           </p>
         )}
@@ -166,8 +170,8 @@ export default function ExpensesPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400 text-sm animate-pulse">Loading expenses...</p>
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl p-8 text-center`}>
+          <p className={`${light ? 'text-gray-500' : 'text-gray-400'} text-sm animate-pulse`}>Loading expenses...</p>
         </div>
       ) : (
         <DataTable
@@ -180,21 +184,21 @@ export default function ExpensesPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-500">
+          <p className={`text-xs ${light ? 'text-gray-400' : 'text-gray-500'}`}>
             Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total}
           </p>
           <div className="flex gap-1">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`p-2 rounded-lg ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'} disabled:opacity-30 disabled:cursor-not-allowed`}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`p-2 rounded-lg ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'} disabled:opacity-30 disabled:cursor-not-allowed`}
             >
               <ChevronRight className="w-4 h-4" />
             </button>

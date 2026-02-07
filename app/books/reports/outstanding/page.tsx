@@ -5,6 +5,7 @@ import ReportShell from '../../components/ReportShell';
 import DataTable, { type Column } from '../../components/DataTable';
 import KPICard from '../../components/KPICard';
 import { Shield, DollarSign } from 'lucide-react';
+import { useTheme } from '../../components/ThemeProvider';
 import type { OutstandingBondReport } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -75,6 +76,8 @@ const columns: Column<BondRow>[] = [
 ];
 
 export default function OutstandingPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
   const [report, setReport] = useState<OutstandingBondReport | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -98,16 +101,16 @@ export default function OutstandingPage() {
   return (
     <ReportShell title="Outstanding Bond Liability" showDateRange={false}>
       {loading ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center animate-pulse">
-          <p className="text-gray-400">Generating report...</p>
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl p-8 text-center animate-pulse`}>
+          <p className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Generating report...</p>
         </div>
       ) : !report ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400">No data available</p>
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl p-8 text-center`}>
+          <p className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>No data available</p>
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-xs text-gray-500">As of {fmtDate(report.as_of)}</p>
+          <p className={`text-xs ${light ? 'text-gray-400' : 'text-gray-500'}`}>As of {fmtDate(report.as_of)}</p>
 
           <div className="grid grid-cols-2 gap-3">
             <KPICard label="Total Bond Liability" value={report.total_liability} icon={Shield} colorClass="border-blue-500/30" />

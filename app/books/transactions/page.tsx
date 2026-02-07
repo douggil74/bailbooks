@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
 import DataTable, { type Column } from '../components/DataTable';
+import { useTheme } from '../components/ThemeProvider';
 import type { Transaction, BankAccount } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -27,6 +28,9 @@ const TYPE_META: Record<string, { label: string; icon: typeof ArrowUpRight; colo
 };
 
 export default function TransactionsPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [total, setTotal] = useState(0);
@@ -93,7 +97,7 @@ export default function TransactionsPage() {
     {
       key: 'bank_account_name',
       label: 'Account',
-      render: (r) => <span className="text-gray-400">{r.bank_account_name || '—'}</span>,
+      render: (r) => <span className={light ? 'text-gray-500' : 'text-gray-400'}>{r.bank_account_name || '—'}</span>,
     },
     {
       key: 'amount',
@@ -125,7 +129,7 @@ export default function TransactionsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Transactions</h1>
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Transactions</h1>
         <button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-1.5 px-3 py-2 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg text-sm hover:bg-[#e5c55a] transition-colors"
@@ -140,7 +144,7 @@ export default function TransactionsPage() {
         <select
           value={accountFilter}
           onChange={(e) => { setAccountFilter(e.target.value); setPage(1); }}
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+          className={`border rounded-lg px-3 py-2 text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none ${light ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-700 text-white'}`}
         >
           <option value="">All Accounts</option>
           {bankAccounts.map((a) => (
@@ -151,8 +155,8 @@ export default function TransactionsPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400 text-sm animate-pulse">Loading transactions...</p>
+        <div className={`border rounded-xl p-8 text-center ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
+          <p className={`text-sm animate-pulse ${light ? 'text-gray-500' : 'text-gray-400'}`}>Loading transactions...</p>
         </div>
       ) : (
         <DataTable
@@ -165,21 +169,21 @@ export default function TransactionsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-500">
+          <p className={`text-xs ${light ? 'text-gray-400' : 'text-gray-500'}`}>
             Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total}
           </p>
           <div className="flex gap-1">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`p-2 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`p-2 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -208,6 +212,9 @@ function TransactionForm({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { theme } = useTheme();
+  const light = theme === 'light';
+
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     transaction_type: 'deposit',
@@ -219,6 +226,8 @@ function TransactionForm({
     transaction_date: new Date().toISOString().split('T')[0],
     notes: '',
   });
+
+  const inputCls = `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none ${light ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-700 text-white'}`;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -244,16 +253,16 @@ function TransactionForm({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4">
-        <h2 className="text-lg font-bold text-white">Add Transaction</h2>
+      <form onSubmit={handleSubmit} className={`border rounded-2xl p-6 w-full max-w-md space-y-4 ${light ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-900 border-gray-700'}`}>
+        <h2 className={`text-lg font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Add Transaction</h2>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Type</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Type</label>
             <select
               value={form.transaction_type}
               onChange={(e) => setForm({ ...form, transaction_type: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none appearance-none"
+              className={`${inputCls} appearance-none`}
             >
               <option value="deposit">Deposit</option>
               <option value="withdrawal">Withdrawal</option>
@@ -262,22 +271,22 @@ function TransactionForm({
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Date</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Date</label>
             <input
               type="date"
               value={form.transaction_date}
               onChange={(e) => setForm({ ...form, transaction_date: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
             />
           </div>
         </div>
 
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Bank Account</label>
+          <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Bank Account</label>
           <select
             value={form.bank_account_id}
             onChange={(e) => setForm({ ...form, bank_account_id: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none appearance-none"
+            className={`${inputCls} appearance-none`}
           >
             <option value="">Select account...</option>
             {bankAccounts.map((a) => (
@@ -287,24 +296,24 @@ function TransactionForm({
         </div>
 
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Amount</label>
+          <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Amount</label>
           <input
             type="number"
             step="0.01"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className={inputCls}
             placeholder="0.00"
             required
           />
         </div>
 
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Description</label>
+          <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Description</label>
           <input
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className={inputCls}
             placeholder="What was this for?"
             required
           />
@@ -312,37 +321,37 @@ function TransactionForm({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Payee</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Payee</label>
             <input
               value={form.payee}
               onChange={(e) => setForm({ ...form, payee: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
               placeholder="Who was paid?"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Reference #</label>
+            <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Reference #</label>
             <input
               value={form.reference_number}
               onChange={(e) => setForm({ ...form, reference_number: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
               placeholder="Check #, etc."
             />
           </div>
         </div>
 
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Notes</label>
+          <label className={`text-xs block mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>Notes</label>
           <textarea
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none resize-none"
+            className={`${inputCls} resize-none`}
             rows={2}
           />
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-800 text-gray-400 rounded-lg text-sm font-medium hover:text-white transition-colors">
+          <button type="button" onClick={onClose} className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
             Cancel
           </button>
           <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-[#d4af37] text-[#0a0a0a] font-bold rounded-lg text-sm disabled:opacity-50 hover:bg-[#e5c55a] transition-colors">

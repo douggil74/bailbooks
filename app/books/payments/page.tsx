@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import DataTable, { type Column } from '../components/DataTable';
+import { useTheme } from '../components/ThemeProvider';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
 
@@ -94,6 +95,8 @@ const columns: Column<PaymentEntry>[] = [
 
 export default function PaymentsPage() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const light = theme === 'light';
   const [data, setData] = useState<PaymentEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -141,11 +144,11 @@ export default function PaymentsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-white">Payments</h1>
+      <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Payments</h1>
 
       {/* Filter Tabs */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-lg p-1">
+        <div className={`flex gap-1 border rounded-lg p-1 ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
@@ -155,8 +158,8 @@ export default function PaymentsPage() {
               }}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
                 statusFilter === tab.value
-                  ? 'bg-gray-800 text-[#d4af37]'
-                  : 'text-gray-400 hover:text-white'
+                  ? light ? 'bg-gray-100 text-[#d4af37]' : 'bg-gray-800 text-[#d4af37]'
+                  : light ? 'text-gray-500 hover:text-gray-900' : 'text-gray-400 hover:text-white'
               }`}
             >
               {tab.label}
@@ -164,21 +167,21 @@ export default function PaymentsPage() {
           ))}
         </div>
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${light ? 'text-gray-400' : 'text-gray-500'}`} />
           <input
             type="text"
             placeholder="Search by defendant name..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-white text-sm placeholder:text-gray-500 focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className={`w-full border rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none ${light ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'}`}
           />
         </div>
       </div>
 
       {/* Table */}
       {loading ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400 text-sm animate-pulse">Loading payments...</p>
+        <div className={`border rounded-xl p-8 text-center ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
+          <p className={`text-sm animate-pulse ${light ? 'text-gray-500' : 'text-gray-400'}`}>Loading payments...</p>
         </div>
       ) : (
         <DataTable
@@ -192,21 +195,21 @@ export default function PaymentsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-500">
+          <p className={`text-xs ${light ? 'text-gray-400' : 'text-gray-500'}`}>
             Showing {(page - 1) * 25 + 1}–{Math.min(page * 25, total)} of {total}
           </p>
           <div className="flex gap-1">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`p-2 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`p-2 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
             >
               <ChevronRight className="w-4 h-4" />
             </button>

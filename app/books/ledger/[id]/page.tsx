@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, DollarSign, Calendar, AlertTriangle } from 'lucide-react';
 import KPICard from '../../components/KPICard';
 import DataTable, { type Column } from '../../components/DataTable';
+import { useTheme } from '../../components/ThemeProvider';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
 
@@ -97,6 +98,8 @@ const paymentCols: Column<PaymentRow>[] = [
 
 export default function BondDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { theme } = useTheme();
+  const light = theme === 'light';
   const [bond, setBond] = useState<BondDetail | null>(null);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,10 +123,10 @@ export default function BondDetailPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 bg-gray-800 rounded animate-pulse" />
+        <div className={`h-8 w-48 rounded animate-pulse ${light ? 'bg-gray-200' : 'bg-gray-800'}`} />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-4 h-20 animate-pulse" />
+            <div key={i} className={`rounded-xl p-4 h-20 animate-pulse border ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`} />
           ))}
         </div>
       </div>
@@ -133,11 +136,11 @@ export default function BondDetailPage() {
   if (!bond) {
     return (
       <div>
-        <Link href="/books/ledger" className="flex items-center gap-1 text-sm text-gray-400 hover:text-white mb-4">
+        <Link href="/books/ledger" className={`flex items-center gap-1 text-sm mb-4 ${light ? 'text-gray-400 hover:text-gray-900' : 'text-gray-400 hover:text-white'}`}>
           <ArrowLeft className="w-4 h-4" /> Back to Ledger
         </Link>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400">Bond not found</p>
+        <div className={`rounded-xl p-8 text-center border ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
+          <p className={light ? 'text-gray-500' : 'text-gray-400'}>Bond not found</p>
         </div>
       </div>
     );
@@ -156,13 +159,13 @@ export default function BondDetailPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/books/ledger" className="flex items-center gap-1 text-sm text-gray-400 hover:text-white mb-3">
+        <Link href="/books/ledger" className={`flex items-center gap-1 text-sm mb-3 ${light ? 'text-gray-400 hover:text-gray-900' : 'text-gray-400 hover:text-white'}`}>
           <ArrowLeft className="w-4 h-4" /> Back to Ledger
         </Link>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>
           {bond.defendant_first} {bond.defendant_last}
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className={`text-sm mt-1 ${light ? 'text-gray-500' : 'text-gray-400'}`}>
           {bond.power_number && `Power #${bond.power_number} · `}
           {bond.case_number && `Case #${bond.case_number} · `}
           {bond.charge_description || 'No charge listed'}
@@ -179,22 +182,22 @@ export default function BondDetailPage() {
 
       {/* Bond Info */}
       <div className="grid sm:grid-cols-2 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+        <div className={`rounded-xl p-4 space-y-3 border ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`}>
+          <h3 className={`text-sm font-semibold flex items-center gap-2 ${light ? 'text-gray-900' : 'text-white'}`}>
             <Calendar className="w-4 h-4 text-blue-400" /> Key Dates
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Bond Date</span>
-              <span className="text-gray-300">{fmtDate(bond.bond_date)}</span>
+              <span className={light ? 'text-gray-400' : 'text-gray-500'}>Bond Date</span>
+              <span className={light ? 'text-gray-700' : 'text-gray-300'}>{fmtDate(bond.bond_date)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Court Date</span>
-              <span className="text-gray-300">{fmtDate(bond.court_date)}</span>
+              <span className={light ? 'text-gray-400' : 'text-gray-500'}>Court Date</span>
+              <span className={light ? 'text-gray-700' : 'text-gray-300'}>{fmtDate(bond.court_date)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Next Payment</span>
-              <span className="text-gray-300">{fmtDate(bond.next_payment_date)}</span>
+              <span className={light ? 'text-gray-400' : 'text-gray-500'}>Next Payment</span>
+              <span className={light ? 'text-gray-700' : 'text-gray-300'}>{fmtDate(bond.next_payment_date)}</span>
             </div>
           </div>
         </div>
@@ -207,25 +210,25 @@ export default function BondDetailPage() {
             </h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Status</span>
+                <span className={light ? 'text-gray-400' : 'text-gray-500'}>Status</span>
                 <span className="text-red-400 font-medium">{bond.forfeiture_status}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Date</span>
-                <span className="text-gray-300">{fmtDate(bond.forfeiture_date)}</span>
+                <span className={light ? 'text-gray-400' : 'text-gray-500'}>Date</span>
+                <span className={light ? 'text-gray-700' : 'text-gray-300'}>{fmtDate(bond.forfeiture_date)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Deadline</span>
-                <span className="text-gray-300">{fmtDate(bond.forfeiture_deadline)}</span>
+                <span className={light ? 'text-gray-400' : 'text-gray-500'}>Deadline</span>
+                <span className={light ? 'text-gray-700' : 'text-gray-300'}>{fmtDate(bond.forfeiture_deadline)}</span>
               </div>
               {bond.forfeiture_amount && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Amount</span>
+                  <span className={light ? 'text-gray-400' : 'text-gray-500'}>Amount</span>
                   <span className="text-red-400 font-medium">{fmt(Number(bond.forfeiture_amount))}</span>
                 </div>
               )}
               {bond.forfeiture_notes && (
-                <p className="text-gray-400 text-xs mt-2">{bond.forfeiture_notes}</p>
+                <p className={`text-xs mt-2 ${light ? 'text-gray-500' : 'text-gray-400'}`}>{bond.forfeiture_notes}</p>
               )}
             </div>
           </div>
@@ -245,7 +248,7 @@ export default function BondDetailPage() {
 
       {/* Payment History */}
       <div>
-        <h2 className="text-sm font-semibold text-white mb-3">Payment History</h2>
+        <h2 className={`text-sm font-semibold mb-3 ${light ? 'text-gray-900' : 'text-white'}`}>Payment History</h2>
         <DataTable
           columns={paymentCols}
           data={payments}

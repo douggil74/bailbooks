@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ReportShell from '../../components/ReportShell';
+import { useTheme } from '../../components/ThemeProvider';
 import type { ProfitLossReport } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -11,6 +12,8 @@ function fmt(n: number) {
 }
 
 export default function ProfitLossPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
   const [report, setReport] = useState<ProfitLossReport | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,29 +53,29 @@ export default function ProfitLossPage() {
       }}
     >
       {loading ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center animate-pulse">
-          <p className="text-gray-400">Generating report...</p>
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl p-8 text-center animate-pulse`}>
+          <p className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Generating report...</p>
         </div>
       ) : !report ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400">No data available</p>
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl p-8 text-center`}>
+          <p className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>No data available</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl divide-y divide-gray-800">
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl divide-y ${light ? 'divide-gray-200' : 'divide-gray-800'}`}>
           {/* Revenue Section */}
           <div className="p-4">
             <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-3">Revenue</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Premiums Earned (bonds created in period)</span>
-                <span className="text-gray-300">{fmt(report.revenue.premiums_earned)}</span>
+                <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Premiums Earned (bonds created in period)</span>
+                <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.premiums_earned)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Payments Collected</span>
-                <span className="text-gray-300">{fmt(report.revenue.payments_collected)}</span>
+                <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Payments Collected</span>
+                <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(report.revenue.payments_collected)}</span>
               </div>
-              <div className="flex justify-between text-sm font-semibold border-t border-gray-800 pt-2 mt-2">
-                <span className="text-white">Total Revenue</span>
+              <div className={`flex justify-between text-sm font-semibold border-t ${light ? 'border-gray-200' : 'border-gray-800'} pt-2 mt-2`}>
+                <span className={`${light ? 'text-gray-900' : 'text-white'}`}>Total Revenue</span>
                 <span className="text-emerald-400">{fmt(report.revenue.total_revenue)}</span>
               </div>
             </div>
@@ -83,17 +86,17 @@ export default function ProfitLossPage() {
             <h3 className="text-sm font-semibold text-red-400 uppercase tracking-wider mb-3">Expenses</h3>
             <div className="space-y-2">
               {report.expenses_by_category.length === 0 ? (
-                <p className="text-gray-500 text-sm">No expenses in this period</p>
+                <p className={`${light ? 'text-gray-400' : 'text-gray-500'} text-sm`}>No expenses in this period</p>
               ) : (
                 report.expenses_by_category.map((cat) => (
                   <div key={cat.category} className="flex justify-between text-sm">
-                    <span className="text-gray-400">{cat.category}</span>
-                    <span className="text-gray-300">{fmt(cat.amount)}</span>
+                    <span className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>{cat.category}</span>
+                    <span className={`${light ? 'text-gray-700' : 'text-gray-300'}`}>{fmt(cat.amount)}</span>
                   </div>
                 ))
               )}
-              <div className="flex justify-between text-sm font-semibold border-t border-gray-800 pt-2 mt-2">
-                <span className="text-white">Total Expenses</span>
+              <div className={`flex justify-between text-sm font-semibold border-t ${light ? 'border-gray-200' : 'border-gray-800'} pt-2 mt-2`}>
+                <span className={`${light ? 'text-gray-900' : 'text-white'}`}>Total Expenses</span>
                 <span className="text-red-400">{fmt(report.total_expenses)}</span>
               </div>
             </div>
@@ -102,7 +105,7 @@ export default function ProfitLossPage() {
           {/* Net Income */}
           <div className="p-4">
             <div className="flex justify-between items-center">
-              <span className="text-lg font-bold text-white">Net Income</span>
+              <span className={`text-lg font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Net Income</span>
               <span className={`text-lg font-bold ${report.net_income >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {fmt(report.net_income)}
               </span>

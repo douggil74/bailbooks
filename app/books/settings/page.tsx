@@ -3,10 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Trash2, UserPlus, Building2, Check } from 'lucide-react';
 import type { Organization, OrgUser, ExpenseCategory } from '@/lib/books-types';
+import { useTheme } from '../components/ThemeProvider';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
 
 export default function SettingsPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
+
   const [org, setOrg] = useState<Organization | null>(null);
   const [users, setUsers] = useState<OrgUser[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
@@ -39,6 +43,13 @@ export default function SettingsPage() {
     surety_company: '',
     premium_rate: '0.12',
   });
+
+  // Theme-aware class helpers
+  const inputCls = `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none ${light ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-700 text-white'}`;
+  const selectCls = `${inputCls} appearance-none`;
+  const labelCls = `block text-xs font-semibold mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`;
+  const cardCls = `border rounded-xl p-4 ${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'}`;
+  const sectionHeading = `text-sm font-semibold mb-4 ${light ? 'text-gray-900' : 'text-white'}`;
 
   useEffect(() => {
     const orgId = localStorage.getItem(ORG_ID_KEY);
@@ -189,9 +200,9 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center animate-pulse">
-          <p className="text-gray-400">Loading...</p>
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Settings</h1>
+        <div className={`${cardCls} p-8 text-center animate-pulse`}>
+          <p className={light ? 'text-gray-500' : 'text-gray-400'}>Loading...</p>
         </div>
       </div>
     );
@@ -201,11 +212,11 @@ export default function SettingsPage() {
   if (showSetup) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-white">Set Up BailBooks</h1>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-md">
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Set Up BailBooks</h1>
+        <div className={`${cardCls} p-6 max-w-md`}>
           <div className="flex items-center gap-3 mb-4">
             <Building2 className="w-6 h-6 text-[#d4af37]" />
-            <p className="text-gray-300 text-sm">Create your organization to get started.</p>
+            <p className={`text-sm ${light ? 'text-gray-700' : 'text-gray-300'}`}>Create your organization to get started.</p>
           </div>
           <form onSubmit={handleSetup} className="space-y-4">
             {message && (
@@ -214,24 +225,24 @@ export default function SettingsPage() {
               </div>
             )}
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Company Name *</label>
+              <label className={labelCls}>Company Name *</label>
               <input
                 type="text"
                 required
                 value={setupName}
                 onChange={(e) => setSetupName(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
                 placeholder="Your bail bonds company name"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Owner Email *</label>
+              <label className={labelCls}>Owner Email *</label>
               <input
                 type="email"
                 required
                 value={setupEmail}
                 onChange={(e) => setSetupEmail(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
                 placeholder="admin@company.com"
               />
             </div>
@@ -257,7 +268,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <h1 className={`text-2xl font-bold ${light ? 'text-gray-900' : 'text-white'}`}>Settings</h1>
         {message && (
           <span className="flex items-center gap-1 text-sm text-[#d4af37] font-medium">
             {message === 'Saved' && <Check className="w-3.5 h-3.5" />}
@@ -267,99 +278,99 @@ export default function SettingsPage() {
       </div>
 
       {/* Organization Details */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+      <div className={cardCls}>
+        <h2 className={`${sectionHeading} flex items-center gap-2`}>
           <Building2 className="w-4 h-4 text-[#d4af37]" />
           Organization Details
         </h2>
         <div className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Company Name</label>
+              <label className={labelCls}>Company Name</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Phone</label>
+              <label className={labelCls}>Phone</label>
               <input
                 type="tel"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1">Address</label>
+            <label className={labelCls}>Address</label>
             <input
               type="text"
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               onBlur={saveOrg}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
             />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">City</label>
+              <label className={labelCls}>City</label>
               <input
                 type="text"
                 value={form.city}
                 onChange={(e) => setForm({ ...form, city: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">State</label>
+              <label className={labelCls}>State</label>
               <input
                 type="text"
                 value={form.state}
                 onChange={(e) => setForm({ ...form, state: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">ZIP</label>
+              <label className={labelCls}>ZIP</label>
               <input
                 type="text"
                 value={form.zip}
                 onChange={(e) => setForm({ ...form, zip: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
           </div>
           <div className="grid sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">License #</label>
+              <label className={labelCls}>License #</label>
               <input
                 type="text"
                 value={form.license_number}
                 onChange={(e) => setForm({ ...form, license_number: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Surety Company</label>
+              <label className={labelCls}>Surety Company</label>
               <input
                 type="text"
                 value={form.surety_company}
                 onChange={(e) => setForm({ ...form, surety_company: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Premium Rate</label>
+              <label className={labelCls}>Premium Rate</label>
               <input
                 type="number"
                 step="0.01"
@@ -368,7 +379,7 @@ export default function SettingsPage() {
                 value={form.premium_rate}
                 onChange={(e) => setForm({ ...form, premium_rate: e.target.value })}
                 onBlur={saveOrg}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
           </div>
@@ -376,14 +387,14 @@ export default function SettingsPage() {
       </div>
 
       {/* Expense Categories */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <h2 className="text-sm font-semibold text-white mb-4">Expense Categories</h2>
+      <div className={cardCls}>
+        <h2 className={sectionHeading}>Expense Categories</h2>
         <div className="space-y-2 mb-4">
           {categories.map((cat) => (
-            <div key={cat.id} className="flex items-center justify-between py-2 px-3 bg-gray-800/50 rounded-lg">
+            <div key={cat.id} className={`flex items-center justify-between py-2 px-3 rounded-lg ${light ? 'bg-gray-50' : 'bg-gray-800/50'}`}>
               <div>
-                <span className="text-sm text-white">{cat.name}</span>
-                {cat.description && <span className="text-xs text-gray-500 ml-2">{cat.description}</span>}
+                <span className={`text-sm ${light ? 'text-gray-900' : 'text-white'}`}>{cat.name}</span>
+                {cat.description && <span className={`text-xs ml-2 ${light ? 'text-gray-400' : 'text-gray-500'}`}>{cat.description}</span>}
               </div>
               {!cat.is_default && (
                 <button
@@ -402,11 +413,11 @@ export default function SettingsPage() {
             value={newCatName}
             onChange={(e) => setNewCatName(e.target.value)}
             placeholder="New category name"
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className={`flex-1 ${inputCls}`}
           />
           <button
             type="submit"
-            className="flex items-center gap-1 px-3 py-2 bg-gray-800 text-gray-400 hover:text-white rounded-lg text-sm transition-colors"
+            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
           >
             <Plus className="w-4 h-4" />
             Add
@@ -415,18 +426,18 @@ export default function SettingsPage() {
       </div>
 
       {/* Users */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+      <div className={cardCls}>
+        <h2 className={`${sectionHeading} flex items-center gap-2`}>
           <UserPlus className="w-4 h-4 text-[#d4af37]" />
           Team Members
         </h2>
         <div className="space-y-2 mb-4">
           {users.map((u) => (
-            <div key={u.id} className="flex items-center justify-between py-2 px-3 bg-gray-800/50 rounded-lg">
+            <div key={u.id} className={`flex items-center justify-between py-2 px-3 rounded-lg ${light ? 'bg-gray-50' : 'bg-gray-800/50'}`}>
               <div className="flex items-center gap-3">
                 <div>
-                  <span className="text-sm text-white">{u.display_name || u.email}</span>
-                  {u.display_name && <span className="text-xs text-gray-500 ml-2">{u.email}</span>}
+                  <span className={`text-sm ${light ? 'text-gray-900' : 'text-white'}`}>{u.display_name || u.email}</span>
+                  {u.display_name && <span className={`text-xs ml-2 ${light ? 'text-gray-400' : 'text-gray-500'}`}>{u.email}</span>}
                 </div>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[u.role] || 'bg-gray-500/20 text-gray-400'}`}>
                   {u.role}
@@ -448,19 +459,19 @@ export default function SettingsPage() {
             onChange={(e) => setInviteEmail(e.target.value)}
             placeholder="Email"
             required
-            className="flex-1 min-w-[200px] bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className={`flex-1 min-w-[200px] ${inputCls}`}
           />
           <input
             type="text"
             value={inviteName}
             onChange={(e) => setInviteName(e.target.value)}
             placeholder="Name"
-            className="w-32 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className={`w-32 ${inputCls}`}
           />
           <select
             value={inviteRole}
             onChange={(e) => setInviteRole(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className={selectCls}
           >
             <option value="admin">Admin</option>
             <option value="agent">Agent</option>
@@ -468,7 +479,7 @@ export default function SettingsPage() {
           </select>
           <button
             type="submit"
-            className="flex items-center gap-1 px-3 py-2 bg-gray-800 text-gray-400 hover:text-white rounded-lg text-sm transition-colors"
+            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
           >
             <UserPlus className="w-4 h-4" />
             Add

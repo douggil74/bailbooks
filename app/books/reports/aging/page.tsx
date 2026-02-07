@@ -5,6 +5,7 @@ import ReportShell from '../../components/ReportShell';
 import KPICard from '../../components/KPICard';
 import DataTable, { type Column } from '../../components/DataTable';
 import { Clock } from 'lucide-react';
+import { useTheme } from '../../components/ThemeProvider';
 import type { AgingReceivablesReport, AgingBucket } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -57,6 +58,8 @@ const BUCKET_COLORS = [
 ];
 
 export default function AgingPage() {
+  const { theme } = useTheme();
+  const light = theme === 'light';
   const [report, setReport] = useState<AgingReceivablesReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedBucket, setExpandedBucket] = useState<number | null>(null);
@@ -81,16 +84,16 @@ export default function AgingPage() {
   return (
     <ReportShell title="Aging Receivables" showDateRange={false}>
       {loading ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center animate-pulse">
-          <p className="text-gray-400">Generating report...</p>
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl p-8 text-center animate-pulse`}>
+          <p className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>Generating report...</p>
         </div>
       ) : !report ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400">No data available</p>
+        <div className={`${light ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-900 border-gray-800'} border rounded-xl p-8 text-center`}>
+          <p className={`${light ? 'text-gray-500' : 'text-gray-400'}`}>No data available</p>
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-xs text-gray-500">As of {fmtDate(report.as_of)}</p>
+          <p className={`text-xs ${light ? 'text-gray-400' : 'text-gray-500'}`}>As of {fmtDate(report.as_of)}</p>
 
           <KPICard
             label="Total Outstanding"
@@ -105,15 +108,15 @@ export default function AgingPage() {
               <button
                 key={bucket.label}
                 onClick={() => setExpandedBucket(expandedBucket === i ? null : i)}
-                className={`bg-gray-900 border rounded-xl p-4 text-left transition-colors ${BUCKET_COLORS[i]} ${
+                className={`${light ? 'bg-white' : 'bg-gray-900'} border rounded-xl p-4 text-left transition-colors ${BUCKET_COLORS[i]} ${
                   expandedBucket === i ? 'ring-2 ring-[#d4af37]' : ''
                 }`}
               >
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                <p className={`text-[10px] font-semibold uppercase tracking-wider ${light ? 'text-gray-400' : 'text-gray-500'}`}>
                   {bucket.label}
                 </p>
-                <p className="text-lg font-bold text-white mt-1">{fmt(bucket.total)}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{bucket.count} payment{bucket.count !== 1 ? 's' : ''}</p>
+                <p className={`text-lg font-bold ${light ? 'text-gray-900' : 'text-white'} mt-1`}>{fmt(bucket.total)}</p>
+                <p className={`text-xs ${light ? 'text-gray-400' : 'text-gray-500'} mt-0.5`}>{bucket.count} payment{bucket.count !== 1 ? 's' : ''}</p>
               </button>
             ))}
           </div>
@@ -121,7 +124,7 @@ export default function AgingPage() {
           {/* Expanded bucket detail */}
           {expandedBucket !== null && report.buckets[expandedBucket] && (
             <div>
-              <h3 className="text-sm font-semibold text-white mb-3">
+              <h3 className={`text-sm font-semibold ${light ? 'text-gray-900' : 'text-white'} mb-3`}>
                 {report.buckets[expandedBucket].label} — Detail
               </h3>
               <DataTable

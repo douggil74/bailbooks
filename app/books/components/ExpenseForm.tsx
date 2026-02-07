@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useTheme } from './ThemeProvider';
 import type { ExpenseCategory, Expense } from '@/lib/books-types';
 
 const ORG_ID_KEY = 'bailbooks_org_id';
@@ -13,6 +14,8 @@ interface ExpenseFormProps {
 }
 
 export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormProps) {
+  const { theme } = useTheme();
+  const light = theme === 'light';
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,17 +76,25 @@ export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormPr
     }
   }
 
+  const inputCls = `w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none ${
+    light ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-700 text-white'
+  }`;
+  const selectCls = `${inputCls} appearance-none`;
+  const labelCls = `block text-xs font-semibold mb-1 ${light ? 'text-gray-500' : 'text-gray-400'}`;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div
-        className="bg-gray-900 border border-gray-800 rounded-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto"
+        className={`border rounded-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto ${
+          light ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-900 border-gray-800'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <h2 className="text-lg font-bold text-white">
+        <div className={`flex items-center justify-between p-4 border-b ${light ? 'border-gray-200' : 'border-gray-800'}`}>
+          <h2 className={`text-lg font-bold ${light ? 'text-gray-900' : 'text-white'}`}>
             {expense ? 'Edit Expense' : 'Add Expense'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button onClick={onClose} className={`${light ? 'text-gray-400 hover:text-gray-900' : 'text-gray-400 hover:text-white'}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -96,20 +107,20 @@ export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormPr
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1">Description *</label>
+            <label className={labelCls}>Description *</label>
             <input
               type="text"
               required
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
               placeholder="What was this expense for?"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Amount *</label>
+              <label className={labelCls}>Amount *</label>
               <input
                 type="number"
                 required
@@ -117,28 +128,28 @@ export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormPr
                 min="0"
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
                 placeholder="0.00"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Date *</label>
+              <label className={labelCls}>Date *</label>
               <input
                 type="date"
                 required
                 value={form.expense_date}
                 onChange={(e) => setForm({ ...form, expense_date: e.target.value })}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1">Category</label>
+            <label className={labelCls}>Category</label>
             <select
               value={form.category_id}
               onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={selectCls}
             >
               <option value="">Uncategorized</option>
               {categories.map((c) => (
@@ -151,21 +162,21 @@ export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormPr
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Vendor</label>
+              <label className={labelCls}>Vendor</label>
               <input
                 type="text"
                 value={form.vendor}
                 onChange={(e) => setForm({ ...form, vendor: e.target.value })}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={inputCls}
                 placeholder="Who was paid?"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Payment Method</label>
+              <label className={labelCls}>Payment Method</label>
               <select
                 value={form.payment_method}
                 onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className={selectCls}
               >
                 <option value="">—</option>
                 <option value="cash">Cash</option>
@@ -178,23 +189,23 @@ export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormPr
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1">Reference #</label>
+            <label className={labelCls}>Reference #</label>
             <input
               type="text"
               value={form.reference_number}
               onChange={(e) => setForm({ ...form, reference_number: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className={inputCls}
               placeholder="Check #, invoice #, etc."
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1">Notes</label>
+            <label className={labelCls}>Notes</label>
             <textarea
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               rows={2}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-[#d4af37] focus:outline-none resize-none"
+              className={`${inputCls} resize-none`}
               placeholder="Additional notes..."
             />
           </div>
@@ -203,7 +214,9 @@ export default function ExpenseForm({ expense, onClose, onSaved }: ExpenseFormPr
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-800 text-gray-400 hover:text-white rounded-lg text-sm font-medium transition-colors"
+              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                light ? 'bg-gray-100 text-gray-500 hover:text-gray-900' : 'bg-gray-800 text-gray-400 hover:text-white'
+              }`}
             >
               Cancel
             </button>

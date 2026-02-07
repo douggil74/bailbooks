@@ -6,6 +6,7 @@ import CommandBar from '@/app/command/components/CommandBar';
 
 export default function MobileAppPage() {
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [amt, setAmt] = useState('');
   const [down, setDown] = useState('');
   const [jailFee, setJailFee] = useState('30');
@@ -109,6 +110,7 @@ export default function MobileAppPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name || 'Quick Entry',
+          phone: phone || '',
           date: new Date().toISOString().split('T')[0],
           amt: bondAmt,
           down: actualDown,
@@ -126,6 +128,7 @@ export default function MobileAppPage() {
 
   const handleReset = () => {
     setName('');
+    setPhone('');
     setAmt('');
     setDown('');
     setJailFee('30');
@@ -157,15 +160,27 @@ export default function MobileAppPage() {
         {/* Input Card */}
         <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 mb-4">
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Client Name (optional)</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter name"
-                className="w-full bg-[#0a0a0a] border border-white/20 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-[#d4af37]"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Client Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Name"
+                  className="w-full bg-[#0a0a0a] border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#d4af37]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(985) 555-1234"
+                  className="w-full bg-[#0a0a0a] border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#d4af37]"
+                />
+              </div>
             </div>
 
             <div>
