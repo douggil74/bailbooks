@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
           await sendSMS(
             from,
             `Great news, ${acceptData.defendant}! Your bail bond case has been started. ` +
-            `An agent will contact you shortly. — BailBonds Made Easy 985-264-9519`,
+            `An agent will contact you shortly. — BailBonds Financed 985-264-9519`,
           );
           console.log(`[SMS Webhook] Quote accepted — case ${acceptData.application_id} created for ${from}`);
         }

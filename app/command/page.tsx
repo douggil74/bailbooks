@@ -209,7 +209,7 @@ export default function CommandPage() {
       <div className="relative border-t border-zinc-900 py-6">
         <div className="flex items-center justify-center gap-3 text-xs text-zinc-600">
           <Link href="/" className="hover:text-zinc-400 transition-colors">
-            BailBonds Made Easy
+            BailBonds Financed
           </Link>
           <span className="text-zinc-800">&middot;</span>
           <span>Louisiana Bail Agents</span>

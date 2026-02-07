@@ -43,12 +43,12 @@ export async function POST(req: NextRequest) {
 
     // Text the quote to the customer
     const smsBody =
-      `Hi ${name.split(' ')[0]}, here's your bail bond quote from BailBonds Made Easy:\n\n` +
+      `Hi ${name.split(' ')[0]}, here's your bail bond quote from BailBonds Financed:\n\n` +
       `Bond Amount: $${fmt(amt)}\n` +
       `Premium (12%): $${fmt(premium)}\n` +
       `Est. Down Payment: $${fmt(downPayment)}\n\n` +
       `Payment plans available. Reply YES to proceed or call 985-264-9519.\n` +
-      `— BailBonds Made Easy`;
+      `— BailBonds Financed`;
 
     const result = await sendSMS(phone, smsBody);
 

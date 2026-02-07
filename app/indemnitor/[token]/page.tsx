@@ -388,7 +388,7 @@ export default function IndemnitorPage() {
       {/* Header */}
       <header className="bg-[#1a4d2e] text-white px-4 py-4">
         <div className="max-w-lg mx-auto">
-          <h1 className="text-lg font-bold">BailBonds Made Easy</h1>
+          <h1 className="text-lg font-bold">BailBonds Financed</h1>
           <p className="text-xs text-green-200 mt-0.5">
             Co-Signer Form{defendantName ? ` for ${defendantName}` : ''}
           </p>

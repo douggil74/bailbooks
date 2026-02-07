@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
           checkinUrl,
         });
         await resend.emails.send({
-          from: 'BailBonds Made Easy <reminders@resend.dev>',
+          from: 'BailBonds Financed <reminders@resend.dev>',
           to: app.defendant_email,
           subject: emailTemplate.subject,
           html: emailTemplate.html,

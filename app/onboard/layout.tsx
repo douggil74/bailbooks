@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Shield } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Start Your Application | BailBonds Made Easy',
+  title: 'Start Your Application | BailBonds Financed',
   description: 'Complete your bail bond application online. Fast, secure, mobile-friendly.',
 };
 
@@ -14,7 +14,7 @@ export default function OnboardLayout({ children }: { children: React.ReactNode 
           <Shield className="w-7 h-7 text-[#d4af37]" />
           <div>
             <h1 className="text-lg font-bold tracking-tight">
-              BailBonds <span className="text-[#d4af37]">Made Easy</span>
+              BailBonds <span className="text-[#d4af37]">Financed</span>
             </h1>
             <p className="text-xs text-green-200">Secure Online Application</p>
           </div>

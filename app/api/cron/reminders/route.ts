@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
             const urgency = days <= 1 ? 'TOMORROW' : `in ${days} days`;
             await sendSMS(
               c.defendant_phone,
-              `Reminder: Your court date at ${c.court_name || 'court'} is ${urgency} (${date}). Do NOT miss it. -BailBonds Made Easy`
+              `Reminder: Your court date at ${c.court_name || 'court'} is ${urgency} (${date}). Do NOT miss it. -BailBonds Financed`
             );
             await supabase.from('sms_log').insert({
               application_id: c.id,
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
         if (c.defendant_email) {
           try {
             await resend.emails.send({
-              from: 'BailBonds Made Easy <reminders@resend.dev>',
+              from: 'BailBonds Financed <reminders@resend.dev>',
               to: c.defendant_email,
               subject: emailTemplate.subject,
               html: emailTemplate.html,
@@ -153,7 +153,7 @@ export async function GET(req: NextRequest) {
             const amt = c.payment_amount ? `$${Number(c.payment_amount).toLocaleString()}` : 'your payment';
             await sendSMS(
               c.defendant_phone,
-              `Reminder: ${amt} is due ${urgency} (${date}). Please pay on time. -BailBonds Made Easy`
+              `Reminder: ${amt} is due ${urgency} (${date}). Please pay on time. -BailBonds Financed`
             );
             await supabase.from('sms_log').insert({
               application_id: c.id,
@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
         if (c.defendant_email) {
           try {
             await resend.emails.send({
-              from: 'BailBonds Made Easy <reminders@resend.dev>',
+              from: 'BailBonds Financed <reminders@resend.dev>',
               to: c.defendant_email,
               subject: emailTemplate.subject,
               html: emailTemplate.html,
@@ -274,7 +274,7 @@ export async function GET(req: NextRequest) {
               checkinUrl,
             });
             await resend.emails.send({
-              from: 'BailBonds Made Easy <reminders@resend.dev>',
+              from: 'BailBonds Financed <reminders@resend.dev>',
               to: c.defendant_email,
               subject: emailTemplate.subject,
               html: emailTemplate.html,

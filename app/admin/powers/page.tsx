@@ -119,7 +119,7 @@ export default function PowersPage() {
           <Shield className="w-8 h-8 text-[#fbbf24]" />
           <div>
             <h1 className="text-xl font-bold">
-              BailBonds <span className="text-[#fbbf24]">Made Easy</span>{' '}
+              BailBonds <span className="text-[#fbbf24]">Financed</span>{' '}
               <span className="text-zinc-500 font-normal text-base">
                 — Power Management
               </span>

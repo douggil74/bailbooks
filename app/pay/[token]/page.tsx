@@ -177,7 +177,7 @@ export default function PaymentPage() {
       {/* Header */}
       <header className="bg-[#1a4d2e] px-6 py-4 text-center">
         <span className="text-lg font-extrabold text-white">BailBonds </span>
-        <span className="text-lg font-extrabold text-[#d4af37]">Made Easy</span>
+        <span className="text-lg font-extrabold text-[#d4af37]">Financed</span>
       </header>
 
       <main className="flex-1 flex items-start justify-center px-4 py-10">
@@ -223,7 +223,7 @@ export default function PaymentPage() {
 
       <footer className="px-6 py-4 text-center border-t border-gray-800">
         <p className="text-xs text-gray-600">
-          BailBonds Made Easy &middot; Serving St. Tammany Parish, Louisiana
+          BailBonds Financed &middot; Serving St. Tammany Parish, Louisiana
         </p>
       </footer>
     </div>

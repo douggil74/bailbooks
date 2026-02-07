@@ -152,7 +152,7 @@ function CheckinContent() {
           </div>
 
           <h1 className="text-xl font-bold text-gray-900 mb-2">GPS Check-In</h1>
-          <p className="text-sm text-gray-500 mb-6">BailBonds Made Easy</p>
+          <p className="text-sm text-gray-500 mb-6">BailBonds Financed</p>
 
           {step === 'missing_id' && (
             <p className="text-red-600 text-sm">Invalid check-in link. Please use the link from your SMS.</p>

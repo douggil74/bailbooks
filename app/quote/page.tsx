@@ -171,7 +171,7 @@ export default function QuotePage() {
               <span className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Text Preview</span>
             </div>
             <div className="bg-[#1a4d2e] rounded-xl rounded-tl-none p-3 text-sm text-white leading-relaxed">
-              <p>Hi {name.split(' ')[0] || '___'}, here&apos;s your bail bond quote from BailBonds Made Easy:</p>
+              <p>Hi {name.split(' ')[0] || '___'}, here&apos;s your bail bond quote from BailBonds Financed:</p>
               <p className="mt-2">
                 Bond Amount: {fmt(amt)}<br />
                 Premium (12%): {fmt(premium)}<br />

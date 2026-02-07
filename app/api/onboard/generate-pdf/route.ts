@@ -147,7 +147,7 @@ export async function GET(req: NextRequest) {
       : defendantName;
 
     y = wrappedText(
-      `THIS AGREEMENT, entered into, on the ${today.getDate()} day of ${today.toLocaleString('en-US', { month: 'long' })}, 20${today.getFullYear().toString().slice(2)}, by and between Elite Bail Bonds dba BailBonds Made Easy (Hereinafter referred to as "COMPANY") and ${defendantName} (Defendant) and ${indemnitorNames} (Hereinafter referred to collectively as "INDEMNITOR"), who, for and in consideration of the covenants hereinafter stated, agree as follows:`,
+      `THIS AGREEMENT, entered into, on the ${today.getDate()} day of ${today.toLocaleString('en-US', { month: 'long' })}, 20${today.getFullYear().toString().slice(2)}, by and between Elite Bail Bonds dba BailBonds Financed (Hereinafter referred to as "COMPANY") and ${defendantName} (Defendant) and ${indemnitorNames} (Hereinafter referred to collectively as "INDEMNITOR"), who, for and in consideration of the covenants hereinafter stated, agree as follows:`,
       margin, y, contentW, 9
     );
 
@@ -536,7 +536,7 @@ export async function GET(req: NextRequest) {
     normal('(Premium & Fees)', margin, y, 8);
     y += 14;
     y = wrappedText(
-      `PROMISE TO PAY. I promise to pay to the order of Elite Bail Bonds dba BailBonds Made Easy ("Lender") on demand the sum of ${premium} bearing interest at the rate of ( ____% ) per annum from date of demand until this Note is paid in full.`,
+      `PROMISE TO PAY. I promise to pay to the order of Elite Bail Bonds dba BailBonds Financed ("Lender") on demand the sum of ${premium} bearing interest at the rate of ( ____% ) per annum from date of demand until this Note is paid in full.`,
       margin, y, contentW, 8
     );
 
@@ -544,7 +544,7 @@ export async function GET(req: NextRequest) {
     normal('(Bond Liability)', margin, y, 8);
     y += 14;
     y = wrappedText(
-      `PROMISE TO PAY. I promise to pay to the order of Elite Bail Bonds dba BailBonds Made Easy ("Lender") on demand the sum of ${bondAmount} bearing interest at the rate of ( ____% ) per annum from date of demand until this Note is paid in full.`,
+      `PROMISE TO PAY. I promise to pay to the order of Elite Bail Bonds dba BailBonds Financed ("Lender") on demand the sum of ${bondAmount} bearing interest at the rate of ( ____% ) per annum from date of demand until this Note is paid in full.`,
       margin, y, contentW, 8
     );
 

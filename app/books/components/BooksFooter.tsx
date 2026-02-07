@@ -50,7 +50,7 @@ export default function BooksFooter() {
         <div className={`mt-6 pt-4 border-t text-center text-xs ${
           light ? 'border-gray-200 text-gray-400' : 'border-gray-800 text-gray-600'
         }`}>
-          © {new Date().getFullYear()} BailBooks by BailBonds Made Easy. All rights reserved. Licensed Louisiana Bail Bond Agents.
+          © {new Date().getFullYear()} BailBooks by BailBonds Financed. All rights reserved. Licensed Louisiana Bail Bond Agents.
         </div>
       </div>
     </footer>
