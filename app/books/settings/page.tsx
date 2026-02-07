@@ -53,12 +53,29 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const orgId = localStorage.getItem(ORG_ID_KEY);
-    if (!orgId) {
-      setShowSetup(true);
-      setLoading(false);
+    if (orgId) {
+      loadData(orgId);
       return;
     }
-    loadData(orgId);
+    // No org_id in localStorage — try to reconnect to existing org
+    fetch('/api/books/org?discover=true')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.organizations && d.organizations.length > 0) {
+          // Auto-reconnect to the most recent org
+          const found = d.organizations[0];
+          localStorage.setItem(ORG_ID_KEY, found.id);
+          setMessage(`Reconnected to "${found.name}"`);
+          loadData(found.id);
+        } else {
+          setShowSetup(true);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        setShowSetup(true);
+        setLoading(false);
+      });
   }, []);
 
   async function loadData(orgId: string) {

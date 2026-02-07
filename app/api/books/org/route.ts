@@ -3,6 +3,28 @@ import { createServerClient } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
   const orgId = req.nextUrl.searchParams.get('org_id');
+  const discover = req.nextUrl.searchParams.get('discover');
+
+  // Discover mode: find any existing org (for reconnecting after localStorage loss)
+  if (discover === 'true') {
+    try {
+      const supabase = createServerClient();
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      return NextResponse.json({ organizations: data || [] });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to discover organizations';
+      return NextResponse.json({ error: msg }, { status: 500 });
+    }
+  }
+
   if (!orgId) {
     return NextResponse.json({ error: 'org_id is required' }, { status: 400 });
   }
