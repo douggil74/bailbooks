@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shield, Calculator, Save, Check, RotateCcw, Sparkles, AlertTriangle } from 'lucide-react';
+import CommandBar from '@/app/command/components/CommandBar';
 
 export default function MobileAppPage() {
   const [name, setName] = useState('');
@@ -142,8 +143,9 @@ export default function MobileAppPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-[#0a0a0a]">
+      <CommandBar />
+      <div className="max-w-md mx-auto p-4">
         {/* Header */}
         <div className="flex items-center justify-center gap-2 mb-6 pt-2">
           <Shield className="w-6 h-6 text-[#d4af37]" />

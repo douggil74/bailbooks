@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Shield, Phone, Send, Check, Clock, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import CommandBar from '@/app/command/components/CommandBar';
 
 export default function QuotePage() {
   const [name, setName] = useState('');
@@ -64,8 +65,9 @@ export default function QuotePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#0a0a0a]">
+      <CommandBar />
+      <div className="max-w-lg mx-auto p-4">
         {/* Header */}
         <div className="text-center py-6">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">

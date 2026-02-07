@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Plus, Trash2, Download, Save, FileText, X, Check, Sparkles, CheckCircle, Phone, Star } from 'lucide-react';
+import CommandBar from '@/app/command/components/CommandBar';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -481,8 +482,9 @@ export default function TrackerPage() {
 
   // Main tracker
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4 sm:p-6">
-      <div className="max-w-full mx-auto">
+    <div className="min-h-screen bg-[#0a0a0a]">
+      <CommandBar />
+      <div className="max-w-full mx-auto p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
