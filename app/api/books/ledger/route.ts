@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('applications')
       .select('id, defendant_first, defendant_last, bond_amount, premium, down_payment, status, bond_date, court_date, next_payment_date, power_number, forfeiture_status, created_at', { count: 'exact' })
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .in('status', ['active', 'approved', 'completed']);
 
     if (search) {

@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const { data: activeBonds } = await supabase
       .from('applications')
       .select('id, bond_amount, premium, down_payment, court_date, court_name, defendant_first, defendant_last, forfeiture_status')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .in('status', ['active', 'approved']);
 
     const bonds = activeBonds || [];
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     const { data: allPayments } = await supabase
       .from('payments')
       .select('id, amount, status, due_date, paid_at, payment_method, application_id')
-      .eq('org_id', orgId);
+      .or(`org_id.eq.${orgId},org_id.is.null`);
 
     const payments = allPayments || [];
     const paidPayments = payments.filter((p) => p.status === 'paid');
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     const { data: expenses } = await supabase
       .from('expenses')
       .select('amount')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .gte('expense_date', yearStart);
 
     const totalExpenses = (expenses || []).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
       const { data: monthExpenses } = await supabase
         .from('expenses')
         .select('amount')
-        .eq('org_id', orgId)
+        .or(`org_id.eq.${orgId},org_id.is.null`)
         .gte('expense_date', monthStart)
         .lt('expense_date', monthEnd);
 

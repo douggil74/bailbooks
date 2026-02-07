@@ -13,18 +13,29 @@ export async function POST(req: NextRequest) {
     const supabase = createServerClient();
 
     // Fetch indemnitor with application info
-    const { data: indemnitor } = await supabase
+    const { data: indemnitor, error: fetchErr } = await supabase
       .from('indemnitors')
       .select('*, applications(defendant_first, defendant_last)')
       .eq('id', indemnitor_id)
       .single();
+
+    if (fetchErr) {
+      console.error('[Invite] Fetch error:', fetchErr);
+      return NextResponse.json({ error: fetchErr.message }, { status: 500 });
+    }
 
     if (!indemnitor) {
       return NextResponse.json({ error: 'Indemnitor not found' }, { status: 404 });
     }
 
     if (!indemnitor.phone) {
-      return NextResponse.json({ error: 'Indemnitor has no phone number' }, { status: 400 });
+      return NextResponse.json({ error: 'Indemnitor has no phone number — add a phone first' }, { status: 400 });
+    }
+
+    // Validate phone has at least 10 digits
+    const phoneDigits = indemnitor.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+      return NextResponse.json({ error: `Invalid phone number: ${indemnitor.phone} (need 10 digits)` }, { status: 400 });
     }
 
     // Generate token with 72hr expiry
@@ -43,6 +54,7 @@ export async function POST(req: NextRequest) {
       .eq('id', indemnitor_id);
 
     if (updateError) {
+      console.error('[Invite] Token update error:', updateError);
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
@@ -50,16 +62,30 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
     const inviteUrl = `${baseUrl}/indemnitor/${token}`;
 
-    const app = indemnitor.applications as { defendant_first: string; defendant_last: string } | null;
-    const defendantName = app ? `${app.defendant_first} ${app.defendant_last}` : 'the defendant';
+    // Handle join — Supabase FK joins can return object or array
+    const rawApp = indemnitor.applications as unknown;
+    const app = Array.isArray(rawApp) ? rawApp[0] : rawApp;
+    const defendantName = app
+      ? `${(app as { defendant_first: string }).defendant_first} ${(app as { defendant_last: string }).defendant_last}`
+      : 'the defendant';
 
     // Send SMS
-    const smsResult = await sendIndemnitorInviteSMS(
-      indemnitor.phone,
-      indemnitor.first_name,
-      defendantName,
-      inviteUrl,
-    );
+    let smsResult: { sid: string; status: string };
+    try {
+      smsResult = await sendIndemnitorInviteSMS(
+        indemnitor.phone,
+        indemnitor.first_name,
+        defendantName,
+        inviteUrl,
+      );
+    } catch (smsErr) {
+      const smsMsg = smsErr instanceof Error ? smsErr.message : 'SMS send failed';
+      console.error('[Invite] SMS error:', smsMsg);
+      return NextResponse.json(
+        { error: `SMS failed: ${smsMsg}. Token was created — try resending.` },
+        { status: 502 },
+      );
+    }
 
     // Log to sms_log
     await supabase.from('sms_log').insert({
@@ -69,6 +95,7 @@ export async function POST(req: NextRequest) {
       message: `Indemnitor invite sent to ${indemnitor.first_name} ${indemnitor.last_name}`,
       twilio_sid: smsResult.sid,
       status: smsResult.status,
+      sent_at: new Date().toISOString(),
     });
 
     return NextResponse.json({
@@ -78,6 +105,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to send invite';
+    console.error('[Invite] Unhandled error:', err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

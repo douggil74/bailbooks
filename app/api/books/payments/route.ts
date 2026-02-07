@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('payments')
       .select('id, application_id, amount, type, status, payment_method, description, due_date, paid_at, created_at', { count: 'exact' })
-      .eq('org_id', orgId);
+      .or(`org_id.eq.${orgId},org_id.is.null`);
 
     if (statusFilter) {
       query = query.eq('status', statusFilter);

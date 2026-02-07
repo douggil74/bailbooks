@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const { data: overduePayments } = await supabase
       .from('payments')
       .select('id, application_id, amount, due_date')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .eq('status', 'pending')
       .not('due_date', 'is', null)
       .lt('due_date', todayStr);

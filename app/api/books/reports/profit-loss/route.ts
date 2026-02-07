@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const { data: payments } = await supabase
       .from('payments')
       .select('amount, paid_at')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .eq('status', 'paid')
       .gte('paid_at', startDate)
       .lte('paid_at', endDate + 'T23:59:59');
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     const { data: bonds } = await supabase
       .from('applications')
       .select('premium')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .in('status', ['active', 'approved', 'completed'])
       .gte('created_at', startDate)
       .lte('created_at', endDate + 'T23:59:59');
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     const { data: expenses } = await supabase
       .from('expenses')
       .select('amount, category_id, expense_categories(name)')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .gte('expense_date', startDate)
       .lte('expense_date', endDate);
 
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     const { data: deposits } = await supabase
       .from('transactions')
       .select('amount')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .eq('transaction_type', 'deposit')
       .gte('transaction_date', startDate)
       .lte('transaction_date', endDate);
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     const { data: withdrawals } = await supabase
       .from('transactions')
       .select('amount')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .eq('transaction_type', 'withdrawal')
       .gte('transaction_date', startDate)
       .lte('transaction_date', endDate);

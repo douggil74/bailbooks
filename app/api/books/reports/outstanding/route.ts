@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const { data: bonds } = await supabase
       .from('applications')
       .select('id, defendant_first, defendant_last, bond_amount, premium, status, bond_date, forfeiture_status')
-      .eq('org_id', orgId)
+      .or(`org_id.eq.${orgId},org_id.is.null`)
       .in('status', ['active', 'approved']);
 
     if (!bonds || bonds.length === 0) {
