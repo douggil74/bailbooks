@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       ? `${(app as { defendant_first: string }).defendant_first} ${(app as { defendant_last: string }).defendant_last}`
       : 'the defendant';
 
-    // Send SMS
+    // Send SMS via SignalWire
     let smsResult: { sid: string; status: string };
     try {
       smsResult = await sendIndemnitorInviteSMS(
@@ -87,12 +87,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Log to sms_log
+    // Log to sms_log so it shows in the comms panel
+    const smsBody =
+      `Hi ${indemnitor.first_name}, you've been listed as a co-signer for ${defendantName}. ` +
+      `Please complete your information here: ${inviteUrl} — BailBonds Financed`;
+
     await supabase.from('sms_log').insert({
       application_id: indemnitor.application_id,
       phone: indemnitor.phone,
       direction: 'outbound',
-      message: `Indemnitor invite sent to ${indemnitor.first_name} ${indemnitor.last_name}`,
+      message: smsBody,
       twilio_sid: smsResult.sid,
       status: smsResult.status,
       sent_at: new Date().toISOString(),
