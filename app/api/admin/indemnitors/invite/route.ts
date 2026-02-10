@@ -38,8 +38,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Invalid phone number: ${indemnitor.phone} (need 10 digits)` }, { status: 400 });
     }
 
-    // Generate token with 72hr expiry
-    const token = crypto.randomUUID();
+    // Generate short token (8 alphanumeric chars) with 72hr expiry
+    // Short tokens keep SMS URLs under the line-break threshold
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    const bytes = new Uint8Array(8);
+    crypto.getRandomValues(bytes);
+    const token = Array.from(bytes, b => chars[b % chars.length]).join('');
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 72 * 60 * 60 * 1000);
 
