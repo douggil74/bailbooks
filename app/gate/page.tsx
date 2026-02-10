@@ -41,7 +41,7 @@ export default function GatePage() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           autoFocus
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 bg-white placeholder-gray-400 focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none"
         />
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         <button
