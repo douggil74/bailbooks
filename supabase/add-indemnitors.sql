@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS indemnitors (
   employer_name TEXT,
   employer_phone TEXT,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','in_progress','complete')),
-  invite_token UUID,
+  invite_token TEXT,
   invite_sent_at TIMESTAMPTZ,
   invite_expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
