@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, Phone, ExternalLink } from 'lucide-react';
+import { BookOpen, ExternalLink } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 
 export default function BooksFooter() {
@@ -38,13 +38,9 @@ export default function BooksFooter() {
             </Link>
           </div>
 
-          <a
-            href="tel:9852649519"
-            className="flex items-center gap-1.5 text-[#d4af37] font-semibold text-sm hover:text-[#e5c55a] transition-colors"
-          >
-            <Phone className="w-3.5 h-3.5" />
-            985-264-9519
-          </a>
+          <span className={`text-xs ${light ? 'text-gray-400' : 'text-gray-600'}`}>
+            BailBonds Financed
+          </span>
         </div>
 
         <div className={`mt-6 pt-4 border-t text-center text-xs ${
