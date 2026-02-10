@@ -2,7 +2,7 @@
 -- Run this in the Supabase SQL editor
 
 ALTER TABLE applications
-  ADD COLUMN IF NOT EXISTS payment_link_token UUID,
+  ADD COLUMN IF NOT EXISTS payment_link_token TEXT,
   ADD COLUMN IF NOT EXISTS payment_link_amount DECIMAL(12,2),
   ADD COLUMN IF NOT EXISTS payment_link_created_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS payment_link_expires_at TIMESTAMPTZ;

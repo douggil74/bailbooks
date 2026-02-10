@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
+import { getRandomValues } from 'crypto';
 import { createServerClient } from '@/lib/supabase';
 import { createCustomer } from '@/lib/stripe-server';
 import { sendPaymentLinkSMS } from '@/lib/twilio-server';
@@ -43,8 +43,11 @@ export async function POST(req: NextRequest) {
         .eq('id', body.application_id);
     }
 
-    // Generate token and expiry
-    const token = randomUUID();
+    // Generate short token (8 alphanumeric chars) for SMS-friendly URLs
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    const bytes = new Uint8Array(8);
+    getRandomValues(bytes);
+    const token = Array.from(bytes, b => chars[b % chars.length]).join('');
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
 

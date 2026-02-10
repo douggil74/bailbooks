@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const { data: app } = await supabase
       .from('applications')
-      .select('id, defendant_first, defendant_phone, defendant_email, sms_consent')
+      .select('id, defendant_first, defendant_phone, defendant_email, sms_consent, checkin_code')
       .eq('id', body.application_id)
       .single();
 
@@ -25,15 +25,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Application not found' }, { status: 404 });
     }
 
+    // Ensure short checkin_code exists for SMS-friendly URLs
+    let checkinCode = app.checkin_code as string | null;
+    if (!checkinCode) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+      const bytes = new Uint8Array(8);
+      crypto.getRandomValues(bytes);
+      checkinCode = Array.from(bytes, b => chars[b % chars.length]).join('');
+      await supabase
+        .from('applications')
+        .update({ checkin_code: checkinCode })
+        .eq('id', app.id);
+    }
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bailbondsfinanced.com';
-    const checkinUrl = `${siteUrl}/checkin?id=${app.id}`;
+    const checkinUrl = `${siteUrl}/c/${checkinCode}`;
     const channels: string[] = [];
     const errors: string[] = [];
 
     // Send SMS if phone exists (admin-initiated sends skip consent check)
     if (app.defendant_phone) {
       try {
-        const message = await sendCheckinRequest(app.id, app.defendant_phone);
+        const message = await sendCheckinRequest(app.id, app.defendant_phone, checkinCode);
         await supabase.from('sms_log').insert({
           application_id: app.id,
           phone: app.defendant_phone,

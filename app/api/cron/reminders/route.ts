@@ -201,7 +201,7 @@ export async function GET(req: NextRequest) {
     (async () => {
       const { data: cases } = await supabase
         .from('applications')
-        .select('id, defendant_first, defendant_last, defendant_phone, defendant_email, sms_consent, checkin_frequency, created_at')
+        .select('id, defendant_first, defendant_last, defendant_phone, defendant_email, sms_consent, checkin_frequency, checkin_code, created_at')
         .in('status', ['approved', 'active'])
         .eq('sms_consent', true);
 
@@ -242,12 +242,22 @@ export async function GET(req: NextRequest) {
 
         if (existing && existing.length > 0) continue;
 
-        const checkinUrl = `${siteUrl}/checkin?id=${c.id}`;
+        // Ensure short checkin_code exists
+        let checkinCode = c.checkin_code as string | null;
+        if (!checkinCode) {
+          const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+          const bytes = new Uint8Array(8);
+          crypto.getRandomValues(bytes);
+          checkinCode = Array.from(bytes, b => chars[b % chars.length]).join('');
+          await supabase.from('applications').update({ checkin_code: checkinCode }).eq('id', c.id);
+        }
+
+        const checkinUrl = `${siteUrl}/c/${checkinCode}`;
 
         // SMS via sendCheckinRequest
         if (c.defendant_phone) {
           try {
-            await sendCheckinRequest(c.id, c.defendant_phone);
+            await sendCheckinRequest(c.id, c.defendant_phone, checkinCode);
             await supabase.from('sms_log').insert({
               application_id: c.id,
               phone: c.defendant_phone,

@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     // Build invite URL
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
-    const inviteUrl = `${baseUrl}/indemnitor/${token}`;
+    const inviteUrl = `${baseUrl}/i/${token}`;
 
     // Handle join — Supabase FK joins can return object or array
     const rawApp = indemnitor.applications as unknown;

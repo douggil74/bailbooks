@@ -75,9 +75,11 @@ export async function sendSMS(to: string, body: string) {
   return { sid: (data.sid as string) || 'sent', status: (data.status as string) || 'queued' };
 }
 
-export async function sendCheckinRequest(applicationId: string, phone: string) {
+export async function sendCheckinRequest(applicationId: string, phone: string, checkinCode?: string) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bailbondsfinanced.com';
-  const checkinUrl = `${siteUrl}/checkin?id=${applicationId}`;
+  const checkinUrl = checkinCode
+    ? `${siteUrl}/c/${checkinCode}`
+    : `${siteUrl}/checkin?id=${applicationId}`;
   const body =
     `Time to check in! Tap the link below to complete your GPS check-in:\n${checkinUrl}\n— BailBonds Financed`;
   return sendSMS(phone, body);
