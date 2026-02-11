@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Paths that should NOT be password-gated (public-facing)
-const PUBLIC_PATHS = ['/indemnitor/', '/i/', '/c/', '/pay/', '/checkin', '/onboard', '/gate', '/_next/', '/icon.svg', '/favicon.ico', '/sitemap.xml', '/og-image']
+const PUBLIC_PATHS = ['/indemnitor/', '/i/', '/d/', '/c/', '/pay/', '/checkin', '/onboard', '/gate', '/_next/', '/icon.svg', '/favicon.ico', '/sitemap.xml', '/og-image']
 
 // API paths that must remain open (webhooks, public forms, cron)
 const PUBLIC_API_PREFIXES = [
-  '/api/indemnitor/', '/api/checkin/', '/api/onboard/', '/api/payment/',
+  '/api/indemnitor/', '/api/defendant/', '/api/checkin/', '/api/onboard/', '/api/payment/',
   '/api/gate', '/api/sms/webhook', '/api/cron/', '/api/lead',
   '/api/bonds', '/api/quote/', '/api/risk', '/api/recommend',
 ]
