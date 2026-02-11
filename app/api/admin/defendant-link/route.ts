@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
+    const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin).trim();
     const url = `${baseUrl}/d/${token}`;
 
     return NextResponse.json({ success: true, url, token });
