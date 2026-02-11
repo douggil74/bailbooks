@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', body.application_id);
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bailmadesimple.com';
     const paymentUrl = `${baseUrl}/pay/${token}`;
     const channelsSent: string[] = [];
     const firstName = app.defendant_first || 'Client';
