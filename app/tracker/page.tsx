@@ -759,38 +759,40 @@ export default function TrackerPage() {
         </div>
 
         {/* Totals */}
-        {rows.length > 0 && (
+        {rows.length > 0 && (() => {
+          const filteredRows = rows.filter(row => filterStatus === 'all' || row.status === filterStatus);
+          return (
           <div className="mt-6 bg-[#1a1a1a] border border-white/10 rounded-xl p-4">
             <h3 className="text-white font-semibold mb-3">Totals</h3>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
               <div className="bg-[#0f3620] rounded-lg p-3">
                 <div className="text-gray-300 text-xs uppercase">GA Owed (3.5%)</div>
                 <div className="text-white font-bold text-xl">
-                  {formatCurrency(rows.reduce((sum, row) => sum + (row.amt * 0.035), 0))}
+                  {formatCurrency(filteredRows.reduce((sum, row) => sum + (row.amt * 0.035), 0))}
                 </div>
               </div>
               <div className="bg-[#d4af37]/20 rounded-lg p-3">
                 <div className="text-[#d4af37] text-xs uppercase">Elite (6%)</div>
                 <div className="text-[#d4af37] font-bold text-xl">
-                  {formatCurrency(rows.reduce((sum, row) => sum + (row.amt * 0.06), 0))}
+                  {formatCurrency(filteredRows.reduce((sum, row) => sum + (row.amt * 0.06), 0))}
                 </div>
               </div>
               <div>
                 <div className="text-gray-400 text-sm">BUF (0.5%)</div>
                 <div className="text-white font-bold">
-                  {formatCurrency(rows.reduce((sum, row) => sum + (row.amt * 0.005), 0))}
+                  {formatCurrency(filteredRows.reduce((sum, row) => sum + (row.amt * 0.005), 0))}
                 </div>
               </div>
               <div>
                 <div className="text-gray-400 text-sm">Jail (2% + fees)</div>
                 <div className="text-white font-bold">
-                  {formatCurrency(rows.reduce((sum, row) => sum + (row.amt * 0.02) + row.jailFee, 0))}
+                  {formatCurrency(filteredRows.reduce((sum, row) => sum + (row.amt * 0.02) + row.jailFee, 0))}
                 </div>
               </div>
               <div>
                 <div className="text-gray-400 text-sm">Total 12%</div>
                 <div className="text-white font-bold">
-                  {formatCurrency(rows.reduce((sum, row) => sum + (row.amt * 0.12), 0))}
+                  {formatCurrency(filteredRows.reduce((sum, row) => sum + (row.amt * 0.12), 0))}
                 </div>
               </div>
             </div>
@@ -798,7 +800,8 @@ export default function TrackerPage() {
               <span className="text-green-400">Terms:</span> 50% down (auto) | Under $100k: 4/6/10 weeks | $100k+: 3/6/9 months
             </div>
           </div>
-        )}
+          );
+        })()}
 
         <p className="text-gray-600 text-xs mt-4 text-center flex items-center justify-center gap-2">
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
