@@ -101,6 +101,50 @@ export default function DefendantPage() {
     validate();
   }, [token]);
 
+  async function saveFields() {
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('First and last name are required');
+      return false;
+    }
+    setError(null);
+    setSaving(true);
+    try {
+      const res = await fetch('/api/defendant/save', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          dob: dob || null,
+          phone: phone || null,
+          email: email || null,
+          address: address || null,
+          city: city || null,
+          state: state || 'LA',
+          zip: zip || null,
+          ssn_last4: ssn4 || null,
+          dl_number: dlNumber || null,
+          employer_name: employerName || null,
+          employer_phone: employerPhone || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed');
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleStep1() {
+    const ok = await saveFields();
+    if (ok) goNext();
+  }
+
   async function handleFileUpload(file: File, docType: string) {
     setError(null);
     setSaving(true);
@@ -324,10 +368,11 @@ export default function DefendantPage() {
               <Input label="Employer Phone" type="tel" value={employerPhone} onChange={setEmployerPhone} />
             </div>
             <button
-              onClick={goNext}
+              onClick={handleStep1}
+              disabled={saving}
               className="w-full mt-6 bg-[#1a4d2e] text-white py-3 rounded-lg font-medium disabled:opacity-50"
             >
-              Next
+              {saving ? 'Saving...' : 'Next'}
             </button>
           </section>
         )}
