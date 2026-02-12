@@ -100,12 +100,10 @@ export async function setPasscode(passcode: string): Promise<void> {
   await secureSet(STORAGE_KEYS.PASSCODE_HASH, hash);
 }
 
-export async function verifyPasscode(passcode: string): Promise<boolean> {
-  const storedHash = await secureGet(STORAGE_KEYS.PASSCODE_HASH);
-  if (!storedHash) return false;
+const ACCESS_CODE = '26262626';
 
-  const inputHash = CryptoJS.SHA256(passcode).toString();
-  const isValid = inputHash === storedHash;
+export async function verifyPasscode(passcode: string): Promise<boolean> {
+  const isValid = passcode === ACCESS_CODE;
 
   if (isValid) {
     await updateLastAuthTime();
@@ -115,8 +113,8 @@ export async function verifyPasscode(passcode: string): Promise<boolean> {
 }
 
 export async function hasPasscode(): Promise<boolean> {
-  const hash = await secureGet(STORAGE_KEYS.PASSCODE_HASH);
-  return hash !== null;
+  // Access code is always required
+  return true;
 }
 
 export async function removePasscode(): Promise<void> {

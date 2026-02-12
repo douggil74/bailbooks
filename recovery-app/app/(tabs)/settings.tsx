@@ -13,16 +13,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/hooks/useSettings';
 import { getStorageUsage, clearAllData } from '@/lib/storage';
 import { confirm, showAlert } from '@/lib/confirm';
-import { Button, Input } from '@/components';
+import { Button } from '@/components';
 import { COLORS, VERSION } from '@/constants';
 
 export default function SettingsScreen() {
   const {
-    passcodeEnabled,
     biometricsEnabled,
     biometricsAvailable,
-    enablePasscode,
-    disablePasscode,
     enableBiometrics,
     disableBiometrics,
     lock,
@@ -32,8 +29,6 @@ export default function SettingsScreen() {
   const [storageUsed, setStorageUsed] = useState('0 B');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [apiKey, setApiKey] = useState(settings.openaiApiKey || '');
-  const [newPasscode, setNewPasscode] = useState('');
-  const [showPasscodeSetup, setShowPasscodeSetup] = useState(false);
   const [showFirebaseSetup, setShowFirebaseSetup] = useState(false);
   const [firebaseConfig, setFirebaseConfig] = useState(settings.firebaseConfig || '');
   const [userId, setUserId] = useState(settings.userId || '');
@@ -51,37 +46,6 @@ export default function SettingsScreen() {
   const loadStorageUsage = async () => {
     const usage = await getStorageUsage();
     setStorageUsed(usage.formatted);
-  };
-
-  const handlePasscodeToggle = async () => {
-    if (passcodeEnabled) {
-      const confirmed = await confirm({
-        title: 'Disable Passcode',
-        message: 'Are you sure you want to disable the passcode lock?',
-        confirmText: 'Disable',
-        destructive: true,
-      });
-      if (confirmed) {
-        disablePasscode();
-      }
-    } else {
-      setShowPasscodeSetup(true);
-    }
-  };
-
-  const handleSetPasscode = async () => {
-    if (newPasscode.length < 4) {
-      showAlert('Error', 'Passcode must be at least 4 digits');
-      return;
-    }
-    const result = await enablePasscode(newPasscode);
-    if (result.success) {
-      setShowPasscodeSetup(false);
-      setNewPasscode('');
-      showAlert('Success', 'Passcode has been set');
-    } else {
-      showAlert('Error', result.error || 'Failed to set passcode');
-    }
   };
 
   const handleBiometricsToggle = async () => {
@@ -174,47 +138,13 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
-            <Text style={styles.settingLabel}>Passcode Lock</Text>
+            <Text style={styles.settingLabel}>Access Code</Text>
             <Text style={styles.settingDescription}>
-              Require passcode to access the app
+              8-digit code required to access the app
             </Text>
           </View>
-          <Switch
-            value={passcodeEnabled}
-            onValueChange={handlePasscodeToggle}
-            trackColor={{ true: COLORS.primary }}
-          />
+          <Ionicons name="lock-closed" size={20} color={COLORS.primary} />
         </View>
-
-        {showPasscodeSetup && (
-          <View style={styles.passcodeSetup}>
-            <TextInput
-              style={styles.passcodeInput}
-              value={newPasscode}
-              onChangeText={setNewPasscode}
-              placeholder="Enter 4-8 digit passcode"
-              keyboardType="number-pad"
-              secureTextEntry
-              maxLength={8}
-            />
-            <View style={styles.passcodeButtons}>
-              <Button
-                title="Cancel"
-                variant="secondary"
-                size="small"
-                onPress={() => {
-                  setShowPasscodeSetup(false);
-                  setNewPasscode('');
-                }}
-              />
-              <Button
-                title="Set Passcode"
-                size="small"
-                onPress={handleSetPasscode}
-              />
-            </View>
-          </View>
-        )}
 
         {biometricsAvailable && (
           <View style={[styles.settingRow, styles.settingRowBorder]}>
@@ -232,7 +162,7 @@ export default function SettingsScreen() {
           </View>
         )}
 
-        {(passcodeEnabled || biometricsEnabled) && (
+        {/* Lock Now — access code is always required */}
           <TouchableOpacity
             style={[styles.settingRow, styles.settingRowBorder]}
             onPress={handleLockNow}
@@ -244,7 +174,6 @@ export default function SettingsScreen() {
             </View>
             <Ionicons name="lock-closed" size={20} color={COLORS.primary} />
           </TouchableOpacity>
-        )}
       </View>
 
       {/* AI Analysis Section */}
@@ -522,24 +451,6 @@ const styles = StyleSheet.create({
   optionTextActive: {
     color: '#fff',
     fontWeight: '600',
-  },
-  passcodeSetup: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  passcodeInput: {
-    backgroundColor: COLORS.background,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  passcodeButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    justifyContent: 'flex-end',
   },
   apiKeySetup: {
     padding: 16,

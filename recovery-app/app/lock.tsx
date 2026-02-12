@@ -14,7 +14,6 @@ import { COLORS } from '@/constants';
 export default function LockScreen() {
   const router = useRouter();
   const {
-    passcodeEnabled,
     biometricsEnabled,
     biometricsAvailable,
     authenticate,
@@ -51,7 +50,7 @@ export default function LockScreen() {
     setPasscode(newPasscode);
     setError('');
 
-    if (newPasscode.length >= 4) {
+    if (newPasscode.length >= 8) {
       verifyPasscode(newPasscode);
     }
   };
@@ -74,7 +73,7 @@ export default function LockScreen() {
 
   const renderPasscodeDots = () => {
     const dots = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 8; i++) {
       dots.push(
         <View
           key={i}
@@ -145,11 +144,11 @@ export default function LockScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Ionicons name="lock-closed" size={48} color={COLORS.primary} />
-        <Text style={styles.title}>Enter Passcode</Text>
+        <Text style={styles.title}>Enter Access Code</Text>
         <Text style={styles.subtitle}>
           {biometricsEnabled
             ? 'Use passcode or biometrics to unlock'
-            : 'Enter your 4-digit passcode'}
+            : 'Enter your 8-digit access code'}
         </Text>
       </View>
 
@@ -188,13 +187,13 @@ const styles = StyleSheet.create({
   },
   dotsContainer: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 10,
     marginBottom: 20,
   },
   dot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     backgroundColor: COLORS.border,
   },
   dotFilled: {
