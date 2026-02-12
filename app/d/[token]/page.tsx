@@ -11,6 +11,7 @@ export default function DefendantPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState('fetching...');
   const [applicationId, setApplicationId] = useState('');
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -67,9 +68,10 @@ export default function DefendantPage() {
   useEffect(() => {
     async function validate() {
       try {
-        const res = await fetch(`/api/defendant/validate?token=${token}`);
+        const res = await fetch(`/api/defendant/validate?token=${token}&_=${Date.now()}`);
         const data = await res.json();
         if (!res.ok) {
+          setDebugInfo(`API error: ${res.status} - ${data.error || 'unknown'}`);
           setError(data.error || 'Invalid link');
           setLoading(false);
           return;
@@ -77,6 +79,7 @@ export default function DefendantPage() {
 
         setApplicationId(data.application_id);
         const d = data.defendant;
+        setDebugInfo(`OK: ${d.first_name} ${d.last_name}, phone=${d.phone}, dob=${d.dob}`);
         setFirstName(d.first_name || '');
         setLastName(d.last_name || '');
         setDob(d.dob || '');
@@ -93,7 +96,8 @@ export default function DefendantPage() {
         setSignerName(`${d.first_name || ''} ${d.last_name || ''}`.trim());
 
         setLoading(false);
-      } catch {
+      } catch (e) {
+        setDebugInfo(`Catch: ${e instanceof Error ? e.message : String(e)}`);
         setError('Failed to load. Please try again.');
         setLoading(false);
       }
@@ -334,6 +338,11 @@ export default function DefendantPage() {
               style={{ width: `${progress}%` }}
             />
           </div>
+        </div>
+
+        {/* Debug banner — remove after testing */}
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded-lg mb-4 text-xs font-mono break-all">
+          DEBUG: token={token} | {debugInfo} | firstName=&quot;{firstName}&quot;
         </div>
 
         {/* Error banner */}
