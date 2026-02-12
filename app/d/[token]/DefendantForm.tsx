@@ -442,7 +442,7 @@ function Input({
         onChange={(e) => onChange(e.target.value)}
         maxLength={maxLength}
         placeholder={placeholder}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none"
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none"
       />
     </div>
   );
