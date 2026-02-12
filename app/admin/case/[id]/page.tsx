@@ -734,6 +734,7 @@ export default function CaseDetailPage() {
               setLightboxUrl(url);
               setLightboxLabel(label);
             }}
+            onRefresh={fetchCase}
           />
         );
       case 'logs':

@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { Document, Signature, Indemnitor, Checkin } from '@/lib/bail-types';
 
@@ -77,6 +80,7 @@ export default function FilesTab({
   indemnitors,
   checkins,
   onOpenLightbox,
+  onRefresh,
 }: {
   documents: DocumentWithUrl[];
   signatures: Signature[];
@@ -84,6 +88,7 @@ export default function FilesTab({
   indemnitors: Indemnitor[];
   checkins: CheckinWithUrl[];
   onOpenLightbox: (url: string, label: string) => void;
+  onRefresh?: () => void;
 }) {
   const checkinsWithSelfies = checkins.filter((ci) => ci.selfie_url);
   const defendantDocs = documents.filter((d) => !d.indemnitor_id);
@@ -110,6 +115,7 @@ export default function FilesTab({
           </a>
         </div>
         <DocumentGrid documents={defendantDocs} onOpenLightbox={onOpenLightbox} />
+        <UploadSection applicationId={applicationId} onRefresh={onRefresh} />
       </div>
 
       {/* Check-in Photos & Location History */}
@@ -227,6 +233,94 @@ export default function FilesTab({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+const UPLOAD_DOC_TYPES = [
+  { value: 'drivers_license_front', label: "Driver's License — Front" },
+  { value: 'drivers_license_back', label: "Driver's License — Back" },
+  { value: 'selfie', label: 'Selfie' },
+  { value: 'other', label: 'Other Document' },
+];
+
+function UploadSection({
+  applicationId,
+  onRefresh,
+}: {
+  applicationId: string;
+  onRefresh?: () => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [docType, setDocType] = useState('drivers_license_front');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleUpload() {
+    const file = fileRef.current?.files?.[0];
+    if (!file) {
+      setError('Select a file first');
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setUploading(true);
+
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('application_id', applicationId);
+      fd.append('doc_type', docType);
+
+      const res = await fetch('/api/onboard/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      setSuccess(`Uploaded ${UPLOAD_DOC_TYPES.find((t) => t.value === docType)?.label}`);
+      if (fileRef.current) fileRef.current.value = '';
+      setTimeout(() => setSuccess(null), 3000);
+      onRefresh?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="mt-5 pt-5 border-t border-zinc-800">
+      <h3 className="text-sm font-semibold text-zinc-300 mb-3">Upload Document</h3>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <select
+          value={docType}
+          onChange={(e) => setDocType(e.target.value)}
+          className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-lg px-3 py-2 focus:ring-1 focus:ring-[#fbbf24] outline-none"
+        >
+          {UPLOAD_DOC_TYPES.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*,.pdf"
+          className="text-sm text-zinc-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-zinc-700 file:text-zinc-200 hover:file:bg-zinc-600 flex-1"
+        />
+        <button
+          onClick={handleUpload}
+          disabled={uploading}
+          className="bg-[#fbbf24] text-zinc-900 text-sm font-bold px-5 py-2 rounded-lg hover:bg-[#fcd34d] transition-colors disabled:opacity-50 whitespace-nowrap"
+        >
+          {uploading ? 'Uploading...' : 'Upload'}
+        </button>
+      </div>
+      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+      {success && <p className="text-green-400 text-xs mt-2">{success}</p>}
     </div>
   );
 }
