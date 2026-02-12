@@ -108,3 +108,13 @@ export async function sendIndemnitorInviteSMS(
     `Please complete your information here: ${inviteUrl} — BailBonds Financed`;
   return sendSMS(phone, body);
 }
+
+export async function sendDefendantLinkSMS(
+  phone: string,
+  defendantName: string,
+  linkUrl: string,
+) {
+  const body =
+    `Hi ${defendantName}, please review your info, upload your ID, and sign here: ${linkUrl} — BailBonds Financed`;
+  return sendSMS(phone, body);
+}
