@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const SITE_PASSWORD = process.env.SITE_PASSWORD || '';
+const ACCESS_CODE = process.env.SITE_PASSWORD || '26262626';
 
 export async function POST(req: NextRequest) {
   const { password } = await req.json();
 
-  if (!SITE_PASSWORD) {
-    return NextResponse.json({ error: 'Not configured' }, { status: 500 });
-  }
-
-  if (password !== SITE_PASSWORD) {
-    return NextResponse.json({ error: 'Wrong password' }, { status: 401 });
+  if (password !== ACCESS_CODE) {
+    return NextResponse.json({ error: 'Wrong code' }, { status: 401 });
   }
 
   const res = NextResponse.json({ ok: true });

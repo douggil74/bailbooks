@@ -34,19 +34,23 @@ export default function GatePage() {
     <div className="min-h-screen bg-[#1a4d2e] flex items-center justify-center p-4">
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
         <h1 className="text-xl font-bold text-gray-900 text-center mb-1">BailBonds Financed</h1>
-        <p className="text-sm text-gray-500 text-center mb-6">Enter password to continue</p>
+        <p className="text-sm text-gray-500 text-center mb-6">Enter access code</p>
         <input
-          type="password"
+          type="tel"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={8}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value.replace(/\D/g, ''))}
+          placeholder="8-digit code"
           autoFocus
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 bg-white placeholder-gray-400 focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none"
+          autoComplete="off"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg text-gray-900 bg-white placeholder-gray-400 text-center tracking-widest focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none"
         />
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         <button
           type="submit"
-          disabled={loading || !password}
+          disabled={loading || password.length !== 8}
           className="w-full mt-4 bg-[#1a4d2e] text-white py-3 rounded-lg font-semibold disabled:opacity-50"
         >
           {loading ? 'Checking...' : 'Enter'}
