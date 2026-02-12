@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ACCESS_CODE = process.env.SITE_PASSWORD || '26262626';
+const ACCESS_CODE = '26262626';
 
 export async function POST(req: NextRequest) {
   const { password } = await req.json();
